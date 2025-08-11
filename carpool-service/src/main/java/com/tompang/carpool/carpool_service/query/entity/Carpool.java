@@ -1,0 +1,58 @@
+package com.tompang.carpool.carpool_service.query.entity;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "carpool")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Carpool {
+    @Id // must specify manually
+    private String id;
+    private int totalSeats;
+    @Builder.Default
+    private int seatsAssigned = 0;
+    private String driverId;
+    private LocalDateTime arrivalTime;
+
+    // TODO change to actual addresses
+    private String origin;
+    private String destination;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "assignedCarpool", orphanRemoval = false)
+    private Set<RideRequest> confirmedRideRequests = new HashSet<>();
+
+    @Builder.Default
+    @ManyToMany
+    @JoinTable(
+        name = "carpool_request_match",
+        joinColumns = @JoinColumn(name = "carpool_id"),
+        inverseJoinColumns = @JoinColumn(name = "request_id")
+    )
+    private Set<RideRequest> pendingRideRequests = new HashSet<>();
+
+    @Override
+    public boolean equals(Object obj) {
+        // TODO Auto-generated method stub
+        return super.equals(obj);
+    }
+}
