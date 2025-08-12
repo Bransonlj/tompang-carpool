@@ -24,7 +24,7 @@ import io.kurrent.dbclient.RecordedEvent;
 import io.kurrent.dbclient.ResolvedEvent;
 
 @Repository
-public class RideRequestRepository {
+public class RideRequestEventRepository {
 
     private final KurrentDBClient client;
     private ObjectMapper objectMapper;
@@ -35,7 +35,7 @@ public class RideRequestRepository {
         RideRequestMatchedEvent.class.getName(), RideRequestMatchedEvent.class
     );
 
-    public RideRequestRepository(KurrentDBClient client, ObjectMapper objectMapper) {
+    public RideRequestEventRepository(KurrentDBClient client, ObjectMapper objectMapper) {
         this.client = client;
         this.objectMapper = objectMapper;
     }

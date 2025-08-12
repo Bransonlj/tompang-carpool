@@ -8,15 +8,15 @@ import com.tompang.carpool.carpool_service.command.command.carpool.CreateCarpool
 import com.tompang.carpool.carpool_service.command.command.carpool.MatchCarpoolCommand;
 import com.tompang.carpool.carpool_service.command.domain.carpool.CarpoolAggregate;
 import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolEvent;
-import com.tompang.carpool.carpool_service.command.repository.CarpoolRepository;
+import com.tompang.carpool.carpool_service.command.repository.CarpoolEventRepository;
 
 @Service
 public class CarpoolCommandHandler {
 
-    private final CarpoolRepository repository;
+    private final CarpoolEventRepository repository;
     private final KafkaProducerService kafkaProducerService;
 
-    public CarpoolCommandHandler(CarpoolRepository repository, KafkaProducerService kafkaProducerService) {
+    public CarpoolCommandHandler(CarpoolEventRepository repository, KafkaProducerService kafkaProducerService) {
         this.repository = repository;
         this.kafkaProducerService = kafkaProducerService;
     }

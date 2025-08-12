@@ -5,14 +5,14 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
-import com.tompang.carpool.carpool_service.query.repository.RideRequestRepository;
+import com.tompang.carpool.carpool_service.query.repository.RideRequestQueryRepository;
 
 @Service
 public class RideRequestQueryService {
 
-    private final RideRequestRepository repository;
+    private final RideRequestQueryRepository repository;
 
-    public RideRequestQueryService(RideRequestRepository repository) {
+    public RideRequestQueryService(RideRequestQueryRepository repository) {
         this.repository = repository;
     }
 

@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
 
-public interface CarpoolRepository extends JpaRepository<Carpool, String> {
+public interface CarpoolQueryRepository extends JpaRepository<Carpool, String> {
 
     @Query(
         value = "SELECT * FROM carpool " + 

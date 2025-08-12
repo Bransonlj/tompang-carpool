@@ -1,9 +1,19 @@
 package com.tompang.carpool.carpool_service.command.command.carpool;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@AllArgsConstructor
 public class MatchCarpoolCommand {
+
     public final String carpoolId;
     public final String requestId;
+
+    @JsonCreator
+    public MatchCarpoolCommand(
+        @JsonProperty("carpoolId") String carpoolId,
+        @JsonProperty("requestId") String requestId
+    ) {
+        this.carpoolId = carpoolId;
+        this.requestId = requestId;
+    }
 }

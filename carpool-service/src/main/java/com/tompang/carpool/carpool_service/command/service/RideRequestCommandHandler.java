@@ -8,14 +8,14 @@ import com.tompang.carpool.carpool_service.command.command.ride_request.CreateRi
 import com.tompang.carpool.carpool_service.command.command.ride_request.MatchRideRequestCommand;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.RideRequestAggregate;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestEvent;
-import com.tompang.carpool.carpool_service.command.repository.RideRequestRepository;
+import com.tompang.carpool.carpool_service.command.repository.RideRequestEventRepository;
 
 @Service
 public class RideRequestCommandHandler {
-    private final RideRequestRepository repository;
+    private final RideRequestEventRepository repository;
     private final KafkaProducerService kafkaProducerService;
 
-    public RideRequestCommandHandler(RideRequestRepository repository, KafkaProducerService kafkaProducerService) {
+    public RideRequestCommandHandler(RideRequestEventRepository repository, KafkaProducerService kafkaProducerService) {
         this.repository = repository;
         this.kafkaProducerService = kafkaProducerService;
     }

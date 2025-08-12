@@ -10,15 +10,17 @@ import com.tompang.carpool.carpool_service.command.domain.ride_request.event.Rid
 import com.tompang.carpool.carpool_service.common.DomainTopics;
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
-import com.tompang.carpool.carpool_service.query.repository.CarpoolRepository;
-import com.tompang.carpool.carpool_service.query.repository.RideRequestRepository;
+import com.tompang.carpool.carpool_service.query.repository.CarpoolQueryRepository;
+import com.tompang.carpool.carpool_service.query.repository.RideRequestQueryRepository;
+
+import jakarta.transaction.Transactional;
 
 @Component
 public class MatchProjector {
-    private final CarpoolRepository carpoolRepository;
-    private final RideRequestRepository rideRequestRepository;
+    private final CarpoolQueryRepository carpoolRepository;
+    private final RideRequestQueryRepository rideRequestRepository;
 
-    public MatchProjector(CarpoolRepository carpoolRepository, RideRequestRepository rideRequestRepository) {
+    public MatchProjector(CarpoolQueryRepository carpoolRepository, RideRequestQueryRepository rideRequestRepository) {
         this.carpoolRepository = carpoolRepository;
         this.rideRequestRepository = rideRequestRepository;
     }
@@ -39,6 +41,7 @@ public class MatchProjector {
         }
     }
 
+    @Transactional
     @KafkaListener(topics = DomainTopics.Carpool.CARPOOL_MATCHED, groupId = "carpool-service-query")
     public void handleCarpoolMatched(CarpoolMatchedEvent event) {
         Optional<Carpool> carpool = carpoolRepository.findById(event.getCarpoolId());
@@ -51,6 +54,7 @@ public class MatchProjector {
         }
     }
 
+    @Transactional
     @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_MATCHED, groupId = "carpool-service-query")
     public void handleRequestMatched(RideRequestMatchedEvent event) {
         RideRequest request = rideRequestRepository.findById(event.getRequestId()).orElseThrow();

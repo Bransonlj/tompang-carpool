@@ -52,7 +52,12 @@ public class Carpool {
 
     @Override
     public boolean equals(Object obj) {
-        // TODO Auto-generated method stub
-        return super.equals(obj);
+        if (this == obj) return true; // Same object
+        if (obj == null || getClass() != obj.getClass()) return false; // Different type
+
+        Carpool carpool = (Carpool) obj;
+
+        // Equality is based on ID only
+        return id != null && id.equals(carpool.id);
     }
 }

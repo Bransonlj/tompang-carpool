@@ -23,7 +23,7 @@ import io.kurrent.dbclient.RecordedEvent;
 import io.kurrent.dbclient.ResolvedEvent;
 
 @Repository
-public class CarpoolRepository {
+public class CarpoolEventRepository {
 
     private static final String STREAM_PREFIX = "carpool";
     private static final Map<String, Class<? extends CarpoolEvent>> EVENT_TYPE_MAP = Map.of(
@@ -34,7 +34,7 @@ public class CarpoolRepository {
     private final KurrentDBClient client;
     private final ObjectMapper objectMapper;
 
-    public CarpoolRepository(KurrentDBClient client, ObjectMapper objectMapper) {
+    public CarpoolEventRepository(KurrentDBClient client, ObjectMapper objectMapper) {
         this.client = client;
         this.objectMapper = objectMapper;
     }

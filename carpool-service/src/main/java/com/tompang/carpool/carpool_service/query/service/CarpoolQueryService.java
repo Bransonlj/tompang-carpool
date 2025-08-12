@@ -7,14 +7,14 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
-import com.tompang.carpool.carpool_service.query.repository.CarpoolRepository;
+import com.tompang.carpool.carpool_service.query.repository.CarpoolQueryRepository;
 
 @Service
 public class CarpoolQueryService {
 
-    private final CarpoolRepository repository;
+    private final CarpoolQueryRepository repository;
 
-    public CarpoolQueryService(CarpoolRepository repository) {
+    public CarpoolQueryService(CarpoolQueryRepository repository) {
         this.repository = repository;
     }
 

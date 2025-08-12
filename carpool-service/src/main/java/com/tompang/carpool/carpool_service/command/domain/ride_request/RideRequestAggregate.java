@@ -44,7 +44,7 @@ public class RideRequestAggregate {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String origin;
-    private String destiation;
+    private String destination;
 
         // List of new events to be persisted
     private final List<RideRequestEvent> changes = new ArrayList<>();
@@ -60,7 +60,7 @@ public class RideRequestAggregate {
     public static RideRequestAggregate createRideRequest(CreateRideRequestCommand command) {
         RideRequestAggregate rideRequest = new RideRequestAggregate();
         rideRequest.raiseEvent(new RideRequestCreatedEvent(UUID.randomUUID().toString(), command.riderId,
-                command.passengers, command.startTime, command.endTime, command.origin, command.destiation));
+                command.passengers, command.startTime, command.endTime, command.origin, command.destination));
         return rideRequest;
     }
 
@@ -96,7 +96,7 @@ public class RideRequestAggregate {
             this.startTime = e.getStartTime();
             this.endTime = e.getEndTime();
             this.origin = e.getOrigin();
-            this.destiation = e.getDestination();
+            this.destination = e.getDestination();
         } else if (event instanceof RideRequestMatchedEvent e) {
             this.matchedCarpools.addAll(e.getMatchedCarpoolIds());
         }

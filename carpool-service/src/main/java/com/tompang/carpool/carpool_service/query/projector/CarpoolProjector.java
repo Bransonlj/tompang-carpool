@@ -6,14 +6,14 @@ import org.springframework.stereotype.Component;
 import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolCreatedEvent;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
-import com.tompang.carpool.carpool_service.query.repository.CarpoolRepository;
+import com.tompang.carpool.carpool_service.query.repository.CarpoolQueryRepository;
 
 @Component
 public class CarpoolProjector {
 
-    private CarpoolRepository repository;
+    private CarpoolQueryRepository repository;
 
-    public CarpoolProjector(CarpoolRepository repository) {
+    public CarpoolProjector(CarpoolQueryRepository repository) {
         this.repository = repository;
     }
 
@@ -29,8 +29,6 @@ public class CarpoolProjector {
 
         repository.save(carpool);
     }
-
-
 
     // Delete
     public void handleDeleteCarpool() {

@@ -1,5 +1,6 @@
 package com.tompang.carpool.carpool_service.query.entity;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,6 +33,13 @@ public class RideRequest {
     private String riderId;
     private int passengers;
 
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
+    // TODO change to actual addresses
+    private String origin;
+    private String destination;
+
     @Builder.Default
     @ManyToMany(mappedBy = "pendingRideRequests")
     private Set<Carpool> matchedCarpools = new HashSet<>();
@@ -43,7 +51,12 @@ public class RideRequest {
 
     @Override
     public boolean equals(Object obj) {
-        // TODO Auto-generated method stub
-        return super.equals(obj);
+        if (this == obj) return true; // Same object
+        if (obj == null || getClass() != obj.getClass()) return false; // Different type
+
+        RideRequest request = (RideRequest) obj;
+
+        // Equality is based on ID only
+        return id != null && id.equals(request.id);
     }
 }
