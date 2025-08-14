@@ -6,10 +6,14 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolMatchedEvent;
+import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestInvalidatedEvent;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestAcceptedEvent;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestDeclinedEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestMatchedEvent;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
+import com.tompang.carpool.carpool_service.query.entity.RideRequestStatus;
 import com.tompang.carpool.carpool_service.query.repository.CarpoolQueryRepository;
 import com.tompang.carpool.carpool_service.query.repository.RideRequestQueryRepository;
 
@@ -44,8 +48,8 @@ public class MatchProjector {
     @Transactional
     @KafkaListener(topics = DomainTopics.Carpool.CARPOOL_MATCHED, groupId = "carpool-service-query")
     public void handleCarpoolMatched(CarpoolMatchedEvent event) {
-        Optional<Carpool> carpool = carpoolRepository.findById(event.getCarpoolId());
-        Optional<RideRequest> request = rideRequestRepository.findById(event.getRideRequestId());
+        Optional<Carpool> carpool = carpoolRepository.findById(event.carpoolId);
+        Optional<RideRequest> request = rideRequestRepository.findById(event.rideRequestId);
 
         if (carpool.isPresent() && request.isPresent()) {
             matchRequestAndCarpoolTogether(carpool.get(), request.get());
@@ -57,9 +61,9 @@ public class MatchProjector {
     @Transactional
     @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_MATCHED, groupId = "carpool-service-query")
     public void handleRequestMatched(RideRequestMatchedEvent event) {
-        RideRequest request = rideRequestRepository.findById(event.getRequestId()).orElseThrow();
+        RideRequest request = rideRequestRepository.findById(event.requestId).orElseThrow();
         Optional<Carpool> carpool;
-        for (String carpoolId : event.getMatchedCarpoolIds()) {
+        for (String carpoolId : event.matchedCarpoolIds) {
             carpool = carpoolRepository.findById(carpoolId);
             if (carpool.isPresent()) {
                 matchRequestAndCarpoolTogether(carpool.get(), request);
@@ -69,4 +73,60 @@ public class MatchProjector {
 
         rideRequestRepository.save(request);
     }
+
+    /**
+     * Can also subscribe to carpool-request-accepted, but we just choose this one.
+     */
+    @Transactional
+    @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_ACCEPTED, groupId = "carpool-service-query")
+    public void handleRequestAccepted(RideRequestAcceptedEvent event) {
+        RideRequest request = rideRequestRepository.findById(event.requestId).orElseThrow();
+        Carpool carpool = carpoolRepository.findById(event.carpoolId).orElseThrow();
+
+        request.setStatus(RideRequestStatus.ASSIGNED);
+        request.setAssignedCarpool(carpool);
+
+        /**
+         * Clear matched carpools
+         * We must clear from the owner-side(carpool) of the join relation
+         */
+        for (Carpool matchedCarpool : request.getMatchedCarpools()) {
+            matchedCarpool.getPendingRideRequests().remove(request);
+            carpoolRepository.save(matchedCarpool);
+        }
+
+        request.getMatchedCarpools().clear(); 
+
+        carpool.getConfirmedRideRequests().add(request);
+        carpool.getPendingRideRequests().remove(request);
+        carpool.incrementSeatsAssigned(request.getPassengers());
+
+        rideRequestRepository.save(request);
+        carpoolRepository.save(carpool);
+    }
+
+    /**
+     * Can also subscribe to carpool-request-declined, but we just choose this one.
+     */
+    @Transactional
+    @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_DECLINED, groupId = "carpool-service-query")
+    public void handleRideRequestDeclined(RideRequestDeclinedEvent event) {
+        RideRequest request = rideRequestRepository.findById(event.requestId).orElseThrow();
+        Carpool carpool = carpoolRepository.findById(event.carpoolId).orElseThrow();
+
+        request.getMatchedCarpools().remove(carpool);
+        carpool.getPendingRideRequests().remove(request);
+
+        rideRequestRepository.save(request);
+        carpoolRepository.save(carpool);
+    }
+
+    @KafkaListener(topics = DomainTopics.Carpool.CARPOOL_REQUEST_INVALIDATED, groupId = "carpool-service-query")
+    public void handleCarpoolInvalidated(CarpoolRequestInvalidatedEvent event) {
+        RideRequest request = rideRequestRepository.findById(event.rideRequestId).orElseThrow();
+        Carpool carpool = carpoolRepository.findById(event.carpoolId).orElseThrow();
+        carpool.getPendingRideRequests().remove(request);
+        carpoolRepository.save(carpool);
+    }
+
 }

@@ -1,26 +1,29 @@
 package com.tompang.carpool.carpool_service.command.domain.ride_request.event;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
 
-public class RideRequestMatchedEvent implements RideRequestEvent {
+/**
+ * Event emitted when no matching carpools are found
+ */
+public class RideRequestFailedEvent implements RideRequestEvent {
+
     public final String requestId;
-    public final List<String> matchedCarpoolIds;
+    public final String reason;
 
     @JsonCreator
-    public RideRequestMatchedEvent(
+    public RideRequestFailedEvent(
         @JsonProperty("requestId") String requestId,
-        @JsonProperty("matchedCarpoolIds") List<String> matchedCarpoolIds
+        @JsonProperty("reason") String reason
     ) {
         this.requestId = requestId;
-        this.matchedCarpoolIds = matchedCarpoolIds;
+        this.reason = reason;
     }
 
     @Override
     public String topicName() {
-        return DomainTopics.RideRequest.REQUEST_MATCHED;
+        return DomainTopics.RideRequest.REQUEST_FAILED;
     }
+
 }

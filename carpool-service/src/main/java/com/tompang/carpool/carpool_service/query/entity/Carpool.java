@@ -29,7 +29,7 @@ public class Carpool {
     private String id;
     private int totalSeats;
     @Builder.Default
-    private int seatsAssigned = 0;
+    private int seatsAssigned = 0; // we track the seats assigned to prevent having to join with requests during runtime.
     private String driverId;
     private LocalDateTime arrivalTime;
 
@@ -49,6 +49,10 @@ public class Carpool {
         inverseJoinColumns = @JoinColumn(name = "request_id")
     )
     private Set<RideRequest> pendingRideRequests = new HashSet<>();
+
+    public void incrementSeatsAssigned(int seats) {
+        this.seatsAssigned += seats;
+    }
 
     @Override
     public boolean equals(Object obj) {

@@ -7,7 +7,10 @@ import java.util.Set;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
@@ -39,6 +42,11 @@ public class RideRequest {
     // TODO change to actual addresses
     private String origin;
     private String destination;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(20) default 'PENDING'")
+    private RideRequestStatus status = RideRequestStatus.PENDING;
 
     @Builder.Default
     @ManyToMany(mappedBy = "pendingRideRequests")

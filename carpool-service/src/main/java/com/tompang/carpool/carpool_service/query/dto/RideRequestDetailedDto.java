@@ -21,6 +21,7 @@ public class RideRequestDetailedDto extends RideRequestSummaryDto {
             .endTime(request.getEndTime())
             .origin(request.getOrigin())
             .destination(request.getDestination())
+            .status(request.getStatus())
             .matchedCarpools(request.getMatchedCarpools().stream()
                 .map(carpool -> CarpoolSummaryDto.fromEntity(carpool)).toList())
             .assignedCarpool(CarpoolSummaryDto.fromEntity(request.getAssignedCarpool()))

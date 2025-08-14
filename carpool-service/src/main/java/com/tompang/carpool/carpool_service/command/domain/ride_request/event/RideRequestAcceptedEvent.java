@@ -6,21 +6,26 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
 
-public class RideRequestMatchedEvent implements RideRequestEvent {
+/**
+ * Event when ride request is accepted by a carpool, assigning them together.
+ */
+public class RideRequestAcceptedEvent implements RideRequestEvent {
+
+    public final String carpoolId;
     public final String requestId;
-    public final List<String> matchedCarpoolIds;
 
     @JsonCreator
-    public RideRequestMatchedEvent(
+    public RideRequestAcceptedEvent(
         @JsonProperty("requestId") String requestId,
-        @JsonProperty("matchedCarpoolIds") List<String> matchedCarpoolIds
+        @JsonProperty("carpoolId") String carpoolId
     ) {
         this.requestId = requestId;
-        this.matchedCarpoolIds = matchedCarpoolIds;
+        this.carpoolId = carpoolId;
     }
 
     @Override
     public String topicName() {
-        return DomainTopics.RideRequest.REQUEST_MATCHED;
+        return DomainTopics.RideRequest.REQUEST_ACCEPTED;
     }
+
 }

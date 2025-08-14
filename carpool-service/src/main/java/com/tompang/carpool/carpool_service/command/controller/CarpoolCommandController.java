@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tompang.carpool.carpool_service.command.command.carpool.AcceptCarpoolRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.carpool.CreateCarpoolCommand;
+import com.tompang.carpool.carpool_service.command.command.carpool.DeclineCarpoolRequestCommand;
 import com.tompang.carpool.carpool_service.command.service.CarpoolCommandHandler;
 
 @RestController
@@ -28,6 +30,22 @@ public class CarpoolCommandController {
         String carpoolId = this.carpoolCommandHandler.handleCreateCarpool(command);
         URI location = URI.create("/query/carpool/" + carpoolId);
         return ResponseEntity.created(location).build();
+    }
+
+    @PostMapping("/request/accept")
+    public ResponseEntity<Void> acceptRequest(
+        @RequestBody AcceptCarpoolRequestCommand command
+    ) {
+        this.carpoolCommandHandler.handleAcceptCarpoolRequest(command);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/request/decline")
+    public ResponseEntity<Void> declineRequest(
+        @RequestBody DeclineCarpoolRequestCommand command
+    ) {
+        this.carpoolCommandHandler.handleDeclineCarpoolRequest(command);
+        return ResponseEntity.ok().build();
     }
 
 }

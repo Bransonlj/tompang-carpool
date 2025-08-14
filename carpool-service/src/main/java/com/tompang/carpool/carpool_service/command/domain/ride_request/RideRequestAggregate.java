@@ -6,47 +6,32 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.tompang.carpool.carpool_service.command.command.carpool.AcceptCarpoolRequestCommand;
+import com.tompang.carpool.carpool_service.command.command.carpool.DeclineCarpoolRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.ride_request.CreateRideRequestCommand;
+import com.tompang.carpool.carpool_service.command.command.ride_request.FailRideRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.ride_request.MatchRideRequestCommand;
+import com.tompang.carpool.carpool_service.command.domain.Route;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestAcceptedEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestCreatedEvent;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestDeclinedEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestEvent;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestFailedEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestMatchedEvent;
 
 public class RideRequestAggregate {
-
-    class AssignedCarpool {
-        private boolean isAssigned;
-        private String assignedCarpoolId;
-
-        public AssignedCarpool() {
-            this.isAssigned = false;
-        }
-
-        public void assign(String carpoolId) {
-            this.isAssigned = true;
-            assignedCarpoolId = carpoolId;
-        }
-
-        public boolean getIsAssigned() {
-            return this.isAssigned;
-        }
-
-        public String getAssignedCarpoolId() {
-            return this.assignedCarpoolId;
-        }
-    }
 
     private String id;
     private String riderId;
     private int passengers;
     private List<String> matchedCarpools = new ArrayList<>();
-    private Optional<AssignedCarpool> assignedCarpool = Optional.empty();
+    private Optional<String> assignedCarpool = Optional.empty();
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private String origin;
-    private String destination;
+    private Route route;
+    private RideRequestStatus status = RideRequestStatus.PENDING;
 
-        // List of new events to be persisted
+    // List of new events to be persisted
     private final List<RideRequestEvent> changes = new ArrayList<>();
 
     public static RideRequestAggregate rehydrate(List<RideRequestEvent> history) {
@@ -60,7 +45,7 @@ public class RideRequestAggregate {
     public static RideRequestAggregate createRideRequest(CreateRideRequestCommand command) {
         RideRequestAggregate rideRequest = new RideRequestAggregate();
         rideRequest.raiseEvent(new RideRequestCreatedEvent(UUID.randomUUID().toString(), command.riderId,
-                command.passengers, command.startTime, command.endTime, command.origin, command.destination));
+                command.passengers, command.startTime, command.endTime, new Route(command.origin, command.destination)));
         return rideRequest;
     }
 
@@ -69,8 +54,72 @@ public class RideRequestAggregate {
         this.raiseEvent(new RideRequestMatchedEvent(command.requestId, command.matchedCarpoolIds));
     }
 
+    /**
+     * raises RideRequestFailedEvent, invoke when request failed (eg. no match found)
+     * @param command
+     */
+    public void failRideRequest(FailRideRequestCommand command) {
+        if (!this.matchedCarpools.isEmpty()) {
+            throw new RuntimeException("RideRequest still has pending carpools matched");
+        }
+
+        if (this.assignedCarpool.isPresent()) {
+            throw new RuntimeException("RideRequest already assigned to a Carpool");
+        }
+        
+        this.raiseEvent(new RideRequestFailedEvent(command.requestId, command.reason));
+    }
+
+    /**
+     * raises RideRequestAcceptedEvent
+     * @param command
+     */
+    public void acceptCarpoolRequest(AcceptCarpoolRequestCommand command) {
+        if (!this.matchedCarpools.contains(command.carpoolId)) {
+            throw new RuntimeException("Carpool and RideRequest do not match");
+        }
+
+        if (this.assignedCarpool.isPresent()) {
+            throw new RuntimeException("RideRequest already assigned to a Carpool");
+        }
+
+        this.raiseEvent(new RideRequestAcceptedEvent(command.requestId, command.carpoolId));
+    }
+
+    public void declineCarpoolRequest(DeclineCarpoolRequestCommand command) {
+        if (!this.matchedCarpools.contains(command.carpoolId)) {
+            throw new RuntimeException("Carpool and RideRequest do not match");
+        }
+
+        if (this.assignedCarpool.isPresent()) {
+            throw new RuntimeException("RideRequest already assigned to a Carpool");
+        }
+
+        this.raiseEvent(new RideRequestDeclinedEvent(command.requestId, command.carpoolId));
+    }
+
     public String getId() {
         return this.id;
+    }
+
+    public RideRequestStatus getStatus() {
+        return this.status;
+    }
+
+    public int getPassengers() {
+        return this.passengers;
+    }
+
+    public List<String> getMatchedCarpoolsCopy() {
+        return new ArrayList<>(this.matchedCarpools);
+    }
+
+    /**
+     * Returns whether RideRequest can be assigned a Carpool by checking if the status is Pending.
+     * @return
+     */
+    public boolean canAssign() {
+        return this.status == RideRequestStatus.PENDING;
     }
 
     public List<RideRequestEvent> getUncommittedChanges() {
@@ -80,7 +129,6 @@ public class RideRequestAggregate {
     public void clearUncommittedChanges() {
         changes.clear();
     }
-
     
     // Raise and apply events
     private void raiseEvent(RideRequestEvent event) {
@@ -90,15 +138,22 @@ public class RideRequestAggregate {
 
     private void apply(RideRequestEvent event) {
         if (event instanceof RideRequestCreatedEvent e) {
-            this.id = e.getRequestId();
-            this.riderId = e.getRiderId();
-            this.passengers = e.getPassengers();
-            this.startTime = e.getStartTime();
-            this.endTime = e.getEndTime();
-            this.origin = e.getOrigin();
-            this.destination = e.getDestination();
+            this.id = e.requestId;
+            this.riderId = e.riderId;
+            this.passengers = e.passengers;
+            this.startTime = e.startTime;
+            this.endTime = e.endTime;
+            this.route = e.route;
         } else if (event instanceof RideRequestMatchedEvent e) {
-            this.matchedCarpools.addAll(e.getMatchedCarpoolIds());
+            this.matchedCarpools.addAll(e.matchedCarpoolIds);
+        } else if (event instanceof RideRequestFailedEvent) {
+            this.status = RideRequestStatus.FAILED;
+        } else if (event instanceof RideRequestAcceptedEvent e) {
+            this.assignedCarpool = Optional.of(e.carpoolId);
+            this.status = RideRequestStatus.ASSIGNED;
+            this.matchedCarpools = new ArrayList<>(); // clear list of matched carpools
+        } else if (event instanceof RideRequestDeclinedEvent e) {
+            this.matchedCarpools.remove(e.carpoolId);
         }
     }
 

@@ -5,34 +5,48 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.tompang.carpool.carpool_service.command.command.ride_request.CreateRideRequestCommand;
+import com.tompang.carpool.carpool_service.command.command.ride_request.FailRideRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.ride_request.MatchRideRequestCommand;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.RideRequestAggregate;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestEvent;
-import com.tompang.carpool.carpool_service.command.repository.RideRequestEventRepository;
+import com.tompang.carpool.carpool_service.command.repository.EventRepository;
+import com.tompang.carpool.carpool_service.common.kurrent.StreamId;
+
+import io.kurrent.dbclient.ReadResult;
 
 @Service
 public class RideRequestCommandHandler {
-    private final RideRequestEventRepository repository;
+    private final EventRepository repository;
     private final KafkaProducerService kafkaProducerService;
 
-    public RideRequestCommandHandler(RideRequestEventRepository repository, KafkaProducerService kafkaProducerService) {
+    public RideRequestCommandHandler(EventRepository repository, KafkaProducerService kafkaProducerService) {
         this.repository = repository;
         this.kafkaProducerService = kafkaProducerService;
     }
 
     public String handleCreateRideRequest(CreateRideRequestCommand command) {
         RideRequestAggregate rideRequest = RideRequestAggregate.createRideRequest(command);
-        repository.appendEvents(rideRequest.getId(), rideRequest.getUncommittedChanges());
+        repository.appendEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, rideRequest.getId()), rideRequest.getUncommittedChanges());
         kafkaProducerService.publishDomainEvents(rideRequest.getUncommittedChanges());
         return rideRequest.getId();
     }
 
-    public void handleMatchRideRequest(MatchRideRequestCommand command) {
-        List<RideRequestEvent> events = repository.readEvents(command.requestId);
-        RideRequestAggregate rideRequest = RideRequestAggregate.rehydrate(events);
-        rideRequest.matchRideRequest(command);
-        repository.appendEvents(rideRequest.getId(), rideRequest.getUncommittedChanges());
-        kafkaProducerService.publishDomainEvents(rideRequest.getUncommittedChanges());
+    public void handleMatchRideRequest(MatchRideRequestCommand command) {        
+        ReadResult readResult = repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId));
+        List<RideRequestEvent> history = repository.deserializeEvents(readResult.getEvents(), EventRepository.RideRequestConstants.EVENT_TYPE_MAP);
+        RideRequestAggregate request = RideRequestAggregate.rehydrate(history);
+        request.matchRideRequest(command);
+        repository.appendEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, request.getId()), request.getUncommittedChanges(), readResult.getLastStreamPosition());
+        kafkaProducerService.publishDomainEvents(request.getUncommittedChanges());
+    }
+
+    public void handleFailRideRequest(FailRideRequestCommand command) {
+        ReadResult readResult = repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId));
+        List<RideRequestEvent> history = repository.deserializeEvents(readResult.getEvents(), EventRepository.RideRequestConstants.EVENT_TYPE_MAP);
+        RideRequestAggregate request = RideRequestAggregate.rehydrate(history);
+        request.failRideRequest(command);
+        repository.appendEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, request.getId()), request.getUncommittedChanges(), readResult.getLastStreamPosition());
+        kafkaProducerService.publishDomainEvents(request.getUncommittedChanges());
     }
 
 }

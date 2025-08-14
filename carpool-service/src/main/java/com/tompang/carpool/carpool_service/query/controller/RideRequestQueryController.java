@@ -1,5 +1,6 @@
 package com.tompang.carpool.carpool_service.query.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tompang.carpool.carpool_service.common.exceptions.ResourceNotFoundException;
 import com.tompang.carpool.carpool_service.query.dto.RideRequestDetailedDto;
+import com.tompang.carpool.carpool_service.query.dto.RideRequestSummaryDto;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
 import com.tompang.carpool.carpool_service.query.service.RideRequestQueryService;
 
@@ -30,5 +32,12 @@ public class RideRequestQueryController {
         }
 
         return ResponseEntity.ok(RideRequestDetailedDto.fromEntity(request.get()));
+    }
+
+    @GetMapping("/rider/{id}")
+    public ResponseEntity<List<RideRequestSummaryDto>> getRiderRequestsByRiderId(@PathVariable String id) {
+        List<RideRequest> requests = queryService.getRideRequestsByRiderId(id);
+        List<RideRequestSummaryDto> requestDtos = requests.stream().map(request -> RideRequestSummaryDto.fromEntity(request)).toList();
+        return ResponseEntity.ok(requestDtos);
     }
 }

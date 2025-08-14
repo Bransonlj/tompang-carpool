@@ -20,16 +20,17 @@ public class CarpoolProjector {
     @KafkaListener(topics = DomainTopics.Carpool.CARPOOL_CREATED, groupId = "carpool-service-query")
     public void handleCarpoolCreated(CarpoolCreatedEvent event) {
         Carpool carpool = Carpool.builder()
-            .id(event.getCarpoolId())
-            .totalSeats(event.getAvailableSeats())
-            .driverId(event.getDriverId())
-            .arrivalTime(event.getArrivalTime()).origin(event.getOrigin())
-            .destination(event.getDestination())
+            .id(event.carpoolId)
+            .totalSeats(event.availableSeats)
+            .driverId(event.driverId)
+            .arrivalTime(event.arrivalTime)
+            .origin(event.route.origin)
+            .destination(event.route.destination)
             .build();
 
         repository.save(carpool);
     }
-
+    
     // Delete
     public void handleDeleteCarpool() {
 

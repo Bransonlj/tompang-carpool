@@ -4,13 +4,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
 
-public class CarpoolMatchedEvent implements CarpoolEvent {
-
+public class CarpoolRequestDeclinedEvent implements CarpoolEvent {
     public final String carpoolId;
     public final String rideRequestId;
-
+    
     @JsonCreator
-    public CarpoolMatchedEvent(
+    public CarpoolRequestDeclinedEvent(
         @JsonProperty("carpoolId") String carpoolId,
         @JsonProperty("rideRequestId") String rideRequestId
     ) {
@@ -20,7 +19,6 @@ public class CarpoolMatchedEvent implements CarpoolEvent {
 
     @Override
     public String topicName() {
-        return DomainTopics.Carpool.CARPOOL_MATCHED;
+        return DomainTopics.Carpool.CARPOOL_REQUEST_ACCEPTED;
     }
-
 }

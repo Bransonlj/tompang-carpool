@@ -1,14 +1,21 @@
 package com.tompang.carpool.carpool_service.command.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Value object of a route with a origin and destination
  */
-@AllArgsConstructor
-@Getter
 public class Route {
-    private final String origin;
-    private final String destination;
+    public final String origin;
+    public final String destination;
+
+    @JsonCreator
+    public Route(
+        @JsonProperty("origin") String origin,
+        @JsonProperty("destination") String destination
+    ) {
+        this.origin = origin;
+        this.destination = destination;
+    }
 }
