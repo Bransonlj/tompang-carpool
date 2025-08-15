@@ -2,6 +2,8 @@ package com.tompang.carpool.carpool_service.command.process;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,7 @@ import com.tompang.carpool.carpool_service.command.repository.EventRepository;
 import com.tompang.carpool.carpool_service.command.service.CarpoolCommandHandler;
 import com.tompang.carpool.carpool_service.command.service.RideRequestCommandHandler;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
+import com.tompang.carpool.carpool_service.common.GeoUtils;
 import com.tompang.carpool.carpool_service.common.kurrent.StreamId;
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
 import com.tompang.carpool.carpool_service.query.service.CarpoolQueryService;
@@ -27,6 +30,7 @@ import io.kurrent.dbclient.ReadResult;
 @Component
 public class RideRequestProcessManager {
 
+    private final Logger logger = LoggerFactory.getLogger(RideRequestProcessManager.class);
     private final CarpoolQueryService carpoolQueryService;
     private final CarpoolCommandHandler carpoolCommandHandler;
     private final RideRequestCommandHandler requestCommandHandler;
@@ -46,14 +50,23 @@ public class RideRequestProcessManager {
 
     @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_CREATED, groupId = "carpool-service-consumer")
     public void handleRideRequestCreated(RideRequestCreatedEvent event) {
-        List<Carpool> matchingCarpools = carpoolQueryService.getCarpoolsByRouteInTimeRangeWithSeats(
-            event.route.origin, event.route.destination, event.startTime, event.endTime, event.passengers
-        );
+        List<Carpool> matchingCarpools;
+        try {
+            matchingCarpools = carpoolQueryService.getCarpoolsByRouteInRangeWithSeats(
+                GeoUtils.createPoint(event.route.origin), GeoUtils.createPoint(event.route.destination), 5000, event.startTime, event.endTime, event.passengers
+            );
+        } catch (RuntimeException e) {
+            logger.error("Error handling RideRequestCreatedEvent, cannot get matching carpools", e);
+            requestCommandHandler.handleFailRideRequest(new FailRideRequestCommand(event.requestId, "Error finding carpool matches"));
+            return;
+        }
 
         if (matchingCarpools.size() == 0) {
             // fail request on no match found
             requestCommandHandler.handleFailRideRequest(new FailRideRequestCommand(event.requestId, "No carpool matches found"));
+            return;
         }
+
 
         for (Carpool carpool : matchingCarpools) {
             carpoolCommandHandler.handleMatchCarpool(new MatchCarpoolCommand(carpool.getId(), event.requestId));

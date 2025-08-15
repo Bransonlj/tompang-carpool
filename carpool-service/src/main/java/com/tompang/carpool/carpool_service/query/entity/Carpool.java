@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.locationtech.jts.geom.Point;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -33,9 +36,10 @@ public class Carpool {
     private String driverId;
     private LocalDateTime arrivalTime;
 
-    // TODO change to actual addresses
-    private String origin;
-    private String destination;
+    @Column(columnDefinition = "GEOGRAPHY(Point,4326)")
+    private Point origin;
+    @Column(columnDefinition = "GEOGRAPHY(Point,4326)")
+    private Point destination;
 
     @Builder.Default
     @OneToMany(mappedBy = "assignedCarpool", orphanRemoval = false)

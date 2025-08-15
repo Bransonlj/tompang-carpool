@@ -2,6 +2,8 @@ package com.tompang.carpool.carpool_service.query.dto;
 
 import java.time.LocalDateTime;
 
+import com.tompang.carpool.carpool_service.command.domain.LatLong;
+import com.tompang.carpool.carpool_service.command.domain.Route;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
 import com.tompang.carpool.carpool_service.query.entity.RideRequestStatus;
 
@@ -17,21 +19,19 @@ public class RideRequestSummaryDto {
     public final String riderId;
     public final LocalDateTime startTime;
     public final LocalDateTime endTime;
-    public final String origin;
-    public final String destination;
+    public final Route route;
     public final RideRequestStatus status;
 
     public static RideRequestSummaryDto fromEntity(RideRequest request) {
         if (request == null) return null;
         return RideRequestSummaryDto.builder()
-            .id(request.getId())
-            .passengers(request.getPassengers())
-            .riderId(request.getRiderId())
-            .startTime(request.getStartTime())
-            .endTime(request.getEndTime())
-            .origin(request.getOrigin())
-            .destination(request.getDestination())
-            .status(request.getStatus())
-            .build();
+                .id(request.getId())
+                .passengers(request.getPassengers())
+                .riderId(request.getRiderId())
+                .startTime(request.getStartTime())
+                .endTime(request.getEndTime())
+                .route(new Route(LatLong.from(request.getOrigin()), LatLong.from(request.getDestination())))
+                .status(request.getStatus())
+                .build();
     }
 }

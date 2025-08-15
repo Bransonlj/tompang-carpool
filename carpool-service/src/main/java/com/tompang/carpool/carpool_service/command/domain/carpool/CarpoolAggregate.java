@@ -44,7 +44,7 @@ public class CarpoolAggregate {
     public static CarpoolAggregate createCarpool(CreateCarpoolCommand command) {
         CarpoolAggregate carpool = new CarpoolAggregate();
         carpool.raiseEvent(new CarpoolCreatedEvent(UUID.randomUUID().toString(), command.seats, command.driverId,
-                command.arrivalTime, new Route(command.origin, command.destination)));
+                command.arrivalTime, command.route));
         return carpool;
     }
 

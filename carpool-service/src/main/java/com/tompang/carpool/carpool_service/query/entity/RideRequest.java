@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.locationtech.jts.geom.Point;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,9 +40,10 @@ public class RideRequest {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    // TODO change to actual addresses
-    private String origin;
-    private String destination;
+    @Column(columnDefinition = "GEOGRAPHY(Point,4326)")
+    private Point origin;
+    @Column(columnDefinition = "GEOGRAPHY(Point,4326)")
+    private Point destination;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

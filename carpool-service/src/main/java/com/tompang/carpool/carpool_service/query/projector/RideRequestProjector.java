@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestCreatedEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestFailedEvent;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
+import com.tompang.carpool.carpool_service.common.GeoUtils;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
 import com.tompang.carpool.carpool_service.query.entity.RideRequestStatus;
 import com.tompang.carpool.carpool_service.query.repository.RideRequestQueryRepository;
@@ -26,8 +27,8 @@ public class RideRequestProjector {
             .passengers(event.passengers)
             .startTime(event.startTime)
             .endTime(event.endTime)
-            .origin(event.route.origin)
-            .destination(event.route.destination)
+            .origin(GeoUtils.createPoint(event.route.origin))
+            .destination(GeoUtils.createPoint(event.route.destination))
             .build();
         
         repository.save(request);

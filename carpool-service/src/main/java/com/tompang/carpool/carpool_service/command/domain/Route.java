@@ -7,13 +7,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Value object of a route with a origin and destination
  */
 public class Route {
-    public final String origin;
-    public final String destination;
+    public final LatLong origin;
+    public final LatLong destination;
 
     @JsonCreator
     public Route(
-        @JsonProperty("origin") String origin,
-        @JsonProperty("destination") String destination
+        @JsonProperty("origin") LatLong origin,
+        @JsonProperty("destination") LatLong destination
     ) {
         this.origin = origin;
         this.destination = destination;

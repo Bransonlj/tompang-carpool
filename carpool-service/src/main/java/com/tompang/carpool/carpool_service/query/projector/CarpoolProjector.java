@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolCreatedEvent;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
+import com.tompang.carpool.carpool_service.common.GeoUtils;
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
 import com.tompang.carpool.carpool_service.query.repository.CarpoolQueryRepository;
 
@@ -24,8 +25,8 @@ public class CarpoolProjector {
             .totalSeats(event.availableSeats)
             .driverId(event.driverId)
             .arrivalTime(event.arrivalTime)
-            .origin(event.route.origin)
-            .destination(event.route.destination)
+            .origin(GeoUtils.createPoint(event.route.origin))
+            .destination(GeoUtils.createPoint(event.route.destination))
             .build();
 
         repository.save(carpool);

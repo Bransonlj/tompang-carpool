@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
@@ -22,13 +23,14 @@ public class CarpoolQueryService {
         return repository.findById(id);
     }
 
-    public List<Carpool> getCarpoolsByRouteInTimeRangeWithSeats(
-        String origin,
-        String destination,
+    public List<Carpool> getCarpoolsByRouteInRangeWithSeats(
+        Point origin,
+        Point destination,
+        double rangeMeters,
         LocalDateTime startTime,
         LocalDateTime endTime,
         int seatsNeeded
     ) {
-        return repository.findCarpoolsByRouteInTimeRangeWithSeats(origin, destination, startTime, endTime, seatsNeeded);
+        return repository.findCarpoolsByRouteInRangeWithSeats(origin, destination, rangeMeters, startTime, endTime, seatsNeeded);
     }
 }

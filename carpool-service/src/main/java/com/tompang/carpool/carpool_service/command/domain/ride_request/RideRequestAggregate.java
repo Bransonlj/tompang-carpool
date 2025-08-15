@@ -45,7 +45,7 @@ public class RideRequestAggregate {
     public static RideRequestAggregate createRideRequest(CreateRideRequestCommand command) {
         RideRequestAggregate rideRequest = new RideRequestAggregate();
         rideRequest.raiseEvent(new RideRequestCreatedEvent(UUID.randomUUID().toString(), command.riderId,
-                command.passengers, command.startTime, command.endTime, new Route(command.origin, command.destination)));
+                command.passengers, command.startTime, command.endTime, command.route));
         return rideRequest;
     }
 
