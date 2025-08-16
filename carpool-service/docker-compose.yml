@@ -74,6 +74,19 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+  redis:
+    container_name: tompang-redis
+    image: redis:latest
+    ports: 
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
 volumes:
   kurrentdb_data:
   kurrentdb_logs:
@@ -82,3 +95,4 @@ volumes:
   zookeeper_log:
   kafka_data:
   rabbitmq_data:
+  redis_data:
