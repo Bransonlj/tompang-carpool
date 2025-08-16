@@ -29,6 +29,7 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
+    container_name: tompang-zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -40,6 +41,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:latest
+    container_name: tompang-kafka
     depends_on:
       - zookeeper
     ports:
@@ -60,6 +62,18 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
 
+  rabbitmq:
+    container_name: tompang-rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # RabbitMQ messaging port
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
 volumes:
   kurrentdb_data:
   kurrentdb_logs:
@@ -67,3 +81,4 @@ volumes:
   zookeeper_data:
   zookeeper_log:
   kafka_data:
+  rabbitmq_data:

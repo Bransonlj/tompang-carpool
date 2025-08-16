@@ -6,16 +6,22 @@ import org.springframework.stereotype.Component;
 import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolCreatedEvent;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
 import com.tompang.carpool.carpool_service.common.GeoUtils;
+import com.tompang.carpool.carpool_service.query.dto.geocode.GeocodeReverseJobDto;
+import com.tompang.carpool.carpool_service.query.dto.geocode.enums.GeocodeEntity;
+import com.tompang.carpool.carpool_service.query.dto.geocode.enums.GeocodeEntityField;
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
 import com.tompang.carpool.carpool_service.query.repository.CarpoolQueryRepository;
+import com.tompang.carpool.carpool_service.query.service.RabbitProducerService;
 
 @Component
 public class CarpoolProjector {
 
-    private CarpoolQueryRepository repository;
+    private final CarpoolQueryRepository repository;
+    private final RabbitProducerService rabbitProducerService;
 
-    public CarpoolProjector(CarpoolQueryRepository repository) {
+    public CarpoolProjector(CarpoolQueryRepository repository, RabbitProducerService rabbitProducerService) {
         this.repository = repository;
+        this.rabbitProducerService = rabbitProducerService;
     }
 
     @KafkaListener(topics = DomainTopics.Carpool.CARPOOL_CREATED, groupId = "carpool-service-query")
@@ -30,6 +36,9 @@ public class CarpoolProjector {
             .build();
 
         repository.save(carpool);
+        // create reverse geocode jobs for origin and destination.
+        rabbitProducerService.sendReverseGeocodeJob(new GeocodeReverseJobDto(event.route.origin, GeocodeEntity.CARPOOL, carpool.getId(), GeocodeEntityField.ORIGIN));
+        rabbitProducerService.sendReverseGeocodeJob(new GeocodeReverseJobDto(event.route.destination, GeocodeEntity.CARPOOL, carpool.getId(), GeocodeEntityField.DESTINATION));
     }
     
     // Delete

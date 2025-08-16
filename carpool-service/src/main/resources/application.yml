@@ -26,11 +26,16 @@ spring:
           json:
             trusted:
               packages: "*"
-
     producer:
       bootstrap-servers: localhost:29092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer   
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer  
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: user
+    password: password
 
 server:
   port: 4000

@@ -24,4 +24,9 @@ public class LatLong {
     public static LatLong from(Point point) {
         return new LatLong(point.getX(), point.getY());
     }
+
+    @Override
+    public String toString() {
+        return String.format("LatLong{latitude=%.6f, longitude=%.6f}", latitude, longitude);
+    }
 }

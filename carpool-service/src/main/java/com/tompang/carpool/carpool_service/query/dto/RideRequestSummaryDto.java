@@ -2,8 +2,6 @@ package com.tompang.carpool.carpool_service.query.dto;
 
 import java.time.LocalDateTime;
 
-import com.tompang.carpool.carpool_service.command.domain.LatLong;
-import com.tompang.carpool.carpool_service.command.domain.Route;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
 import com.tompang.carpool.carpool_service.query.entity.RideRequestStatus;
 
@@ -19,7 +17,7 @@ public class RideRequestSummaryDto {
     public final String riderId;
     public final LocalDateTime startTime;
     public final LocalDateTime endTime;
-    public final Route route;
+    public final RouteDto route;
     public final RideRequestStatus status;
 
     public static RideRequestSummaryDto fromEntity(RideRequest request) {
@@ -30,7 +28,7 @@ public class RideRequestSummaryDto {
                 .riderId(request.getRiderId())
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
-                .route(new Route(LatLong.from(request.getOrigin()), LatLong.from(request.getDestination())))
+                .route(new RouteDto(request.getOrigin(), request.getDestination(), request.getOriginEventualAddress(), request.getDestinationEventualAddress()))
                 .status(request.getStatus())
                 .build();
     }

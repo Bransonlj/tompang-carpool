@@ -2,8 +2,6 @@ package com.tompang.carpool.carpool_service.query.dto;
 
 import java.util.List;
 
-import com.tompang.carpool.carpool_service.command.domain.LatLong;
-import com.tompang.carpool.carpool_service.command.domain.Route;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
 
 import lombok.experimental.SuperBuilder;
@@ -21,7 +19,7 @@ public class RideRequestDetailedDto extends RideRequestSummaryDto {
                 .riderId(request.getRiderId())
                 .startTime(request.getStartTime())
                 .endTime(request.getEndTime())
-                .route(new Route(LatLong.from(request.getOrigin()), LatLong.from(request.getDestination())))
+                .route(new RouteDto(request.getOrigin(), request.getDestination(), request.getOriginEventualAddress(), request.getDestinationEventualAddress()))
                 .status(request.getStatus())
                 .matchedCarpools(request.getMatchedCarpools().stream()
                     .map(carpool -> CarpoolSummaryDto.fromEntity(carpool)).toList())

@@ -7,16 +7,22 @@ import com.tompang.carpool.carpool_service.command.domain.ride_request.event.Rid
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestFailedEvent;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
 import com.tompang.carpool.carpool_service.common.GeoUtils;
+import com.tompang.carpool.carpool_service.query.dto.geocode.GeocodeReverseJobDto;
+import com.tompang.carpool.carpool_service.query.dto.geocode.enums.GeocodeEntity;
+import com.tompang.carpool.carpool_service.query.dto.geocode.enums.GeocodeEntityField;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
 import com.tompang.carpool.carpool_service.query.entity.RideRequestStatus;
 import com.tompang.carpool.carpool_service.query.repository.RideRequestQueryRepository;
+import com.tompang.carpool.carpool_service.query.service.RabbitProducerService;
 
 @Component
 public class RideRequestProjector {
     private final RideRequestQueryRepository repository;
+    private final RabbitProducerService rabbitProducerService;
 
-    public RideRequestProjector(RideRequestQueryRepository repository) {
+    public RideRequestProjector(RideRequestQueryRepository repository, RabbitProducerService rabbitProducerService) {
         this.repository = repository;
+        this.rabbitProducerService = rabbitProducerService;
     }
 
     @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_CREATED, groupId = "carpool-service-query")
@@ -32,6 +38,9 @@ public class RideRequestProjector {
             .build();
         
         repository.save(request);
+        // create reverse geocode jobs for origin and destination.
+        rabbitProducerService.sendReverseGeocodeJob(new GeocodeReverseJobDto(event.route.origin, GeocodeEntity.RIDEREQUEST, request.getId(), GeocodeEntityField.ORIGIN));
+        rabbitProducerService.sendReverseGeocodeJob(new GeocodeReverseJobDto(event.route.destination, GeocodeEntity.RIDEREQUEST, request.getId(), GeocodeEntityField.DESTINATION));
     }
 
     @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_FAILED, groupId = "carpool-service-query")

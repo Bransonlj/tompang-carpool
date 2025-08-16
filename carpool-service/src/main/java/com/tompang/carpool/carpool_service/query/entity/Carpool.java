@@ -6,7 +6,10 @@ import java.util.Set;
 
 import org.locationtech.jts.geom.Point;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -40,6 +43,22 @@ public class Carpool {
     private Point origin;
     @Column(columnDefinition = "GEOGRAPHY(Point,4326)")
     private Point destination;
+
+    @Embedded
+    @Builder.Default
+    @AttributeOverrides({
+        @AttributeOverride(name = "status", column = @Column(name = "origin_address_status")),
+        @AttributeOverride(name = "addressString", column = @Column(name = "origin_address_string"))
+    })
+    private EventualAddress originEventualAddress = EventualAddress.get();
+
+    @Embedded
+    @Builder.Default
+    @AttributeOverrides({
+        @AttributeOverride(name = "status", column = @Column(name = "destination_address_status")),
+        @AttributeOverride(name = "addressString", column = @Column(name = "destination_address_string"))
+    })
+    private EventualAddress destinationEventualAddress = EventualAddress.get();
 
     @Builder.Default
     @OneToMany(mappedBy = "assignedCarpool", orphanRemoval = false)

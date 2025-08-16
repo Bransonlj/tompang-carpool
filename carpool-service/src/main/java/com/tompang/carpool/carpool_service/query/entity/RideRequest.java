@@ -8,7 +8,10 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.locationtech.jts.geom.Point;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -44,6 +47,22 @@ public class RideRequest {
     private Point origin;
     @Column(columnDefinition = "GEOGRAPHY(Point,4326)")
     private Point destination;
+
+    @Embedded
+    @Builder.Default
+    @AttributeOverrides({
+        @AttributeOverride(name = "status", column = @Column(name = "origin_address_status")),
+        @AttributeOverride(name = "addressString", column = @Column(name = "origin_address_string"))
+    })
+    private EventualAddress originEventualAddress = EventualAddress.get();
+
+    @Embedded
+    @Builder.Default
+    @AttributeOverrides({
+        @AttributeOverride(name = "status", column = @Column(name = "destination_address_status")),
+        @AttributeOverride(name = "addressString", column = @Column(name = "destination_address_string"))
+    })
+    private EventualAddress destinationEventualAddress = EventualAddress.get();
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
