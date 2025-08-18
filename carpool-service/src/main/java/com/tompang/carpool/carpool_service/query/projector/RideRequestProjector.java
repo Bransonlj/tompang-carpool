@@ -7,22 +7,22 @@ import com.tompang.carpool.carpool_service.command.domain.ride_request.event.Rid
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestFailedEvent;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
 import com.tompang.carpool.carpool_service.common.GeoUtils;
-import com.tompang.carpool.carpool_service.query.dto.geocode.GeocodeReverseJobDto;
-import com.tompang.carpool.carpool_service.query.dto.geocode.enums.GeocodeEntity;
-import com.tompang.carpool.carpool_service.query.dto.geocode.enums.GeocodeEntityField;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
 import com.tompang.carpool.carpool_service.query.entity.RideRequestStatus;
+import com.tompang.carpool.carpool_service.query.geocode.GeocodeJobService;
+import com.tompang.carpool.carpool_service.query.geocode.dto.ReverseGeocodeJobDto;
+import com.tompang.carpool.carpool_service.query.geocode.enums.GeocodeEntity;
+import com.tompang.carpool.carpool_service.query.geocode.enums.GeocodeEntityField;
 import com.tompang.carpool.carpool_service.query.repository.RideRequestQueryRepository;
-import com.tompang.carpool.carpool_service.query.service.RabbitProducerService;
 
 @Component
 public class RideRequestProjector {
     private final RideRequestQueryRepository repository;
-    private final RabbitProducerService rabbitProducerService;
+    private final GeocodeJobService geocodeJobService;
 
-    public RideRequestProjector(RideRequestQueryRepository repository, RabbitProducerService rabbitProducerService) {
+    public RideRequestProjector(RideRequestQueryRepository repository, GeocodeJobService geocodeJobService) {
         this.repository = repository;
-        this.rabbitProducerService = rabbitProducerService;
+        this.geocodeJobService = geocodeJobService;
     }
 
     @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_CREATED, groupId = "carpool-service-query")
@@ -39,8 +39,8 @@ public class RideRequestProjector {
         
         repository.save(request);
         // create reverse geocode jobs for origin and destination.
-        rabbitProducerService.sendReverseGeocodeJob(new GeocodeReverseJobDto(event.route.origin, GeocodeEntity.RIDEREQUEST, request.getId(), GeocodeEntityField.ORIGIN));
-        rabbitProducerService.sendReverseGeocodeJob(new GeocodeReverseJobDto(event.route.destination, GeocodeEntity.RIDEREQUEST, request.getId(), GeocodeEntityField.DESTINATION));
+        geocodeJobService.createReverseGeocodeJob(new ReverseGeocodeJobDto(event.route.origin, GeocodeEntity.RIDEREQUEST, request.getId(), GeocodeEntityField.ORIGIN));
+        geocodeJobService.createReverseGeocodeJob(new ReverseGeocodeJobDto(event.route.destination, GeocodeEntity.RIDEREQUEST, request.getId(), GeocodeEntityField.DESTINATION));
     }
 
     @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_FAILED, groupId = "carpool-service-query")

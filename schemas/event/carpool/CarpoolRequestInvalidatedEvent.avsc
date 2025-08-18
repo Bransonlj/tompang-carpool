@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "namespace": "com.tompang.carpool.event.carpool",
+  "name": "CarpoolRequestInvalidatedEvent",
+  "fields": [
+    {
+      "name": "carpoolId",
+      "type": "string"
+    },
+    {
+      "name": "rideRequestId",
+      "type": "string"
+    },
+    {
+        "name": "reason",
+        "type": "string"
+    }
+  ]
+}

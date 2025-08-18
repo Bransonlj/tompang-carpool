@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: geospatial-service
+
+  kafka:
+    producer:
+      bootstrap-servers: localhost:29092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer 
+      properties: 
+        spring.json.add.type.headers: false # allow other microservices to consume with their own event dto
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: user
+    password: password
+
+  redis:
+    host: localhost
+    port: 6379

@@ -3,17 +3,20 @@ package com.tompang.carpool.carpool_service.query.projector;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import com.tompang.carpool.carpool_service.common.DomainTopics;
-import com.tompang.carpool.carpool_service.query.dto.geocode.GeocodeReverseCompletedEvent;
-import com.tompang.carpool.carpool_service.query.dto.geocode.enums.GeocodeEntity;
-import com.tompang.carpool.carpool_service.query.dto.geocode.enums.GeocodeEntityField;
+import com.tompang.carpool.carpool_service.common.ExternalTopics;
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
 import com.tompang.carpool.carpool_service.query.entity.EventualAddress;
 import com.tompang.carpool.carpool_service.query.entity.EventualAddressStatus;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
+import com.tompang.carpool.carpool_service.query.geocode.enums.GeocodeEntity;
+import com.tompang.carpool.carpool_service.query.geocode.enums.GeocodeEntityField;
+import com.tompang.carpool.carpool_service.query.geocode.event.ReverseGeocodeCompletedEvent;
 import com.tompang.carpool.carpool_service.query.repository.CarpoolQueryRepository;
 import com.tompang.carpool.carpool_service.query.repository.RideRequestQueryRepository;
 
+/**
+ * Updates repository with data from geocode events
+ */
 @Component
 public class GeocodeProjector {
     private final CarpoolQueryRepository carpoolRepository;
@@ -24,8 +27,8 @@ public class GeocodeProjector {
         this.rideRequestRepository = rideRequestRepository;
     }
 
-    @KafkaListener(topics = DomainTopics.Geocode.GEOCODE_REVERSE_COMPLETED, groupId = "carpool-service-query")
-    public void handleGeocodeReverseCompleted(GeocodeReverseCompletedEvent event) {
+    @KafkaListener(topics = ExternalTopics.Geocode.REVERSE_GEOCODE_COMPLETED, groupId = "carpool-service-query")
+    public void handleGeocodeReverseCompleted(ReverseGeocodeCompletedEvent event) {
         EventualAddress eventualAddress = EventualAddress.get();
         if (event.success) {
             eventualAddress.setStatus(EventualAddressStatus.RESOLVED);

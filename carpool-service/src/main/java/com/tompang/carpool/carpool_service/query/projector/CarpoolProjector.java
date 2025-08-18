@@ -6,22 +6,22 @@ import org.springframework.stereotype.Component;
 import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolCreatedEvent;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
 import com.tompang.carpool.carpool_service.common.GeoUtils;
-import com.tompang.carpool.carpool_service.query.dto.geocode.GeocodeReverseJobDto;
-import com.tompang.carpool.carpool_service.query.dto.geocode.enums.GeocodeEntity;
-import com.tompang.carpool.carpool_service.query.dto.geocode.enums.GeocodeEntityField;
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
+import com.tompang.carpool.carpool_service.query.geocode.GeocodeJobService;
+import com.tompang.carpool.carpool_service.query.geocode.dto.ReverseGeocodeJobDto;
+import com.tompang.carpool.carpool_service.query.geocode.enums.GeocodeEntity;
+import com.tompang.carpool.carpool_service.query.geocode.enums.GeocodeEntityField;
 import com.tompang.carpool.carpool_service.query.repository.CarpoolQueryRepository;
-import com.tompang.carpool.carpool_service.query.service.RabbitProducerService;
 
 @Component
 public class CarpoolProjector {
 
     private final CarpoolQueryRepository repository;
-    private final RabbitProducerService rabbitProducerService;
+    private final GeocodeJobService geocodeJobService;
 
-    public CarpoolProjector(CarpoolQueryRepository repository, RabbitProducerService rabbitProducerService) {
+    public CarpoolProjector(CarpoolQueryRepository repository, GeocodeJobService geocodeJobService) {
         this.repository = repository;
-        this.rabbitProducerService = rabbitProducerService;
+        this.geocodeJobService = geocodeJobService;
     }
 
     @KafkaListener(topics = DomainTopics.Carpool.CARPOOL_CREATED, groupId = "carpool-service-query")
@@ -37,8 +37,8 @@ public class CarpoolProjector {
 
         repository.save(carpool);
         // create reverse geocode jobs for origin and destination.
-        rabbitProducerService.sendReverseGeocodeJob(new GeocodeReverseJobDto(event.route.origin, GeocodeEntity.CARPOOL, carpool.getId(), GeocodeEntityField.ORIGIN));
-        rabbitProducerService.sendReverseGeocodeJob(new GeocodeReverseJobDto(event.route.destination, GeocodeEntity.CARPOOL, carpool.getId(), GeocodeEntityField.DESTINATION));
+        geocodeJobService.createReverseGeocodeJob(new ReverseGeocodeJobDto(event.route.origin, GeocodeEntity.CARPOOL, carpool.getId(), GeocodeEntityField.ORIGIN));
+        geocodeJobService.createReverseGeocodeJob(new ReverseGeocodeJobDto(event.route.destination, GeocodeEntity.CARPOOL, carpool.getId(), GeocodeEntityField.DESTINATION));
     }
     
     // Delete

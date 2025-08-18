@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "namespace": "com.tompang.carpool.event.geospatial",
+  "name": "ReverseGeocodeCompletedEvent",
+  "fields": [
+    {
+      "name": "success",
+      "type": "boolean"
+    },
+    {
+      "name": "address",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "entity",
+      "type": {
+        "type": "enum",
+        "name": "GeocodeEntity",
+        "symbols": ["CARPOOL", "RIDEREQUEST"]
+      }
+    },
+    {
+      "name": "entityId",
+      "type": "string"
+    },
+    {
+      "name": "field",
+      "type": {
+        "type": "enum",
+        "name": "GeocodeEntityField",
+        "symbols": ["ORIGIN", "DESTINATION"]
+      }
+    }
+  ]
+}

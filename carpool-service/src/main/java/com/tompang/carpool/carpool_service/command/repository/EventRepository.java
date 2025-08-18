@@ -44,28 +44,10 @@ public class EventRepository {
 
     public static final class CarpoolConstants {
         public static final String STREAM_PREFIX = "carpool";
-        public static final Map<String, Class<? extends CarpoolEvent>> EVENT_TYPE_MAP = Stream
-                .<Class<? extends CarpoolEvent>>of(
-                        CarpoolCreatedEvent.class,
-                        CarpoolMatchedEvent.class,
-                        CarpoolRequestAcceptedEvent.class,
-                        CarpoolRequestDeclinedEvent.class,
-                        CarpoolRequestInvalidatedEvent.class
-                    )
-                .collect(Collectors.toUnmodifiableMap(Class::getName, c -> c));
     }
 
     public static final class RideRequestConstants {
         public static final String STREAM_PREFIX = "ride-request";
-        public static final Map<String, Class<? extends RideRequestEvent>> EVENT_TYPE_MAP = Stream
-                .<Class<? extends RideRequestEvent>>of(
-                    RideRequestCreatedEvent.class,
-                    RideRequestMatchedEvent.class,
-                    RideRequestFailedEvent.class,
-                    RideRequestAcceptedEvent.class,
-                    RideRequestDeclinedEvent.class
-                    )
-                .collect(Collectors.toUnmodifiableMap(Class::getName, c -> c));
     }
 
     private final Logger logger = LoggerFactory.getLogger(EventRepository.class);

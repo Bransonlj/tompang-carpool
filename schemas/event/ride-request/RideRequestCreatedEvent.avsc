@@ -1,0 +1,57 @@
+{
+  "type": "record",
+  "namespace": "com.tompang.carpool.event.ride_request",
+  "name": "RideRequestCreatedEvent",
+  "fields": [
+    {
+      "name": "requestId",
+      "type": "string"
+    },
+    {
+      "name": "riderId",
+      "type": "string"
+    },
+    {
+      "name": "passengers",
+      "type": "int"
+    },
+    {
+      "name": "startTime",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {
+      "name": "endTime",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {
+      "name": "route",
+      "type": {
+        "type": "record",
+        "name": "Route",
+        "fields": [
+          {
+            "name": "origin",
+            "type": {
+              "type": "record",
+              "name": "Location",
+              "fields": [
+                { "name": "latitude", "type": "double" },
+                { "name": "longitude", "type": "double" }
+              ]
+            }
+          },
+          {
+            "name": "destination",
+            "type": "Location"
+          }
+        ]
+      }
+    }
+  ]
+}

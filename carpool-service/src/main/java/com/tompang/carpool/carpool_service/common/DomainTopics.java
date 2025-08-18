@@ -19,12 +19,4 @@ public final class DomainTopics {
         public static final String REQUEST_ACCEPTED = "ride-request-accepted";
         public static final String REQUEST_DECLINED = "ride-request-declined";
     }
-
-    /*
-     * This really isnt considered a domain topic...
-     */
-    public static final class Geocode {
-        public static final String GEOCODE_REVERSE_COMPLETED = "geocode-reverse-completed";
-    }
-
 }

@@ -1,7 +1,5 @@
 package com.tompang.carpool.carpool_service.command.domain.ride_request.event;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
