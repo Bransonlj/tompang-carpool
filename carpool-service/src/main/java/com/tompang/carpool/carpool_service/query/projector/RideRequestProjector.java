@@ -3,8 +3,8 @@ package com.tompang.carpool.carpool_service.query.projector;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestCreatedEvent;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestFailedEvent;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestCreatedDomainEvent;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestFailedDomainEvent;
 import com.tompang.carpool.carpool_service.common.DomainTopics;
 import com.tompang.carpool.carpool_service.common.GeoUtils;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
@@ -26,7 +26,7 @@ public class RideRequestProjector {
     }
 
     @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_CREATED, groupId = "carpool-service-query")
-    public void handleRideRequestCreated(RideRequestCreatedEvent event) {
+    public void handleRideRequestCreated(RideRequestCreatedDomainEvent event) {
         RideRequest request = RideRequest.builder()
             .id(event.requestId)
             .riderId(event.riderId)
@@ -44,7 +44,7 @@ public class RideRequestProjector {
     }
 
     @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_FAILED, groupId = "carpool-service-query")
-    public void handleRideRequestFailed(RideRequestFailedEvent event) {
+    public void handleRideRequestFailed(RideRequestFailedDomainEvent event) {
         RideRequest request = repository.findById(event.requestId).orElseThrow();
         request.setStatus(RideRequestStatus.FAILED);
         repository.save(request);

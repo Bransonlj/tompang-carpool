@@ -1,25 +1,23 @@
 package com.tompang.carpool.carpool_service.command.domain.carpool.event;
 
 import com.tompang.carpool.carpool_service.common.DomainTopics;
-import com.tompang.carpool.event.carpool.CarpoolCreatedEvent;
+import com.tompang.carpool.event.carpool.CarpoolMatchedEvent;
 
 import lombok.AllArgsConstructor;
 
-/**
- * Wrapped CarpoolCreatedEvent implementing a DomainEvent interface
- */
 @AllArgsConstructor
-public class CarpoolCreatedDomainEvent implements CarpoolDomainEvent {
+public class CarpoolMatchedDomainEvent implements CarpoolDomainEvent {
 
-    public final CarpoolCreatedEvent event;
+    public final CarpoolMatchedEvent event;
 
     @Override
     public String topicName() {
-        return DomainTopics.Carpool.CARPOOL_CREATED;
+        return DomainTopics.Carpool.CARPOOL_MATCHED;
     }
 
     @Override
     public Object getEvent() {
         return this.event;
     }
+
 }

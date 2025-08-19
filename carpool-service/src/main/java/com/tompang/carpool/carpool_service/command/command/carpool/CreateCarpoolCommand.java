@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tompang.carpool.carpool_service.command.domain.Route;
+import com.tompang.carpool.carpool_service.command.domain.RouteValue;
 
 public class CreateCarpoolCommand {
 
@@ -13,7 +13,7 @@ public class CreateCarpoolCommand {
         @JsonProperty("driverId") String driverId,
         @JsonProperty("seats") int seats,
         @JsonProperty("arrivalTime") LocalDateTime arrivalTime,
-        @JsonProperty("route") Route route
+        @JsonProperty("route") RouteValue route
     ) {
         this.driverId = driverId;
         this.seats = seats;
@@ -24,5 +24,5 @@ public class CreateCarpoolCommand {
     public final String driverId;
     public final int seats;
     public final LocalDateTime arrivalTime;
-    public final Route route;
+    public final RouteValue route;
 }

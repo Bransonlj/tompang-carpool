@@ -1,6 +1,7 @@
 package com.tompang.carpool.carpool_service.command.domain.carpool;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -10,13 +11,18 @@ import com.tompang.carpool.carpool_service.command.command.carpool.CreateCarpool
 import com.tompang.carpool.carpool_service.command.command.carpool.DeclineCarpoolRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.carpool.InvalidateCarpoolRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.carpool.MatchCarpoolCommand;
-import com.tompang.carpool.carpool_service.command.domain.Route;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolCreatedEvent;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolEvent;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolMatchedEvent;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestAcceptedEvent;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestDeclinedEvent;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestInvalidatedEvent;
+import com.tompang.carpool.carpool_service.command.domain.RouteValue;
+import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolCreatedDomainEvent;
+import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolDomainEvent;
+import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolMatchedDomainEvent;
+import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestAcceptedDomainEvent;
+import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestDeclinedDomainEvent;
+import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestInvalidatedDomainEvent;
+import com.tompang.carpool.event.carpool.CarpoolCreatedEvent;
+import com.tompang.carpool.event.carpool.CarpoolMatchedEvent;
+import com.tompang.carpool.event.carpool.CarpoolRequestAcceptedEvent;
+import com.tompang.carpool.event.carpool.CarpoolRequestDeclinedEvent;
+import com.tompang.carpool.event.carpool.CarpoolRequestInvalidatedEvent;
 
 public class CarpoolAggregate {
 
@@ -27,15 +33,15 @@ public class CarpoolAggregate {
     private List<String> pendingRideRequests = new ArrayList<>();;
     private String driverId;
 
-    private Route route;
+    private RouteValue route;
     private LocalDateTime arrivalTime;
 
     // List of new events to be persisted
-    private final List<CarpoolEvent> changes = new ArrayList<>();
+    private final List<CarpoolDomainEvent> changes = new ArrayList<>();
 
-    public static CarpoolAggregate rehydrate(List<CarpoolEvent> history) {
+    public static CarpoolAggregate rehydrate(List<CarpoolDomainEvent> history) {
         CarpoolAggregate carpool = new CarpoolAggregate();
-        for (CarpoolEvent event : history) {
+        for (CarpoolDomainEvent event : history) {
             carpool.apply(event);
         }
         return carpool;
@@ -43,14 +49,23 @@ public class CarpoolAggregate {
 
     public static CarpoolAggregate createCarpool(CreateCarpoolCommand command) {
         CarpoolAggregate carpool = new CarpoolAggregate();
-        carpool.raiseEvent(new CarpoolCreatedEvent(UUID.randomUUID().toString(), command.seats, command.driverId,
-                command.arrivalTime, command.route));
+        CarpoolCreatedDomainEvent domainEvent = new CarpoolCreatedDomainEvent(
+            new CarpoolCreatedEvent(
+                UUID.randomUUID().toString(), command.seats, command.driverId, 
+                command.arrivalTime.atZone(ZoneId.of("UTC")).toInstant(), 
+                command.route.toSchemaRoute()
+            )
+        );
+        carpool.raiseEvent(domainEvent);
         return carpool;
     }
 
     public void matchRequestToCarpool(MatchCarpoolCommand command) {
         // TODO validate
-        raiseEvent(new CarpoolMatchedEvent(command.carpoolId, command.requestId));
+        CarpoolMatchedDomainEvent domainEvent = new CarpoolMatchedDomainEvent(
+            new CarpoolMatchedEvent(command.carpoolId, command.requestId)
+        );
+        raiseEvent(domainEvent);
     } 
 
     public void acceptRequestToCarpool(AcceptCarpoolRequestCommand command, int passengers) {
@@ -67,7 +82,10 @@ public class CarpoolAggregate {
             throw new RuntimeException("Carpool already accepted RideRequest");
         }
 
-        raiseEvent(new CarpoolRequestAcceptedEvent(command.carpoolId, command.requestId, passengers));
+        CarpoolRequestAcceptedDomainEvent domainEvent = new CarpoolRequestAcceptedDomainEvent(
+            new CarpoolRequestAcceptedEvent(command.carpoolId, command.requestId, passengers)
+        );
+        raiseEvent(domainEvent);
     }
 
     public void declineRequestToCarpool(DeclineCarpoolRequestCommand command) {
@@ -79,7 +97,10 @@ public class CarpoolAggregate {
             throw new RuntimeException("Carpool already accepted RideRequest");
         }
 
-        raiseEvent(new CarpoolRequestDeclinedEvent(command.carpoolId, command.requestId));
+        CarpoolRequestDeclinedDomainEvent domainEvent = new CarpoolRequestDeclinedDomainEvent(
+            new CarpoolRequestDeclinedEvent(command.carpoolId, command.requestId)
+        );
+        raiseEvent(domainEvent);
     }
 
     /**
@@ -95,14 +116,17 @@ public class CarpoolAggregate {
             throw new RuntimeException("Carpool already accepted RideRequest");
         }
 
-        raiseEvent(new CarpoolRequestInvalidatedEvent(command.carpoolId, command.requestId, command.reason));
+        CarpoolRequestInvalidatedDomainEvent domainEvent = new CarpoolRequestInvalidatedDomainEvent(
+            new CarpoolRequestInvalidatedEvent(command.carpoolId, command.requestId, command.reason)
+        );
+        raiseEvent(domainEvent);
     }
 
     public String getId() {
         return this.id;
     }
 
-    public List<CarpoolEvent> getUncommittedChanges() {
+    public List<CarpoolDomainEvent> getUncommittedChanges() {
         return changes;
     }
 
@@ -111,28 +135,28 @@ public class CarpoolAggregate {
     }
     
     // Raise and apply events
-    private void raiseEvent(CarpoolEvent event) {
+    private void raiseEvent(CarpoolDomainEvent event) {
         apply(event);
         changes.add(event);
     }
     
-    private void apply(CarpoolEvent event) {
-        if (event instanceof CarpoolCreatedEvent e) {
-            this.id = e.carpoolId;
-            this.driverId = e.driverId;
-            this.totalSeats = e.availableSeats;
-            this.arrivalTime = e.arrivalTime;
-            this.route = e.route;
-        } else if (event instanceof CarpoolMatchedEvent e) {
-            this.pendingRideRequests.add(e.rideRequestId);
-        } else if (event instanceof CarpoolRequestAcceptedEvent e) {
-            this.pendingRideRequests.remove(e.rideRequestId);
-            this.confirmedRideRequests.add(e.rideRequestId);
-            this.seatsAssigned += e.passengers;
-        } else if (event instanceof CarpoolRequestDeclinedEvent e) {
-            this.pendingRideRequests.remove(e.rideRequestId);
-        } else if (event instanceof CarpoolRequestInvalidatedEvent e) {
-            this.pendingRideRequests.remove(e.rideRequestId);
+    private void apply(CarpoolDomainEvent event) {
+        if (event instanceof CarpoolCreatedDomainEvent e) {
+            this.id = e.event.getCarpoolId();
+            this.driverId = e.event.getDriverId();
+            this.totalSeats = e.event.getAvailableSeats();
+            this.arrivalTime = LocalDateTime.ofInstant(e.event.getArrivalTime(), ZoneId.of("UTC"));
+            this.route = RouteValue.from(e.event.getRoute());
+        } else if (event instanceof CarpoolMatchedDomainEvent e) {
+            this.pendingRideRequests.add(e.event.getRideRequestId());
+        } else if (event instanceof CarpoolRequestAcceptedDomainEvent e) {
+            this.pendingRideRequests.remove(e.event.getRideRequestId());
+            this.confirmedRideRequests.add(e.event.getRideRequestId());
+            this.seatsAssigned += e.event.getPassengers();
+        } else if (event instanceof CarpoolRequestDeclinedDomainEvent e) {
+            this.pendingRideRequests.remove(e.event.getRideRequestId());
+        } else if (event instanceof CarpoolRequestInvalidatedDomainEvent e) {
+            this.pendingRideRequests.remove(e.event.getRideRequestId());
         }
     }
 

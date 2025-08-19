@@ -10,7 +10,7 @@ import com.tompang.carpool.carpool_service.command.command.carpool.DeclineCarpoo
 import com.tompang.carpool.carpool_service.command.command.carpool.InvalidateCarpoolRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.carpool.MatchCarpoolCommand;
 import com.tompang.carpool.carpool_service.command.domain.carpool.CarpoolAggregate;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolEvent;
+import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.RideRequestAggregate;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestEvent;
 import com.tompang.carpool.carpool_service.command.repository.EventRepository;
@@ -38,7 +38,7 @@ public class CarpoolCommandHandler {
 
     public void handleMatchCarpool(MatchCarpoolCommand command) {
         ReadResult readResult = repository.readEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, command.carpoolId));
-        List<CarpoolEvent> events = repository.deserializeEvents(readResult.getEvents(), EventRepository.CarpoolConstants.EVENT_TYPE_MAP);
+        List<CarpoolDomainEvent> events = repository.deserializeEvents(readResult.getEvents());
         CarpoolAggregate carpool = CarpoolAggregate.rehydrate(events);
         carpool.matchRequestToCarpool(command);
         repository.appendEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, carpool.getId()), carpool.getUncommittedChanges(), readResult.getLastStreamPosition());
@@ -56,8 +56,8 @@ public class CarpoolCommandHandler {
         ReadResult carpoolReadResult = repository.readEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, command.carpoolId));
         ReadResult requestReadResult = repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId));
 
-        List<CarpoolEvent> carpoolHistory = repository.deserializeEvents(carpoolReadResult.getEvents(), EventRepository.CarpoolConstants.EVENT_TYPE_MAP);
-        List<RideRequestEvent> requestHistory = repository.deserializeEvents(requestReadResult.getEvents(), EventRepository.RideRequestConstants.EVENT_TYPE_MAP);
+        List<CarpoolDomainEvent> carpoolHistory = repository.deserializeEvents(carpoolReadResult.getEvents());
+        List<RideRequestEvent> requestHistory = repository.deserializeEvents(requestReadResult.getEvents());
 
         CarpoolAggregate carpool = CarpoolAggregate.rehydrate(carpoolHistory);
         RideRequestAggregate request = RideRequestAggregate.rehydrate(requestHistory);
@@ -82,8 +82,8 @@ public class CarpoolCommandHandler {
         ReadResult carpoolReadResult = repository.readEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, command.carpoolId));
         ReadResult requestReadResult = repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId));
 
-        List<CarpoolEvent> carpoolHistory = repository.deserializeEvents(carpoolReadResult.getEvents(), EventRepository.CarpoolConstants.EVENT_TYPE_MAP);
-        List<RideRequestEvent> requestHistory = repository.deserializeEvents(requestReadResult.getEvents(), EventRepository.RideRequestConstants.EVENT_TYPE_MAP);
+        List<CarpoolDomainEvent> carpoolHistory = repository.deserializeEvents(carpoolReadResult.getEvents());
+        List<RideRequestEvent> requestHistory = repository.deserializeEvents(requestReadResult.getEvents());
 
         CarpoolAggregate carpool = CarpoolAggregate.rehydrate(carpoolHistory);
         RideRequestAggregate request = RideRequestAggregate.rehydrate(requestHistory);
@@ -102,7 +102,7 @@ public class CarpoolCommandHandler {
 
     public void handleInvalidateCarpoolRequest(InvalidateCarpoolRequestCommand command) {
         ReadResult carpoolReadResult = repository.readEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, command.carpoolId));
-        List<CarpoolEvent> carpoolHistory = repository.deserializeEvents(carpoolReadResult.getEvents(), EventRepository.CarpoolConstants.EVENT_TYPE_MAP);
+        List<CarpoolDomainEvent> carpoolHistory = repository.deserializeEvents(carpoolReadResult.getEvents());
         CarpoolAggregate carpool = CarpoolAggregate.rehydrate(carpoolHistory);
         carpool.invalidateRequestToCarpool(command);
         repository.appendEvents(new StreamId(EventRepository.CarpoolConstants.STREAM_PREFIX, carpool.getId()),

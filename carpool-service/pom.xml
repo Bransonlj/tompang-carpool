@@ -132,11 +132,13 @@
 					<phase>generate-sources</phase>
 					<goals><goal>schema</goal></goals>
 					<configuration>
+						<!--set "string" schema type to String instead of default CharSequence-->
+						<stringType>String</stringType>
 						<sourceDirectory>${project.basedir}/../schemas</sourceDirectory>
 						<includes>
+							<include>event/CreatedEvents.avsc</include>
 							<include>event/carpool/*.avsc</include>
 							<include>event/ride-request/*.avsc</include>
-							<include>common/*.avsc</include>
 						</includes>
 						<outputDirectory>${project.basedir}/target/generated-sources/avro</outputDirectory>
 					</configuration>

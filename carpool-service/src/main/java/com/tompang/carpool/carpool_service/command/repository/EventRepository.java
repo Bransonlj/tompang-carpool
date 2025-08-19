@@ -1,33 +1,27 @@
 package com.tompang.carpool.carpool_service.command.repository;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.Encoder;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.io.JsonDecoder;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.avro.specific.SpecificDatumWriter;
+import org.apache.avro.specific.SpecificRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tompang.carpool.carpool_service.command.domain.DomainEvent;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolCreatedEvent;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolEvent;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolMatchedEvent;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestAcceptedEvent;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestDeclinedEvent;
-import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestInvalidatedEvent;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestAcceptedEvent;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestCreatedEvent;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestDeclinedEvent;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestEvent;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestFailedEvent;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestMatchedEvent;
+import com.tompang.carpool.carpool_service.command.domain.DomainEventRegistry;
 import com.tompang.carpool.carpool_service.common.kurrent.StreamId;
 
 import io.kurrent.dbclient.AppendToStreamOptions;
@@ -52,38 +46,71 @@ public class EventRepository {
 
     private final Logger logger = LoggerFactory.getLogger(EventRepository.class);
     private final KurrentDBClient client;
-    private final ObjectMapper objectMapper;
 
-    public EventRepository(KurrentDBClient client, ObjectMapper objectMapper) {
+    public EventRepository(KurrentDBClient client) {
         this.client = client;
-        this.objectMapper = objectMapper;
     }
 
-    public <T extends DomainEvent> T deserializeEvent(ResolvedEvent resolvedEvent, Map<String, Class<? extends T>> eventTypeMap) {
+    /**
+     * Serializes Avro schema record to JSON format.
+     * @param <T>
+     * @param record
+     * @return
+     */
+    private <T extends SpecificRecord> byte[] serializeAvro(T record) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            SpecificDatumWriter<T> writer = new SpecificDatumWriter<>(record.getSchema());
+            Encoder encoder = EncoderFactory.get().jsonEncoder(record.getSchema(), out);
+            writer.write(record, encoder);
+            encoder.flush();
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to serialize Avro record as JSON: " + record.getClass(), e);
+        }
+    }
+
+    /**
+     * Deserializes JSON formatted data to the specified Avro Schema class
+     * @param <T>
+     * @param data
+     * @param clazz
+     * @return
+     */
+    private <T extends SpecificRecord> T deserializeAvro(byte[] data, Class<T> clazz) {
+        try {
+            T instance = clazz.getDeclaredConstructor().newInstance();
+            SpecificDatumReader<T> reader = new SpecificDatumReader<>(instance.getSchema());
+            ByteArrayInputStream in = new ByteArrayInputStream(data);
+            JsonDecoder decoder = DecoderFactory.get().jsonDecoder(instance.getSchema(), in);
+            return reader.read(instance, decoder);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to deserialize Avro JSON record: " + clazz.getName(), e);
+        }
+    }
+
+    public <T extends DomainEvent> T deserializeEvent(ResolvedEvent resolvedEvent) {
         RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
         String eventType = recordedEvent.getEventType();
-        byte[] json = recordedEvent.getEventData();
-        Class<? extends T> clazz = eventTypeMap.get(eventType);
-
-        if (clazz == null) {
-            throw new RuntimeException(String.format(
-                "Unable to map KurrentDb eventType to a domain event class '$s'. Please ensure the domain event class has a mapping in EVENT_TYPE_MAP.",
-                eventType));
-        }
-
+        byte[] data = recordedEvent.getEventData();
         try {
-            T eventObj = objectMapper.readValue(json, clazz);
-            return eventObj;
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to deserialize event type '%s': %s%n", eventType, e.getMessage()));
+            Class<?> clazz = Class.forName(eventType);
+            if (!SpecificRecord.class.isAssignableFrom(clazz)) {
+                throw new RuntimeException("Event type is not Avro SpecificRecord: " + eventType);
+            }
+
+            @SuppressWarnings("unchecked")
+            SpecificRecord record = deserializeAvro(data, (Class<? extends SpecificRecord>) clazz);
+            return DomainEventRegistry.wrap(record);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Event class not found: " + eventType, e);
         }
     }
 
-    public <T extends DomainEvent> List<T> deserializeEvents(List<ResolvedEvent> resolvedEvents, Map<String, Class<? extends T>> eventTypeMap) {
+    public <T extends DomainEvent> List<T> deserializeEvents(List<ResolvedEvent> resolvedEvents) {
         List<T> domainEvents = new ArrayList<>();
         for (ResolvedEvent resolvedEvent : resolvedEvents) {
             try {
-                domainEvents.add(deserializeEvent(resolvedEvent, eventTypeMap));
+                domainEvents.add(deserializeEvent(resolvedEvent));
             } catch (Exception e) {
                 this.logger.warn(e.getMessage());
             } 
@@ -97,22 +124,23 @@ public class EventRepository {
     }
 
     public void appendEvents(StreamId streamId, List<? extends DomainEvent> events, Long revision) {
+        // Serialize events
         List<EventData> eventDatas = events.stream()
             .map(event -> {
-                try {
-                    byte[] jsonBytes = this.objectMapper.writeValueAsBytes(event);
-                    return EventData
-                        .builderAsJson(
-                            UUID.randomUUID(), 
-                            event.getClass().getName(),
-                            jsonBytes
-                        ).build();
-                } catch (JsonProcessingException exception) {
-                    throw new RuntimeException("Failed to serialize event: " + event.getClass(), exception);
+                Object raw = event.getEvent();
+                if (!(raw instanceof SpecificRecord record)) {
+                    throw new RuntimeException("DomainEvent payload is not an Avro SpecificRecord: " + raw.getClass());
                 }
-
+                byte[] avroBytes = serializeAvro(record);
+                return EventData
+                    .builderAsJson(
+                        UUID.randomUUID(), 
+                        event.getEvent().getClass().getName(),
+                        avroBytes
+                    ).build();
             })
             .toList();
+
         AppendToStreamOptions appendOptions; 
         if (revision == null) {
             appendOptions = AppendToStreamOptions.get();

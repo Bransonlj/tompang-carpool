@@ -5,12 +5,17 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 import com.tompang.carpool.carpool_service.command.domain.LatLong;
+import com.tompang.carpool.common.Location;
 
 public class GeoUtils {
     private static final GeometryFactory geometryFactory = new GeometryFactory();
 
     public static Point createPoint(LatLong latLong) {
         return createPoint(latLong.latitude, latLong.longitude);    
+    }
+
+    public static Point createPoint(Location latLong) {
+        return createPoint(latLong.getLatitude(), latLong.getLongitude());    
     }
 
     public static Point createPoint(double latitude, double longitude) {

@@ -33,7 +33,7 @@ public class RideRequestCommandHandler {
 
     public void handleMatchRideRequest(MatchRideRequestCommand command) {        
         ReadResult readResult = repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId));
-        List<RideRequestEvent> history = repository.deserializeEvents(readResult.getEvents(), EventRepository.RideRequestConstants.EVENT_TYPE_MAP);
+        List<RideRequestEvent> history = repository.deserializeEvents(readResult.getEvents());
         RideRequestAggregate request = RideRequestAggregate.rehydrate(history);
         request.matchRideRequest(command);
         repository.appendEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, request.getId()), request.getUncommittedChanges(), readResult.getLastStreamPosition());
@@ -42,7 +42,7 @@ public class RideRequestCommandHandler {
 
     public void handleFailRideRequest(FailRideRequestCommand command) {
         ReadResult readResult = repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId));
-        List<RideRequestEvent> history = repository.deserializeEvents(readResult.getEvents(), EventRepository.RideRequestConstants.EVENT_TYPE_MAP);
+        List<RideRequestEvent> history = repository.deserializeEvents(readResult.getEvents());
         RideRequestAggregate request = RideRequestAggregate.rehydrate(history);
         request.failRideRequest(command);
         repository.appendEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, request.getId()), request.getUncommittedChanges(), readResult.getLastStreamPosition());

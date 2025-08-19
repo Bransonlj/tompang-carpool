@@ -1,6 +1,7 @@
 package com.tompang.carpool.carpool_service.command.domain.ride_request;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -11,13 +12,18 @@ import com.tompang.carpool.carpool_service.command.command.carpool.DeclineCarpoo
 import com.tompang.carpool.carpool_service.command.command.ride_request.CreateRideRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.ride_request.FailRideRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.ride_request.MatchRideRequestCommand;
-import com.tompang.carpool.carpool_service.command.domain.Route;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestAcceptedEvent;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestCreatedEvent;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestDeclinedEvent;
+import com.tompang.carpool.carpool_service.command.domain.RouteValue;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestAcceptedDomainEvent;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestCreatedDomainEvent;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestDeclineDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestEvent;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestFailedEvent;
-import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestMatchedEvent;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestFailedDomainEvent;
+import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestMatchedDomainEvent;
+import com.tompang.carpool.event.ride_request.RideRequestAcceptedEvent;
+import com.tompang.carpool.event.ride_request.RideRequestCreatedEvent;
+import com.tompang.carpool.event.ride_request.RideRequestDeclinedEvent;
+import com.tompang.carpool.event.ride_request.RideRequestFailedEvent;
+import com.tompang.carpool.event.ride_request.RideRequestMatchedEvent;
 
 public class RideRequestAggregate {
 
@@ -28,7 +34,7 @@ public class RideRequestAggregate {
     private Optional<String> assignedCarpool = Optional.empty();
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Route route;
+    private RouteValue route;
     private RideRequestStatus status = RideRequestStatus.PENDING;
 
     // List of new events to be persisted
@@ -44,14 +50,23 @@ public class RideRequestAggregate {
 
     public static RideRequestAggregate createRideRequest(CreateRideRequestCommand command) {
         RideRequestAggregate rideRequest = new RideRequestAggregate();
-        rideRequest.raiseEvent(new RideRequestCreatedEvent(UUID.randomUUID().toString(), command.riderId,
-                command.passengers, command.startTime, command.endTime, command.route));
+        RideRequestCreatedDomainEvent domainEvent = new RideRequestCreatedDomainEvent(
+            new RideRequestCreatedEvent(UUID.randomUUID().toString(), command.riderId, command.passengers, 
+                command.startTime.atZone(ZoneId.of("UTC")).toInstant(), 
+                command.endTime.atZone(ZoneId.of("UTC")).toInstant(), 
+                command.route.toSchemaRoute()
+            )
+        );
+        rideRequest.raiseEvent(domainEvent);
         return rideRequest;
     }
 
     public void matchRideRequest(MatchRideRequestCommand command) {
         // TODO perform any validation
-        this.raiseEvent(new RideRequestMatchedEvent(command.requestId, command.matchedCarpoolIds));
+        RideRequestMatchedDomainEvent domainEvent = new RideRequestMatchedDomainEvent(
+            new RideRequestMatchedEvent(command.requestId, command.matchedCarpoolIds)
+        );
+        this.raiseEvent(domainEvent);
     }
 
     /**
@@ -67,7 +82,10 @@ public class RideRequestAggregate {
             throw new RuntimeException("RideRequest already assigned to a Carpool");
         }
         
-        this.raiseEvent(new RideRequestFailedEvent(command.requestId, command.reason));
+        RideRequestFailedDomainEvent domainEvent = new RideRequestFailedDomainEvent(
+            new RideRequestFailedEvent(command.requestId, command.reason)
+        );
+        this.raiseEvent(domainEvent);
     }
 
     /**
@@ -83,7 +101,10 @@ public class RideRequestAggregate {
             throw new RuntimeException("RideRequest already assigned to a Carpool");
         }
 
-        this.raiseEvent(new RideRequestAcceptedEvent(command.requestId, command.carpoolId));
+        RideRequestAcceptedDomainEvent domainEvent = new RideRequestAcceptedDomainEvent(
+            new RideRequestAcceptedEvent(command.requestId, command.carpoolId)
+        );
+        this.raiseEvent(domainEvent);
     }
 
     public void declineCarpoolRequest(DeclineCarpoolRequestCommand command) {
@@ -95,7 +116,10 @@ public class RideRequestAggregate {
             throw new RuntimeException("RideRequest already assigned to a Carpool");
         }
 
-        this.raiseEvent(new RideRequestDeclinedEvent(command.requestId, command.carpoolId));
+        RideRequestDeclineDomainEvent domainEvent = new RideRequestDeclineDomainEvent(
+            new RideRequestDeclinedEvent(command.requestId, command.carpoolId)
+        );
+        this.raiseEvent(domainEvent);
     }
 
     public String getId() {
@@ -137,23 +161,23 @@ public class RideRequestAggregate {
     }
 
     private void apply(RideRequestEvent event) {
-        if (event instanceof RideRequestCreatedEvent e) {
-            this.id = e.requestId;
-            this.riderId = e.riderId;
-            this.passengers = e.passengers;
-            this.startTime = e.startTime;
-            this.endTime = e.endTime;
-            this.route = e.route;
-        } else if (event instanceof RideRequestMatchedEvent e) {
-            this.matchedCarpools.addAll(e.matchedCarpoolIds);
-        } else if (event instanceof RideRequestFailedEvent) {
+        if (event instanceof RideRequestCreatedDomainEvent e) {
+            this.id = e.event.getRequestId();
+            this.riderId = e.event.getRiderId();
+            this.passengers = e.event.getPassengers();
+            this.startTime = LocalDateTime.ofInstant(e.event.getStartTime(), ZoneId.of("UTC"));
+            this.endTime = LocalDateTime.ofInstant(e.event.getEndTime(), ZoneId.of("UTC"));
+            this.route = RouteValue.from(e.event.getRoute());
+        } else if (event instanceof RideRequestMatchedDomainEvent e) {
+            this.matchedCarpools.addAll(e.event.getMatchedCarpoolIds());
+        } else if (event instanceof RideRequestFailedDomainEvent) {
             this.status = RideRequestStatus.FAILED;
-        } else if (event instanceof RideRequestAcceptedEvent e) {
-            this.assignedCarpool = Optional.of(e.carpoolId);
+        } else if (event instanceof RideRequestAcceptedDomainEvent e) {
+            this.assignedCarpool = Optional.of(e.event.getCarpoolId());
             this.status = RideRequestStatus.ASSIGNED;
-            this.matchedCarpools = new ArrayList<>(); // clear list of matched carpools
-        } else if (event instanceof RideRequestDeclinedEvent e) {
-            this.matchedCarpools.remove(e.carpoolId);
+            this.matchedCarpools.clear(); // clear list of matched carpools
+        } else if (event instanceof RideRequestDeclineDomainEvent e) {
+            this.matchedCarpools.remove(e.event.getCarpoolId());
         }
     }
 

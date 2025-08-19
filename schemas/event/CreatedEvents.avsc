@@ -1,0 +1,91 @@
+[
+  {
+    "type": "record",
+    "name": "Route",
+    "namespace": "com.tompang.carpool.common",
+    "fields": [
+      {
+        "name": "origin",
+        "type": {
+          "type": "record",
+          "name": "Location",
+          "fields": [
+            { "name": "latitude", "type": "double" },
+            { "name": "longitude", "type": "double" }
+          ]
+        }
+      },
+      {
+        "name": "destination",
+        "type": "Location"
+      }
+    ]
+  },
+  {
+    "type": "record",
+    "namespace": "com.tompang.carpool.event.carpool",
+    "name": "CarpoolCreatedEvent",
+    "fields": [
+      {
+        "name": "carpoolId",
+        "type": "string"
+      },
+      {
+        "name": "availableSeats",
+        "type": "int"
+      },
+      {
+        "name": "driverId",
+        "type": "string"
+      },
+      {
+        "name": "arrivalTime",
+        "type": {
+          "type": "long",
+          "logicalType": "timestamp-millis"
+        }
+      },
+      {
+        "name": "route",
+        "type": "com.tompang.carpool.common.Route"
+      }
+    ]
+  },
+  {
+    "type": "record",
+    "namespace": "com.tompang.carpool.event.ride_request",
+    "name": "RideRequestCreatedEvent",
+    "fields": [
+      {
+        "name": "requestId",
+        "type": "string"
+      },
+      {
+        "name": "riderId",
+        "type": "string"
+      },
+      {
+        "name": "passengers",
+        "type": "int"
+      },
+      {
+        "name": "startTime",
+        "type": {
+          "type": "long",
+          "logicalType": "timestamp-millis"
+        }
+      },
+      {
+        "name": "endTime",
+        "type": {
+          "type": "long",
+          "logicalType": "timestamp-millis"
+        }
+      },
+      {
+        "name": "route",
+        "type": "com.tompang.carpool.common.Route"
+      }
+    ]
+  }
+]
