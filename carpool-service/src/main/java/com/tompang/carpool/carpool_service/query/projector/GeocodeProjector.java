@@ -8,11 +8,11 @@ import com.tompang.carpool.carpool_service.query.entity.Carpool;
 import com.tompang.carpool.carpool_service.query.entity.EventualAddress;
 import com.tompang.carpool.carpool_service.query.entity.EventualAddressStatus;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
-import com.tompang.carpool.carpool_service.query.geocode.enums.GeocodeEntity;
-import com.tompang.carpool.carpool_service.query.geocode.enums.GeocodeEntityField;
-import com.tompang.carpool.carpool_service.query.geocode.event.ReverseGeocodeCompletedEvent;
 import com.tompang.carpool.carpool_service.query.repository.CarpoolQueryRepository;
 import com.tompang.carpool.carpool_service.query.repository.RideRequestQueryRepository;
+import com.tompang.carpool.geospatial.ReverseGeocodeCompletedEvent;
+import com.tompang.carpool.geospatial.enums.GeocodeEntity;
+import com.tompang.carpool.geospatial.enums.GeocodeEntityField;
 
 /**
  * Updates repository with data from geocode events
@@ -30,27 +30,27 @@ public class GeocodeProjector {
     @KafkaListener(topics = ExternalTopics.Geocode.REVERSE_GEOCODE_COMPLETED, groupId = "carpool-service-query")
     public void handleGeocodeReverseCompleted(ReverseGeocodeCompletedEvent event) {
         EventualAddress eventualAddress = EventualAddress.get();
-        if (event.success) {
+        if (event.getSuccess()) {
             eventualAddress.setStatus(EventualAddressStatus.RESOLVED);
-            eventualAddress.setAddressString(event.address);
+            eventualAddress.setAddressString(event.getAddress());
         } else {
             eventualAddress.setStatus(EventualAddressStatus.FAILED);
         }
 
-        if (event.entity.equals(GeocodeEntity.CARPOOL)) {
-            Carpool carpool = carpoolRepository.findById(event.entityId).orElseThrow();
-            if (event.field.equals(GeocodeEntityField.ORIGIN)) {
+        if (event.getEntity().equals(GeocodeEntity.CARPOOL)) {
+            Carpool carpool = carpoolRepository.findById(event.getEntityId()).orElseThrow();
+            if (event.getField().equals(GeocodeEntityField.ORIGIN)) {
                 carpool.setOriginEventualAddress(eventualAddress);
-            } else if (event.field.equals(GeocodeEntityField.DESTINATION)) {
+            } else if (event.getField().equals(GeocodeEntityField.DESTINATION)) {
                 carpool.setDestinationEventualAddress(eventualAddress);
             }
 
             carpoolRepository.save(carpool);
-        } else if (event.entity.equals(GeocodeEntity.RIDEREQUEST)) {
-            RideRequest request = rideRequestRepository.findById(event.entityId).orElseThrow();
-            if (event.field.equals(GeocodeEntityField.ORIGIN)) {
+        } else if (event.getEntity().equals(GeocodeEntity.RIDEREQUEST)) {
+            RideRequest request = rideRequestRepository.findById(event.getEntityId()).orElseThrow();
+            if (event.getField().equals(GeocodeEntityField.ORIGIN)) {
                 request.setOriginEventualAddress(eventualAddress);
-            } else if (event.field.equals(GeocodeEntityField.DESTINATION)) {
+            } else if (event.getField().equals(GeocodeEntityField.DESTINATION)) {
                 request.setDestinationEventualAddress(eventualAddress);
             }
 

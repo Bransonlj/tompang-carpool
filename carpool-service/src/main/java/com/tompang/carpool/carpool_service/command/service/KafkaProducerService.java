@@ -18,7 +18,7 @@ public class KafkaProducerService {
 
     public void publishDomainEvents(List<? extends DomainEvent> events) {
         for (DomainEvent event : events) {
-            kafkaTemplate.send(event.topicName(), event);
+            kafkaTemplate.send(event.topicName(), event.getEvent()); // unwrap and publish the Avro schema event class
         }
     }
 }

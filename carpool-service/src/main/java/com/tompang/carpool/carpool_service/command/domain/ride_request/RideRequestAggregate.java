@@ -1,7 +1,6 @@
 package com.tompang.carpool.carpool_service.command.domain.ride_request;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -52,8 +51,8 @@ public class RideRequestAggregate {
         RideRequestAggregate rideRequest = new RideRequestAggregate();
         RideRequestCreatedDomainEvent domainEvent = new RideRequestCreatedDomainEvent(
             new RideRequestCreatedEvent(UUID.randomUUID().toString(), command.riderId, command.passengers, 
-                command.startTime.atZone(ZoneId.of("UTC")).toInstant(), 
-                command.endTime.atZone(ZoneId.of("UTC")).toInstant(), 
+                command.startTime, 
+                command.endTime, 
                 command.route.toSchemaRoute()
             )
         );
@@ -165,8 +164,8 @@ public class RideRequestAggregate {
             this.id = e.event.getRequestId();
             this.riderId = e.event.getRiderId();
             this.passengers = e.event.getPassengers();
-            this.startTime = LocalDateTime.ofInstant(e.event.getStartTime(), ZoneId.of("UTC"));
-            this.endTime = LocalDateTime.ofInstant(e.event.getEndTime(), ZoneId.of("UTC"));
+            this.startTime = e.event.getStartTime();
+            this.endTime = e.event.getEndTime();
             this.route = RouteValue.from(e.event.getRoute());
         } else if (event instanceof RideRequestMatchedDomainEvent e) {
             this.matchedCarpools.addAll(e.event.getMatchedCarpoolIds());

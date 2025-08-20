@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tompang.carpool.carpool_service.command.domain.DomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.DomainEventRegistry;
 import com.tompang.carpool.carpool_service.common.kurrent.StreamId;

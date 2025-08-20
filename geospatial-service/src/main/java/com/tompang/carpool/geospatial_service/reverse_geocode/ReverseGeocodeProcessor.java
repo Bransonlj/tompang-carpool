@@ -6,13 +6,13 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import com.tompang.carpool.geospatial.ReverseGeocodeCompletedEvent;
 import com.tompang.carpool.geospatial_service.common.KafkaTopics;
 import com.tompang.carpool.geospatial_service.common.exception.OnemapApiException;
 import com.tompang.carpool.geospatial_service.config.RabbitConfig;
 import com.tompang.carpool.geospatial_service.onemap.OnemapService;
 import com.tompang.carpool.geospatial_service.onemap.dto.OnemapGeocodeResponseDto;
 import com.tompang.carpool.geospatial_service.reverse_geocode.dto.ReverseGeocodeJobDto;
-import com.tompang.carpool.geospatial_service.reverse_geocode.event.ReverseGeocodeCompletedEvent;
 
 
 /**
@@ -38,12 +38,49 @@ public class ReverseGeocodeProcessor {
 
         ReverseGeocodeCompletedEvent event;
         try {
-            OnemapGeocodeResponseDto response = onemapService.reverseGeocode(job.location.latitude, job.location.longitude);
-            event = ReverseGeocodeCompletedEvent.from(job, response);
+            OnemapGeocodeResponseDto response = onemapService.reverseGeocode(job.latitude, job.longitude);
+            if (response == null || response.getGeocodeInfo().isEmpty()) {
+                // no response, fail
+                throw new OnemapApiException("No response/empty response from Onemap.");
+            }
+
+            // we will use the first address (closest)
+            OnemapGeocodeResponseDto.GeocodeInfo firstInfo = response.getGeocodeInfo().get(0);
+            StringBuilder builder = new StringBuilder();
+
+            if (!firstInfo.getBuildingName().equals(OnemapGeocodeResponseDto.NIL)) {
+                builder.append(firstInfo.getBuildingName());
+                builder.append(" ");
+            }
+
+            if (!firstInfo.getBlock().equals(OnemapGeocodeResponseDto.NIL)) {
+                builder.append(firstInfo.getBlock());
+                builder.append(" ");
+            }
+
+            if (!firstInfo.getRoad().equals(OnemapGeocodeResponseDto.NIL)) {
+                builder.append(firstInfo.getRoad());
+                builder.append(" ");
+            }
+
+            if (!firstInfo.getPostalCode().equals(OnemapGeocodeResponseDto.NIL)) {
+                builder.append(firstInfo.getPostalCode());
+                builder.append(" ");
+            }
+
+            if (builder.isEmpty()) {
+                // no result found (NIL for all fields)
+                throw new OnemapApiException("Address fields are NIL.");
+            }
+
+            // address successfully fetched.
+            event = new ReverseGeocodeCompletedEvent(true, builder.toString(), job.entity, job.entityId, job.field);
+            
+            
             logger.info("Processing completed" + event.toString());
         } catch (OnemapApiException e) {
             this.logger.error("Error processing", e);
-            event = ReverseGeocodeCompletedEvent.from(job, null);
+            event = new ReverseGeocodeCompletedEvent(false, null, job.entity, job.entityId, job.field);
         }
 
         this.kafkaTemplate.send(KafkaTopics.Geocode.REVERSE_GEOCODE_COMPLETED, event);

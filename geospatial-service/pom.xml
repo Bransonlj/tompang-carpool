@@ -29,6 +29,13 @@
 	<properties>
 		<java.version>17</java.version>
 	</properties>
+	<repositories>
+		<repository>
+			<id>confluent</id>
+			<name>Confluent Maven Repository</name>
+			<url>https://packages.confluent.io/maven/</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -46,6 +53,18 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/io.confluent/kafka-avro-serializer -->
+		<dependency>
+			<groupId>io.confluent</groupId>
+			<artifactId>kafka-avro-serializer</artifactId>
+			<version>8.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.avro</groupId>
+			<artifactId>avro</artifactId>
+			<version>1.11.2</version>
 		</dependency>
 
 		<dependency>
@@ -83,6 +102,26 @@
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.avro</groupId>
+				<artifactId>avro-maven-plugin</artifactId>
+				<version>1.11.2</version>
+				<executions>
+					<execution>
+					<phase>generate-sources</phase>
+					<goals><goal>schema</goal></goals>
+					<configuration>
+						<!--set "string" schema type to String instead of default CharSequence-->
+						<stringType>String</stringType>
+						<sourceDirectory>${project.basedir}/../schemas</sourceDirectory>
+						<includes>
+							<include>event/geospatial/*.avsc</include>
+						</includes>
+						<outputDirectory>${project.basedir}/target/generated-sources/avro</outputDirectory>
+					</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

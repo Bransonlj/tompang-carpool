@@ -1,7 +1,6 @@
 package com.tompang.carpool.carpool_service.command.domain.carpool;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -52,7 +51,7 @@ public class CarpoolAggregate {
         CarpoolCreatedDomainEvent domainEvent = new CarpoolCreatedDomainEvent(
             new CarpoolCreatedEvent(
                 UUID.randomUUID().toString(), command.seats, command.driverId, 
-                command.arrivalTime.atZone(ZoneId.of("UTC")).toInstant(), 
+                command.arrivalTime, 
                 command.route.toSchemaRoute()
             )
         );
@@ -145,7 +144,7 @@ public class CarpoolAggregate {
             this.id = e.event.getCarpoolId();
             this.driverId = e.event.getDriverId();
             this.totalSeats = e.event.getAvailableSeats();
-            this.arrivalTime = LocalDateTime.ofInstant(e.event.getArrivalTime(), ZoneId.of("UTC"));
+            this.arrivalTime = e.event.getArrivalTime();
             this.route = RouteValue.from(e.event.getRoute());
         } else if (event instanceof CarpoolMatchedDomainEvent e) {
             this.pendingRideRequests.add(e.event.getRideRequestId());

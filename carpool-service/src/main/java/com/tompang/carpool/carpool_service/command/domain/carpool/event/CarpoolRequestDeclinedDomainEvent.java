@@ -11,7 +11,7 @@ public class CarpoolRequestDeclinedDomainEvent implements CarpoolDomainEvent {
 
     @Override
     public String topicName() {
-        return DomainTopics.Carpool.CARPOOL_REQUEST_ACCEPTED;
+        return DomainTopics.Carpool.CARPOOL_REQUEST_DECLINED;
     }
 
     @Override

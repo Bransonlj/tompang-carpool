@@ -6,4 +6,12 @@ import lombok.AllArgsConstructor;
 public class FailRideRequestCommand {
     public final String requestId;
     public final String reason;
+
+    @Override
+    public String toString() {
+        return "FailRideRequestCommand{" +
+                "requestId=" + requestId +
+                ", reason=" + reason +
+                '}';
+    }
 }

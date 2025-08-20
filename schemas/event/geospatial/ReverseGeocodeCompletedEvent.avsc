@@ -1,36 +1,43 @@
-{
-  "type": "record",
-  "namespace": "com.tompang.carpool.event.geospatial",
-  "name": "ReverseGeocodeCompletedEvent",
-  "fields": [
-    {
-      "name": "success",
-      "type": "boolean"
-    },
-    {
-      "name": "address",
-      "type": ["null", "string"],
-      "default": null
-    },
-    {
-      "name": "entity",
-      "type": {
-        "type": "enum",
-        "name": "GeocodeEntity",
-        "symbols": ["CARPOOL", "RIDEREQUEST"]
+[
+  {
+    "type": "enum",
+    "namespace": "com.tompang.carpool.geospatial.enums",
+    "name": "GeocodeEntity",
+    "symbols": ["CARPOOL", "RIDEREQUEST"]
+  },
+  {
+    "type": "enum",
+    "namespace": "com.tompang.carpool.geospatial.enums",
+    "name": "GeocodeEntityField",
+    "symbols": ["ORIGIN", "DESTINATION"]
+  },
+  {
+    "type": "record",
+    "namespace": "com.tompang.carpool.geospatial",
+    "name": "ReverseGeocodeCompletedEvent",
+    "fields": [
+      {
+        "name": "success",
+        "type": "boolean"
+      },
+      {
+        "name": "address",
+        "type": ["null", "string"],
+        "default": null
+      },
+      {
+        "name": "entity",
+        "type": "com.tompang.carpool.geospatial.enums.GeocodeEntity"
+      },
+      {
+        "name": "entityId",
+        "type": "string"
+      },
+      {
+        "name": "field",
+        "type": "com.tompang.carpool.geospatial.enums.GeocodeEntityField"
       }
-    },
-    {
-      "name": "entityId",
-      "type": "string"
-    },
-    {
-      "name": "field",
-      "type": {
-        "type": "enum",
-        "name": "GeocodeEntityField",
-        "symbols": ["ORIGIN", "DESTINATION"]
-      }
-    }
-  ]
-}
+    ]
+  }
+]
+
