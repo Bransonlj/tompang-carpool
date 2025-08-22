@@ -14,7 +14,7 @@ import com.tompang.carpool.carpool_service.query.entity.Carpool;
 import com.tompang.carpool.carpool_service.query.service.CarpoolQueryService;
 
 @RestController
-@RequestMapping("/query/carpool")
+@RequestMapping("api/carpool/query")
 public class CarpoolQueryController {
 
     private final CarpoolQueryService carpoolQueryService;

@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: api-gateway
+
+jwt:
+  secret-key: this_is_a_secure_and_long_enough_key_for_HS256
+
+server:
+  port: 4500

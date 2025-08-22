@@ -12,7 +12,7 @@ import com.tompang.carpool.carpool_service.command.command.ride_request.CreateRi
 import com.tompang.carpool.carpool_service.command.service.RideRequestCommandHandler;
 
 @RestController
-@RequestMapping("/command/ride-request")
+@RequestMapping("api/ride-request/command")
 public class RideRequestCommandController {
 
     private final RideRequestCommandHandler commandHandler;
