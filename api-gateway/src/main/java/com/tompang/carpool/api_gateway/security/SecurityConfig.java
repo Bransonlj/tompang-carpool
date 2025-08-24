@@ -4,28 +4,28 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
-@EnableWebFluxSecurity
+@EnableWebSecurity
 public class SecurityConfig {
-  private JwtWebFilter jwtAuthFilter;
+  private JwtAuthFilter jwtAuthFilter;
 
-  public SecurityConfig(JwtWebFilter jwtAuthFilter) {
+  public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
     this.jwtAuthFilter = jwtAuthFilter;
   }
 
   @Bean
-  public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
       .csrf(csrf -> csrf.disable())
-      .authorizeExchange(exchange -> exchange
-          .anyExchange().permitAll()
+      .authorizeHttpRequests(auth -> auth
+          .anyRequest().permitAll()
       )
       .cors(cors -> cors.configurationSource(request -> {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -34,8 +34,8 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
         return configuration;
       }))
-      .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
-      .addFilterAt(jwtAuthFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
       .build();
   }
 
