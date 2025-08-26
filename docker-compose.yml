@@ -44,6 +44,23 @@ services:
     volumes:
       - tompang_postgres_carpool_data:/var/lib/postgresql/data
 
+  postgres-profile-service:
+    container_name: tompang-postgres-profile-service
+    image: postgis/postgis:17-3.5
+    ports:
+      - 5442:5432
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: profile-service
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d profile-service"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - tompang_postgres_profile_data:/var/lib/postgresql/data
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: tompang-zookeeper
@@ -133,6 +150,7 @@ volumes:
   tompang_kurrentdb_logs:
   tompang_postgres_auth_data:
   tompang_postgres_carpool_data:
+  tompang_postgres_profile_data:
   tompang_zookeeper_data:
   tompang_zookeeper_log:
   tompang_kafka_data:
