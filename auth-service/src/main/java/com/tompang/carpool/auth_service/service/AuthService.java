@@ -4,6 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.tompang.carpool.auth_service.auth.JwtService;
+import com.tompang.carpool.auth_service.dto.LoginResponseDto;
 import com.tompang.carpool.auth_service.exception.EmailAlreadyExistsException;
 import com.tompang.carpool.auth_service.exception.InvalidCredentialsException;
 import com.tompang.carpool.auth_service.exception.UsernameAlreadyExistsException;
@@ -47,13 +48,17 @@ public class AuthService {
      * @param password
      * @return
      */
-    public String login(String username, String password) {
+    public LoginResponseDto login(String username, String password) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
-        return jwtService.generateToken(user.getId());
+        String jwtToken = jwtService.generateToken(user.getId());
+        return LoginResponseDto.builder()
+                .userId(user.getId())
+                .token(jwtToken)
+                .build();
     }
 }

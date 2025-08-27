@@ -1,5 +1,7 @@
 package com.tompang.carpool.auth_service.controller;
 
+import java.net.URI;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tompang.carpool.auth_service.common.KafkaTopics;
 import com.tompang.carpool.auth_service.dto.LoginRequestDto;
+import com.tompang.carpool.auth_service.dto.LoginResponseDto;
 import com.tompang.carpool.auth_service.dto.RegisterRequestDto;
 import com.tompang.carpool.auth_service.model.User;
 import com.tompang.carpool.auth_service.service.AuthService;
@@ -28,16 +31,17 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequestDto req) {
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequestDto req) {
         User registeredUser = authService.register(req.getEmail(), req.getUsername(), req.getPassword());
         kafkaTemplate.send(KafkaTopics.User.USER_REGISTERED, new UserRegisteredEvent(
                 registeredUser.getId(), registeredUser.getUsername(), req.getFirstName(), req.getLastName()));
-        return ResponseEntity.ok("User registered successfully!");
+        URI location = URI.create("/api/auth/" + registeredUser.getId());
+        return ResponseEntity.created(location).build();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid LoginRequestDto req) {
-        String token = authService.login(req.getUsername(), req.getPassword());
-        return ResponseEntity.ok(token);
+    public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto req) {
+        LoginResponseDto responseDto = authService.login(req.getUsername(), req.getPassword());
+        return ResponseEntity.ok(responseDto);
     }
 }
