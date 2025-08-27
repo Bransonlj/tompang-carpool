@@ -1,6 +1,5 @@
 package com.tompang.carpool.driver_service.controller;
 
-import java.io.IOException;
 import java.net.URI;
 
 import org.springframework.http.MediaType;
@@ -19,16 +18,19 @@ import com.tompang.carpool.driver_service.exception.BadRequestException;
 import com.tompang.carpool.driver_service.model.DriverRegistration;
 import com.tompang.carpool.driver_service.service.DriverRegistrationService;
 import com.tompang.carpool.driver_service.service.S3Service;
+import com.tompang.carpool.driver_service.service.VerificationService;
 
 @RestController
 @RequestMapping("/api/driver")
 public class DriverController {
     private final S3Service s3Service;
     private final DriverRegistrationService driverService;
+    private final VerificationService verificationService;
 
-    public DriverController(S3Service s3Service, DriverRegistrationService driverService) {
+    public DriverController(S3Service s3Service, DriverRegistrationService driverService, VerificationService verificationService) {
         this.s3Service = s3Service;
         this.driverService = driverService;
+        this.verificationService = verificationService;
     }
 
     @GetMapping("{id}")
@@ -37,7 +39,10 @@ public class DriverController {
     ) {
         DriverRegistration driver = driverService.getDriverById(id);
         DriverRegistrationResponseDto dto = DriverRegistrationResponseDto.fromEntity(driver);
-        String signedImageUrl = s3Service.getFileUrl(id);
+        String signedImageUrl = s3Service.getFileUrl(S3Service.Key.builder()
+                .dir(S3Service.DRIVER_FOLDER)
+                .id(id)
+                .build());
         dto.setSignedImageUrl(signedImageUrl);
         return ResponseEntity.ok().body(dto);
     }
@@ -59,18 +64,7 @@ public class DriverController {
             throw new BadRequestException("Only JPEG and PNG files are allowed");
         }
 
-        // create driver
-        String driverRegistrationId = driverService.registerDriver(dto);
-        // upload image
-        try {
-            s3Service.uploadFile(driverRegistrationId, file);
-        } catch (IOException exception) {
-            driverService.failDriverRegistration(driverRegistrationId, "Failed to upload image");
-        } catch (Exception exception) {
-            // rollback any other exception
-            driverService.deleteDriverRegistration(driverRegistrationId);
-            throw exception;
-        }
+        String driverRegistrationId = verificationService.registerAndVerifyDriver(dto, file);
 
         URI location = URI.create("/api/driver/" + driverRegistrationId);
         return ResponseEntity.created(location).build();

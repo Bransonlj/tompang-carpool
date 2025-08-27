@@ -14,10 +14,24 @@ spring:
       hibernate:
         format_sql: true
 
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer 
+      properties:
+        schema.registry.url: http://localhost:8081
+
   servlet:
     multipart:
       max-file-size: 5MB # Limit individual file size to 5MB
       max-request-size: 5MB # Limit total request size (if multiple files)
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: user
+    password: password
 
 server:
   port: 4004
