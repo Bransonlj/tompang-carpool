@@ -26,7 +26,7 @@ public class RideRequestCommandController {
         @RequestBody CreateRideRequestCommand command
     ) {
         String requestId = this.commandHandler.handleCreateRideRequest(command);
-        URI location = URI.create("/query/ride-request/" + requestId);
+        URI location = URI.create("/api/ride-request/query/" + requestId);
         return ResponseEntity.created(location).build();
     }
 

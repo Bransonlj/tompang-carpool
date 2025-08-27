@@ -34,7 +34,7 @@ public class CarpoolCommandController {
         @RequestBody CreateCarpoolCommand command
     ) {
         String carpoolId = this.carpoolCommandHandler.handleCreateCarpool(command);
-        URI location = URI.create("/query/carpool/" + carpoolId);
+        URI location = URI.create("/api/carpool/query/" + carpoolId);
         return ResponseEntity.created(location).build();
     }
 
