@@ -124,6 +124,7 @@
 						<sourceDirectory>${project.basedir}/../schemas</sourceDirectory>
 						<includes>
 							<include>event/user/*.avsc</include>
+							<include>event/driver/*.avsc</include>
 						</includes>
 						<outputDirectory>${project.basedir}/target/generated-sources/avro</outputDirectory>
 					</configuration>
