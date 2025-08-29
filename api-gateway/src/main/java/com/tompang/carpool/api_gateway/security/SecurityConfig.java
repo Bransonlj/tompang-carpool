@@ -4,15 +4,14 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebFluxSecurity
 public class SecurityConfig {
   private JwtAuthFilter jwtAuthFilter;
 
@@ -21,13 +20,13 @@ public class SecurityConfig {
   }
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) throws Exception {
     return http
       .csrf(csrf -> csrf.disable())
-      .authorizeHttpRequests(auth -> auth
-          .requestMatchers("/api/auth/public/**").permitAll()
-          .requestMatchers("/api/auth/admin/**").hasRole("ADMIN")  // only admins
-          .anyRequest().hasRole("USER")
+      .authorizeExchange(auth -> auth
+          .pathMatchers("/api/auth/public/**").permitAll()
+          .pathMatchers("/api/auth/admin/**").hasRole("ADMIN")  // only admins
+          .anyExchange().hasRole("USER")
       )
       .cors(cors -> cors.configurationSource(request -> {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -36,8 +35,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
         return configuration;
       }))
-      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-      .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+      .addFilterAt(jwtAuthFilter, SecurityWebFiltersOrder.AUTHENTICATION)
       .build();
   }
 

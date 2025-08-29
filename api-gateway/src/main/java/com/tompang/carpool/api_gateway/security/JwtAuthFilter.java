@@ -1,24 +1,22 @@
 package com.tompang.carpool.api_gateway.security;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import reactor.core.publisher.Mono;
 
 @Component
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class JwtAuthFilter implements WebFilter  {
 
     private final JwtService jwtService;
     private final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
@@ -28,49 +26,47 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException  {
-      StringBuilder logMessage = new StringBuilder(String.format("Request: %s %s | ", 
-          request.getMethod(),
-          request.getRequestURI()));
-      String authHeader = request.getHeader("Authorization");
-      String token = null;
-      String userId = null;
-      if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-        filterChain.doFilter(request, response);
-        logMessage.append("Invalid authorization header");
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        StringBuilder logMessage = new StringBuilder(
+            String.format("Request: %s %s | ", 
+                exchange.getRequest().getMethod(),
+                exchange.getRequest().getURI().getPath()));
+        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            logMessage.append("Invalid authorization header");
+            logger.info(logMessage.toString());
+            return chain.filter(exchange);
+        }
+
+        String token = authHeader.substring(7); // Extract token
+        String userId = jwtService.extractUserId(token);
+        if (userId == null || jwtService.isTokenExpired(token)) {
+            logMessage.append("Invalid authorization token");
+            logger.info(logMessage.toString());
+            return chain.filter(exchange);
+        }
+
+        List<String> roles = jwtService.extractRoles(token);
+        List<SimpleGrantedAuthority> authorities = roles.stream()
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // must prefix with ROLE_
+            .toList();
+
+        UsernamePasswordAuthenticationToken authToken =
+            new UsernamePasswordAuthenticationToken(userId, null, authorities);
+
+        String rolesString = String.join(",", roles);
+        logMessage.append(String.format("User: %s | Roles: %s", userId, rolesString));
         logger.info(logMessage.toString());
-        return;
-      }
 
-      token = authHeader.substring(7); // Extract token
-      userId = jwtService.extractUserId(token);
-      // If the token is valid & no authentication is set in the context & token not expired 
-      if (userId != null 
-          && SecurityContextHolder.getContext().getAuthentication() == null 
-          && !jwtService.isTokenExpired(token)
-      ) {
-          List<String> roles = jwtService.extractRoles(token);
-          List<SimpleGrantedAuthority> authorities = roles.stream()
-              .map(role -> new SimpleGrantedAuthority("ROLE_" + role)) // must prefix with ROLE_
-              .toList();
+        ServerWebExchange mutatedExchange = exchange.mutate()
+            .request(r -> r.headers(headers -> {
+                headers.add("X-User-Id", userId);
+                headers.add("X-User-Roles", rolesString);
+            }))
+            .build();
 
-          UsernamePasswordAuthenticationToken authToken =
-              new UsernamePasswordAuthenticationToken(userId, null, authorities);
-
-          // Set the authentication in the SecurityContext
-          SecurityContextHolder.getContext().setAuthentication(authToken);
-
-          // TODO add auth credentials to headers
-
-          String rolesString = authorities.stream()
-              .map(auth -> auth.getAuthority())
-              .collect(Collectors.joining(","));
-          logMessage.append(String.format("User: %s | Roles: %s", userId, rolesString));
-      } else {
-          logMessage.append("Invalid authorization token");
-      }
-
-      logger.info(logMessage.toString());
-      filterChain.doFilter(request, response);
+        // Set Authentication in the reactive SecurityContext
+        return chain.filter(mutatedExchange)
+                .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authToken));
     }
 }
