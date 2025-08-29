@@ -25,7 +25,9 @@ public class SecurityConfig {
     return http
       .csrf(csrf -> csrf.disable())
       .authorizeHttpRequests(auth -> auth
-          .anyRequest().permitAll()
+          .requestMatchers("/api/auth/public/**").permitAll()
+          .requestMatchers("/api/auth/admin/**").hasRole("ADMIN")  // only admins
+          .anyRequest().hasRole("USER")
       )
       .cors(cors -> cors.configurationSource(request -> {
         CorsConfiguration configuration = new CorsConfiguration();

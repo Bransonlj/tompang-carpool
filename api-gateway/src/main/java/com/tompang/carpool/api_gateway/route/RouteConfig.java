@@ -13,6 +13,13 @@ import org.springframework.web.servlet.function.ServerResponse;
 public class RouteConfig {
 
         @Bean
+        public RouterFunction<ServerResponse> authServiceRoute() {
+                return GatewayRouterFunctions.route("auth-service")
+                                .route(GatewayRequestPredicates.path("/api/auth/**"), HandlerFunctions.http())
+                                .before(BeforeFilterFunctions.uri("http://localhost:4002")).build();
+        }
+
+        @Bean
         public RouterFunction<ServerResponse> carpoolServiceRoute() {
                 return GatewayRouterFunctions.route("carpool-service")
                                 .route(GatewayRequestPredicates.path("/api/carpool/**", "/api/ride-request/**"),

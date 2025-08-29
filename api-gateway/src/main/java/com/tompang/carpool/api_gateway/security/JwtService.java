@@ -1,6 +1,7 @@
 package com.tompang.carpool.api_gateway.security;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.crypto.SecretKey;
 
@@ -33,7 +34,12 @@ public class JwtService {
 
     public String extractUserId(String token) {
         Claims claims = extractAllClaims(token);
-        return claims.get("userId", String.class);
+        return claims.getSubject();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> extractRoles(String token) {
+        return extractAllClaims(token).get("roles", List.class);
     }
 
     public Date extractExpiration(String token) {

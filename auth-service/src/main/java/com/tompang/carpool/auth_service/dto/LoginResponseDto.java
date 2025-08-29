@@ -1,5 +1,9 @@
 package com.tompang.carpool.auth_service.dto;
 
+import java.util.Set;
+
+import com.tompang.carpool.auth_service.model.UserRole;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,4 +12,5 @@ import lombok.Data;
 public class LoginResponseDto {
     public String userId;
     public String token;
+    public Set<UserRole> roles; 
 }
