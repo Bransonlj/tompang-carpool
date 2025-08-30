@@ -1,7 +1,7 @@
 {
   "type": "record",
   "namespace": "com.tompang.carpool.event.driver",
-  "name": "DriverRegistrationSucceededEvent",
+  "name": "DriverRegistrationRejectedEvent",
   "fields": [
     {
       "name": "driverRegistrationId",

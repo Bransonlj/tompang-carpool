@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tompang.carpool.auth_service.common.AuthHeader;
 import com.tompang.carpool.auth_service.dto.RegisterRequestDto;
 import com.tompang.carpool.auth_service.service.AuthService;
 
@@ -27,8 +28,8 @@ public class AdminController {
 
     @GetMapping("/check")
     public ResponseEntity<String> testAdmin(
-        @RequestHeader(name = "X-User-Id", required = false) String userId,
-        @RequestHeader(name = "X-User-Roles", required = false) String roles
+        @RequestHeader(name = AuthHeader.USER_ID) String userId,
+        @RequestHeader(name = AuthHeader.USER_ROLES) String roles
     ) {
         return ResponseEntity.ok()
                 .body(String.format("Admin check passed. X-User-Id: %s, X-User-Roles: %s", 

@@ -9,7 +9,7 @@ public class KafkaTopics {
     }
 
     public static final class Driver {
-        public static final String DRIVER_REGISTRATION_SUCCEEDED = "driver-registration-succeeded";
+        public static final String DRIVER_REGISTRATION_APPROVED = "driver-registration-approved";
         public static final String DRIVER_DEREGISTERED = "driver-deregistered";
     }
 

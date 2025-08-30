@@ -20,7 +20,6 @@ public class UserProfile {
   public String id;
   public String firstName;
   public String lastName;
-  public String username;
 
   // null if user not a driver
   @Builder.Default

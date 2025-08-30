@@ -26,7 +26,6 @@ public class UserProfileController {
     UserProfile userProfile = userProfileService.getUserProfileById(id);
     return ResponseEntity.ok().body(UserProfileResopnseDto.builder()
         .id(userProfile.getId())
-        .username(userProfile.getUsername())
         .fullName(userProfile.getFirstName() + " " + userProfile.getLastName())
         .driverId(userProfile.getDriverId())
         .build());

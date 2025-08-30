@@ -27,6 +27,15 @@ public class RouteConfig {
         }
 
         @Bean
+        public RouteLocator driverServiceRoute(RouteLocatorBuilder builder) {
+                return builder.routes()
+                        .route("driver-service", r -> 
+                                r.path("/api/driver/**")
+                                .uri("http://localhost:4004"))
+                        .build();
+        }
+
+        @Bean
         public RouteLocator geospatialServiceRoute(RouteLocatorBuilder builder) {
                 return builder.routes()
                         .route("geospatial-service", r -> 

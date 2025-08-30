@@ -1,0 +1,73 @@
+package com.tompang.carpool.driver_service.controller;
+
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.tompang.carpool.driver_service.common.AuthHeader;
+import com.tompang.carpool.driver_service.dto.DriverRegistrationResponseDto;
+import com.tompang.carpool.driver_service.dto.admin.ManualRejectRequestDto;
+import com.tompang.carpool.driver_service.exception.AccessDeniedException;
+import com.tompang.carpool.driver_service.service.DriverAdminService;
+
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+
+@RestController
+@RequestMapping("/api/driver/admin")
+public class AdminController {
+
+    private final DriverAdminService adminService;
+
+    public AdminController(DriverAdminService adminService) {
+        this.adminService = adminService;
+    }
+
+    private void verifyAdminRole(String roles) {
+        if (!AuthHeader.hasAdminRole(roles)) {
+            throw new AccessDeniedException("Must have ADMIN user role");
+        }
+    }
+
+    @GetMapping("pending-review")
+    public ResponseEntity<List<DriverRegistrationResponseDto>> getAllPendingManualReview(
+        @RequestHeader(name = AuthHeader.USER_ID) String userId,
+        @RequestHeader(name = AuthHeader.USER_ROLES) String roles
+    ) {
+        verifyAdminRole(roles);
+        return ResponseEntity.ok().body(
+            adminService.getAllPendingManualReview()
+                .stream()
+                .map(registration -> DriverRegistrationResponseDto.fromEntity(registration))
+                .toList());
+    }
+
+    @PostMapping("{id}/approve")
+    public ResponseEntity<Void> manuallyApproveDriverRegistration(
+        @RequestHeader(name = AuthHeader.USER_ID) String userId,
+        @RequestHeader(name = AuthHeader.USER_ROLES) String roles,
+        @PathVariable("id") String driverRegistrationId
+    ) {
+        verifyAdminRole(roles);
+        adminService.manuallyApproveDriverRegistration(driverRegistrationId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("{id}/reject")
+    public ResponseEntity<Void> manuallyRejectDriverRegistration(
+        @RequestHeader(name = AuthHeader.USER_ID) String userId,
+        @RequestHeader(name = AuthHeader.USER_ROLES) String roles,
+        @PathVariable("id") String driverRegistrationId,
+        @RequestBody ManualRejectRequestDto dto
+    ) {
+        verifyAdminRole(roles);
+        adminService.manuallyRejectDriverRegistration(driverRegistrationId, userId, dto.getRejectReason());
+        return ResponseEntity.noContent().build();
+    }
+
+}

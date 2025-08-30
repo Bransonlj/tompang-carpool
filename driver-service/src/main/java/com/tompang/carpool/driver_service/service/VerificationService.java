@@ -36,10 +36,11 @@ public class VerificationService {
         try {
             s3Service.uploadFile(new S3Service.Key(S3Service.DRIVER_FOLDER, driverRegistrationId), file);
         } catch (IOException exception) {
-            driverService.failDriverRegistration(driverRegistrationId, "Failed to upload image");
-            return driverRegistrationId;
+            // rollback any exception
+            driverService.deleteDriverRegistration(driverRegistrationId);
+            throw new RuntimeException("Error uploading image");
         } catch (Exception exception) {
-            // rollback any other exception
+            // rollback any exception
             driverService.deleteDriverRegistration(driverRegistrationId);
             throw exception;
         }

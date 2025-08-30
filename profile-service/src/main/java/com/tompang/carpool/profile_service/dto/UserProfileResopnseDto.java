@@ -7,7 +7,6 @@ import lombok.Data;
 @Builder
 public class UserProfileResopnseDto {
   public String id;
-  public String username;
   public String fullName;
   public String driverId;
 }

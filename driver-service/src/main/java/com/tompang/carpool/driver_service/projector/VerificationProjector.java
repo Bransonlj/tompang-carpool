@@ -38,15 +38,14 @@ public class VerificationProjector {
             driver.setRegistrationStatus(RegistrationStatus.PENDING_MANUAL_REVIEW);
         } else if (dto.result.equals(VerificationResult.INVALID)) {
             driver.setRegistrationStatus(RegistrationStatus.FAILED);
-            driver.setFailedReason("Automated failure");
         }
 
         registrationRepository.save(driver);
 
         if (dto.result.equals(VerificationResult.VALID)) {
-            kafkaProducerService.produceDriverRegistrationSucceeded(driver.getId(), driver.getUserId());
+            kafkaProducerService.produceDriverRegistrationApproved(driver.getId(), driver.getUserId());
         } else if (dto.result.equals(VerificationResult.INVALID)) {
-            kafkaProducerService.produceDriverRegistrationFailed(driver.getId(), driver.getUserId());
+            kafkaProducerService.produceDriverRegistrationRejected(driver.getId(), driver.getUserId());
         }
     }
 }

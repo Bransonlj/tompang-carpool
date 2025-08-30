@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.tompang.carpool.driver_service.dto.RegisterDriverRequestDto;
 import com.tompang.carpool.driver_service.exception.ResourceNotFoundException;
 import com.tompang.carpool.driver_service.model.DriverRegistration;
-import com.tompang.carpool.driver_service.model.RegistrationStatus;
 import com.tompang.carpool.driver_service.repository.DriverRegistrationRepository;
 
 @Service
@@ -39,13 +38,6 @@ public class DriverRegistrationService {
 
     public void deleteDriverRegistration(String id) {
         repository.deleteById(id);
-    }
-
-    public void failDriverRegistration(String id, String reason) {
-        DriverRegistration driver = getDriverById(id);
-        driver.setRegistrationStatus(RegistrationStatus.FAILED);
-        driver.setFailedReason(reason);
-        repository.save(driver);
     }
 
 }

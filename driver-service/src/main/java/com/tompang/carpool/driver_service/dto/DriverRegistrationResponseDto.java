@@ -18,7 +18,6 @@ public class DriverRegistrationResponseDto {
     public String vehicleModel;
     public LocalDateTime createdAt;
     public RegistrationStatus status;
-    public String failedReason;
     
     public String signedImageUrl;
 
@@ -31,7 +30,6 @@ public class DriverRegistrationResponseDto {
             .vehicleModel(driver.getVehicleModel())
             .createdAt(driver.getCreatedAt())
             .status(driver.getRegistrationStatus())
-            .failedReason(driver.getFailedReason())
             .build();
     }
 }

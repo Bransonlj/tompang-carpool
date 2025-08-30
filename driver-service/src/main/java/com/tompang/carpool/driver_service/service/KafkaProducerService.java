@@ -4,8 +4,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.tompang.carpool.driver_service.common.KafkaTopics;
-import com.tompang.carpool.event.driver.DriverRegistrationFailedEvent;
-import com.tompang.carpool.event.driver.DriverRegistrationSucceededEvent;
+import com.tompang.carpool.event.driver.DriverRegistrationApprovedEvent;
+import com.tompang.carpool.event.driver.DriverRegistrationRejectedEvent;
 
 @Service
 public class KafkaProducerService {
@@ -16,15 +16,15 @@ public class KafkaProducerService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void produceDriverRegistrationSucceeded(String driverId, String userId) {
+    public void produceDriverRegistrationApproved(String driverId, String userId) {
         kafkaTemplate.send(
-            KafkaTopics.Driver.DRIVER_REGISTRATION_SUCCEEDED, 
-            new DriverRegistrationSucceededEvent(driverId, userId));
+            KafkaTopics.Driver.DRIVER_REGISTRATION_APPROVED, 
+            new DriverRegistrationApprovedEvent(driverId, userId));
     }
 
-    public void produceDriverRegistrationFailed(String driverId, String userId) {
+    public void produceDriverRegistrationRejected(String driverId, String userId) {
         kafkaTemplate.send(
-            KafkaTopics.Driver.DRIVER_REGISTRATION_FAILED, 
-            new DriverRegistrationFailedEvent(driverId, userId));
+            KafkaTopics.Driver.DRIVER_REGISTRATION_REJECTED, 
+            new DriverRegistrationRejectedEvent(driverId, userId));
     }
 }

@@ -59,10 +59,10 @@ public class JwtAuthFilter implements WebFilter  {
         logger.info(logMessage.toString());
 
         ServerWebExchange mutatedExchange = exchange.mutate()
-            .request(r -> r.headers(headers -> {
-                headers.add("X-User-Id", userId);
-                headers.add("X-User-Roles", rolesString);
-            }))
+            .request(r -> r
+                .header("X-User-Id", userId)
+                .header("X-User-Roles", rolesString)
+                .build())
             .build();
 
         // Set Authentication in the reactive SecurityContext
