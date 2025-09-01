@@ -25,6 +25,17 @@ public class JwtAuthFilter implements WebFilter  {
       this.jwtService = jwtService;
     }
 
+    private Mono<Void> logAndContinue(
+        WebFilterChain chain, 
+        ServerWebExchange exchange, 
+        StringBuilder logMessage,
+        String message
+    ) {
+        logMessage.append(message);
+        logger.info(logMessage.toString());
+        return chain.filter(exchange);
+    }
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         StringBuilder logMessage = new StringBuilder(
@@ -32,18 +43,21 @@ public class JwtAuthFilter implements WebFilter  {
                 exchange.getRequest().getMethod(),
                 exchange.getRequest().getURI().getPath()));
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            logMessage.append("Invalid authorization header");
-            logger.info(logMessage.toString());
-            return chain.filter(exchange);
+        if (authHeader == null) {
+            return logAndContinue(chain, exchange, logMessage, "Missing authorization header");        }
+
+        if (!authHeader.startsWith("Bearer ")) {
+            return logAndContinue(chain, exchange, logMessage, String.format("Invalid authorization header format: %s...", authHeader.substring(0, 10))); 
         }
 
         String token = authHeader.substring(7); // Extract token
         String userId = jwtService.extractUserId(token);
-        if (userId == null || jwtService.isTokenExpired(token)) {
-            logMessage.append("Invalid authorization token");
-            logger.info(logMessage.toString());
-            return chain.filter(exchange);
+        if (userId == null) {
+            return logAndContinue(chain, exchange, logMessage, "Missing userId subject from token");
+        }
+
+        if (jwtService.isTokenExpired(token)) {
+            return logAndContinue(chain, exchange, logMessage, "Token is expired");
         }
 
         List<String> roles = jwtService.extractRoles(token);

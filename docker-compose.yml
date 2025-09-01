@@ -10,6 +10,27 @@ services:
       - tompang_kurrentdb_data:/var/lib/kurrentdb
       - tompang_kurrentdb_logs:/var/log/kurrentdb
 
+  cassandra-tompang:
+    image: cassandra:4.1
+    container_name: tompang-cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      CASSANDRA_CLUSTER_NAME: "TompangCarpoolCluster"
+    volumes:
+      - tompang_cassandra_data:/var/lib/cassandra
+
+  cassandra-setup: # script to create keyspace & tables
+    image: nuvo/docker-cqlsh
+    depends_on:
+      - cassandra-tompang
+    volumes:
+      - ./data.cql:/scripts/data.cql
+    environment:
+      CQLVERSION: '3.4.6'
+      CQLSH_HOST: cassandra-tompang
+      CQLSH_PORT: 9042
+
   postgres-auth-service:
     container_name: tompang-postgres-auth-service
     image: postgres:latest
@@ -164,6 +185,7 @@ services:
 
 volumes:
   tompang_kurrentdb_data:
+  tompang_cassandra_data:
   tompang_kurrentdb_logs:
   tompang_postgres_auth_data:
   tompang_postgres_carpool_data:

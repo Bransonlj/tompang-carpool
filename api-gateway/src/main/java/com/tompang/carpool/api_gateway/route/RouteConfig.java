@@ -43,4 +43,13 @@ public class RouteConfig {
                                 .uri("http://localhost:4001"))
                         .build();
         }
+
+        @Bean
+        public RouteLocator notificationServiceRoute(RouteLocatorBuilder builder) {
+                return builder.routes()
+                        .route("notification-service", r -> 
+                                r.path("/socket.io/**")
+                                .uri("http://localhost:4100"))
+                        .build();
+        }
 }

@@ -27,6 +27,7 @@ public class SecurityConfig {
           .pathMatchers("/api/auth/public/**").permitAll()
           .pathMatchers("/api/auth/admin/**").hasRole("ADMIN")  // only admins
           .pathMatchers("/api/driver/admin/**").hasAnyRole("ADMIN")
+          .pathMatchers("/socket.io/**").hasAnyRole("USER", "ADMIN")
           .anyExchange().hasRole("USER")
       )
       .cors(cors -> cors.configurationSource(request -> {
