@@ -1,11 +1,15 @@
 import { DomainEvent } from "src/message/event";
-import { UserRegisteredEvent } from "src/message/event/user";
 import { CarpoolMatchedEvent, CarpoolRequestInvalidatedEvent } from "./event/carpool";
 import { RideRequestAcceptedEvent, RideRequestDeclinedEvent, RideRequestFailedEvent, RideRequestMatchedEvent } from "./event/ride-request";
+import { DriverRegistrationApprovedEvent, DriverRegistrationRejectedEvent } from "./event/driver";
 
 enum Topic {
   USER_REGISTERED="user-registered",
   
+  DRIVER_REGISTRATION_APPROVED = "driver-registration-approved",
+  DRIVER_REGISTRATION_REJECTED = "driver-registration-rejected",
+  DRIVER_DEREGISTERED = "driver-deregistered",
+
   CARPOOL_CREATED = "carpool-created",
   CARPOOL_MATCHED = "carpool-matched",
   CARPOOL_REQUEST_ACCEPTED = "carpool-request-accepted",
@@ -23,7 +27,10 @@ type DomainEventConstructor<T extends DomainEvent = DomainEvent> = new (payload:
 
 export const KAFKA_TOPIC_EVENT_MAP: ReadonlyMap<string, DomainEventConstructor> = new Map<string, DomainEventConstructor>([
   // user events
-  [Topic.USER_REGISTERED, UserRegisteredEvent],
+
+  // driver events
+  [Topic.DRIVER_REGISTRATION_APPROVED, DriverRegistrationApprovedEvent],
+  [Topic.DRIVER_REGISTRATION_REJECTED, DriverRegistrationRejectedEvent],
 
   // carpool events
   [Topic.CARPOOL_MATCHED, CarpoolMatchedEvent],

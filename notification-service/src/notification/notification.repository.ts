@@ -37,10 +37,10 @@ export class NotificationRepository {
     }
   }
 
-  async getUserNotifications(userId: string): Promise<UserNotificationDto[]> {
+  async getNotificationsByUserSorted(userId: string): Promise<UserNotificationDto[]> {
     const query = `SELECT * FROM ${this.notificationKeySpace}.${this.notificationTable}
                     WHERE user_id = ?
-                    LIMIT 10;`
+                    ORDER BY created_at DESC;`
     const result = await this.client.execute(query, [userId], { prepare: true });
     return result.rows.map(row => ({
       userId: row.user_id,

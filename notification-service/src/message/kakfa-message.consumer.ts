@@ -47,6 +47,9 @@ export class KafkaMessageConsumer implements OnModuleInit, OnModuleDestroy {
     this.registry = new SchemaRegistry({ host: 'http://localhost:8081' });
   }
 
+  /**
+   * Decodes the kafka event message payload with schema registry and creates the notification from the payload data.
+   */
   private async handleEvent<T extends DomainEvent>(
     ctor: new (payload: any) => T,
     message: Buffer,
@@ -59,6 +62,9 @@ export class KafkaMessageConsumer implements OnModuleInit, OnModuleDestroy {
     return event;
   }
 
+  /**
+   * Subscibe to topics and handle the events specified in "kafka-message.consumer.ts"
+   */
   async onModuleInit() {
     await this.kafkaConsumer.connect();
     await this.kafkaConsumer.subscribe({ topics: Array.from(KAFKA_TOPIC_EVENT_MAP.keys()), fromBeginning: true });

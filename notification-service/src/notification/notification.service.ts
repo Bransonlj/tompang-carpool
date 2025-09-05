@@ -17,7 +17,7 @@ export class NotificationService {
   }
 
   async getNotificationsByUser(userId: string) {
-    return await this.repository.getUserNotifications(userId);
+    return await this.repository.getNotificationsByUserSorted(userId);
   }
 
 
