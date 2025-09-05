@@ -1,5 +1,6 @@
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
+import { UserNotificationDto } from "./dto/user-notification";
 
 interface AuthenticatedSocket extends Socket {
   userId: string;
@@ -47,8 +48,8 @@ export class NotificationGateway implements OnGatewayInit, OnGatewayConnection, 
     console.log("user disconnected", client.userId)
   }
 
-  sendNotification(message: { title: string, message: string }, userId: string) {
-    this.server.to(userId).emit("notification", message);
+  sendNotification(message: UserNotificationDto) {
+    this.server.to(message.userId).emit("notification", message);
   }
 
 }

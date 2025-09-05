@@ -1,23 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import cassandra, { Client } from "cassandra-driver";
+import { NotificationGateway } from './notification.gateway';
+import { NotificationRepository } from './notification.repository';
+import { CreateUserNotificationDto } from './dto/user-notification';
 
 @Injectable()
 export class NotificationService {
+  constructor(
+    private gateway: NotificationGateway,
+    private repository: NotificationRepository,
+  ) {}
 
-  client: Client;
-
-  constructor() {
-    this.client = new Client({
-      contactPoints: ['127.0.0.1'], // or 'localhost'
-      localDataCenter: 'datacenter1', // default DC in cassandra:4.1
-      keyspace: 'store',       // use your keyspace name
-    })
+  async createNotification(createDto: CreateUserNotificationDto) {
+    const createdNotification = await this.repository.saveNotification(createDto);
+    await this.gateway.sendNotification(createdNotification);
+    return createdNotification;
   }
 
-  async testInsert() {
-    const query = 
-    "INSERT INTO store.shopping_cart (userid, item_count, last_update_timestamp) VALUES ('2222', 2, toTimeStamp(now()));"
-    await this.client.execute(query);
-    console.log("added")
+  async getNotificationsByUser(userId: string) {
+    return await this.repository.getUserNotifications(userId);
   }
+
+
 }

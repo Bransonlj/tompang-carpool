@@ -1,24 +1,23 @@
-import { Controller, Param, Post } from '@nestjs/common';
-import { NotificationGateway } from './notification.gateway';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { NotificationService } from './notification.service';
+import { CreateUserNotificationDto } from './dto/user-notification';
 
 @Controller('/api/notification')
 export class NotificationController {
 
   constructor(
-    private notificationGateway: NotificationGateway,
     private notificationService: NotificationService,
   ) {}
 
-  @Post("create/:id")
-  createNotification(@Param('id') userId: string) {
-    this.notificationGateway.sendNotification({ title: "buh", message: "cuh cuh buh facuh"}, userId);
+  @Post("create/")
+  async createNotification(@Body() notification: CreateUserNotificationDto) {
+    await this.notificationService.createNotification(notification);
   }
 
-  @Post("cass")
-  async testCass() {
-    await this.notificationService.testInsert();
-    return "buh"
+  @Get("user/:id")
+  async testCass(@Param('id') userId: string) {
+    const notifications = await this.notificationService.getNotificationsByUser(userId);
+    return notifications;
   }
 
 }
