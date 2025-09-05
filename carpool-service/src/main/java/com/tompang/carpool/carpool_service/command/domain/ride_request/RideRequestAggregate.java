@@ -63,8 +63,11 @@ public class RideRequestAggregate {
     public void matchRideRequest(MatchRideRequestCommand command) {
         // TODO perform any validation
         RideRequestMatchedDomainEvent domainEvent = new RideRequestMatchedDomainEvent(
-            new RideRequestMatchedEvent(command.requestId, command.matchedCarpoolIds)
-        );
+                RideRequestMatchedEvent.newBuilder()
+                        .setRequestId(command.requestId)
+                        .setMatchedCarpoolIds(command.matchedCarpoolIds)
+                        .setRiderId(this.riderId)
+                        .build());
         this.raiseEvent(domainEvent);
     }
 
@@ -82,8 +85,11 @@ public class RideRequestAggregate {
         }
         
         RideRequestFailedDomainEvent domainEvent = new RideRequestFailedDomainEvent(
-            new RideRequestFailedEvent(command.requestId, command.reason)
-        );
+                RideRequestFailedEvent.newBuilder()
+                        .setRequestId(command.requestId)
+                        .setReason(command.reason)
+                        .setRiderId(this.riderId)
+                        .build());
         this.raiseEvent(domainEvent);
     }
 
@@ -101,7 +107,10 @@ public class RideRequestAggregate {
         }
 
         RideRequestAcceptedDomainEvent domainEvent = new RideRequestAcceptedDomainEvent(
-            new RideRequestAcceptedEvent(command.requestId, command.carpoolId)
+                RideRequestAcceptedEvent.newBuilder()
+                        .setRequestId(command.requestId)
+                        .setCarpoolId(command.carpoolId)
+                        .setRiderId(this.riderId).build()
         );
         this.raiseEvent(domainEvent);
     }
@@ -116,8 +125,11 @@ public class RideRequestAggregate {
         }
 
         RideRequestDeclineDomainEvent domainEvent = new RideRequestDeclineDomainEvent(
-            new RideRequestDeclinedEvent(command.requestId, command.carpoolId)
-        );
+                RideRequestDeclinedEvent.newBuilder()
+                        .setRequestId(command.requestId)
+                        .setCarpoolId(command.carpoolId)
+                        .setRiderId(this.riderId)
+                        .build());
         this.raiseEvent(domainEvent);
     }
 

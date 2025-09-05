@@ -12,8 +12,12 @@
       "type": "string"
     },
     {
-        "name": "passengers",
-        "type": "int"
+      "name": "passengers",
+      "type": "int"
+    },
+    {
+      "name": "driverId",
+      "type": "string"
     }
   ]
 }

@@ -62,8 +62,11 @@ public class CarpoolAggregate {
     public void matchRequestToCarpool(MatchCarpoolCommand command) {
         // TODO validate
         CarpoolMatchedDomainEvent domainEvent = new CarpoolMatchedDomainEvent(
-            new CarpoolMatchedEvent(command.carpoolId, command.requestId)
-        );
+                CarpoolMatchedEvent.newBuilder()
+                        .setCarpoolId(command.carpoolId)
+                        .setRideRequestId(command.requestId)
+                        .setDriverId(this.driverId)
+                        .build());
         raiseEvent(domainEvent);
     } 
 
@@ -82,8 +85,12 @@ public class CarpoolAggregate {
         }
 
         CarpoolRequestAcceptedDomainEvent domainEvent = new CarpoolRequestAcceptedDomainEvent(
-            new CarpoolRequestAcceptedEvent(command.carpoolId, command.requestId, passengers)
-        );
+                CarpoolRequestAcceptedEvent.newBuilder()
+                        .setCarpoolId(command.carpoolId)
+                        .setRideRequestId(command.requestId)
+                        .setPassengers(passengers)
+                        .setDriverId(this.driverId)
+                        .build());
         raiseEvent(domainEvent);
     }
 
@@ -97,8 +104,11 @@ public class CarpoolAggregate {
         }
 
         CarpoolRequestDeclinedDomainEvent domainEvent = new CarpoolRequestDeclinedDomainEvent(
-            new CarpoolRequestDeclinedEvent(command.carpoolId, command.requestId)
-        );
+                CarpoolRequestDeclinedEvent.newBuilder()
+                        .setCarpoolId(command.carpoolId)
+                        .setRideRequestId(command.requestId)
+                        .setDriverId(this.driverId)
+                        .build());
         raiseEvent(domainEvent);
     }
 
@@ -116,8 +126,12 @@ public class CarpoolAggregate {
         }
 
         CarpoolRequestInvalidatedDomainEvent domainEvent = new CarpoolRequestInvalidatedDomainEvent(
-            new CarpoolRequestInvalidatedEvent(command.carpoolId, command.requestId, command.reason)
-        );
+                CarpoolRequestInvalidatedEvent.newBuilder()
+                        .setCarpoolId(command.carpoolId)
+                        .setRideRequestId(command.requestId)
+                        .setReason(command.reason)
+                        .setDriverId(this.driverId)
+                        .build());
         raiseEvent(domainEvent);
     }
 
