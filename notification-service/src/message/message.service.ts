@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { NotificationService } from 'src/notification/notification.service';
-import { DomainEvent } from './event';
+import { DomainEvent } from './domain-event';
 
 
 @Injectable()

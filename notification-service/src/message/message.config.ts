@@ -1,27 +1,8 @@
-import { DomainEvent } from "src/message/event";
-import { CarpoolMatchedEvent, CarpoolRequestInvalidatedEvent } from "./event/carpool";
-import { RideRequestAcceptedEvent, RideRequestDeclinedEvent, RideRequestFailedEvent, RideRequestMatchedEvent } from "./event/ride-request";
-import { DriverRegistrationApprovedEvent, DriverRegistrationRejectedEvent } from "./event/driver";
-
-enum Topic {
-  USER_REGISTERED="user-registered",
-  
-  DRIVER_REGISTRATION_APPROVED = "driver-registration-approved",
-  DRIVER_REGISTRATION_REJECTED = "driver-registration-rejected",
-  DRIVER_DEREGISTERED = "driver-deregistered",
-
-  CARPOOL_CREATED = "carpool-created",
-  CARPOOL_MATCHED = "carpool-matched",
-  CARPOOL_REQUEST_ACCEPTED = "carpool-request-accepted",
-  CARPOOL_REQUEST_DECLINED = "carpool-request-declined",
-  CARPOOL_REQUEST_INVALIDATED = "carpool-request-invalidated",
-
-  REQUEST_CREATED = "ride-request-created",
-  REQUEST_MATCHED = "ride-request-matched",
-  REQUEST_FAILED = "ride-request-failed",
-  REQUEST_ACCEPTED = "ride-request-accepted",
-  REQUEST_DECLINED = "ride-request-declined",
-}
+import { DomainEvent } from "src/message/domain-event";
+import { CarpoolMatchedDomainEvent, CarpoolRequestInvalidatedDomainEvent } from "./domain-event/carpool";
+import { RideRequestAcceptedDomainEvent, RideRequestDeclinedDomainEvent, RideRequestFailedDomainEvent, RideRequestMatchedDomainEvent } from "./domain-event/ride-request";
+import { DriverRegistrationApprovedDomainEvent, DriverRegistrationRejectedDomainEvent } from "./domain-event/driver";
+import { KafkaTopic } from "src/kafka/topics";
 
 type DomainEventConstructor<T extends DomainEvent = DomainEvent> = new (payload: any) => T;
 
@@ -29,16 +10,16 @@ export const KAFKA_TOPIC_EVENT_MAP: ReadonlyMap<string, DomainEventConstructor> 
   // user events
 
   // driver events
-  [Topic.DRIVER_REGISTRATION_APPROVED, DriverRegistrationApprovedEvent],
-  [Topic.DRIVER_REGISTRATION_REJECTED, DriverRegistrationRejectedEvent],
+  [KafkaTopic.DRIVER_REGISTRATION_APPROVED, DriverRegistrationApprovedDomainEvent],
+  [KafkaTopic.DRIVER_REGISTRATION_REJECTED, DriverRegistrationRejectedDomainEvent],
 
   // carpool events
-  [Topic.CARPOOL_MATCHED, CarpoolMatchedEvent],
-  [Topic.CARPOOL_REQUEST_INVALIDATED, CarpoolRequestInvalidatedEvent],
+  [KafkaTopic.CARPOOL_MATCHED, CarpoolMatchedDomainEvent],
+  [KafkaTopic.CARPOOL_REQUEST_INVALIDATED, CarpoolRequestInvalidatedDomainEvent],
 
   // ride-request events
-  [Topic.REQUEST_ACCEPTED, RideRequestAcceptedEvent],
-  [Topic.REQUEST_DECLINED, RideRequestDeclinedEvent],
-  [Topic.REQUEST_FAILED, RideRequestFailedEvent],
-  [Topic.REQUEST_MATCHED, RideRequestMatchedEvent],
+  [KafkaTopic.REQUEST_ACCEPTED, RideRequestAcceptedDomainEvent],
+  [KafkaTopic.REQUEST_DECLINED, RideRequestDeclinedDomainEvent],
+  [KafkaTopic.REQUEST_FAILED, RideRequestFailedDomainEvent],
+  [KafkaTopic.REQUEST_MATCHED, RideRequestMatchedDomainEvent],
 ]);

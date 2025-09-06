@@ -4,5 +4,5 @@ export type ChatMessageSentEvent = {
   groupChatUsers: string[];
   senderUserId: string;
   message: string;
-  createdAt: Date;
+  createdAt: number; // avro schema timestamp is number in typescript
 }

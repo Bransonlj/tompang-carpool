@@ -31,4 +31,11 @@ export class EventConsumerController {
       }
     }
   }
+
+  @EventPattern(KafkaTopics.Notification.NOTIFICATION_RECEIVED)
+  async handleNotificationReceived(message: Buffer) {
+    const decoded = await this.registry.decode(message);
+    this.logger.log(KafkaTopics.Notification.NOTIFICATION_RECEIVED, decoded);
+    this.eventGateway.sendSocketEvent(this.eventTranslatorService.translateNotificationReceived(decoded));
+  }
 }

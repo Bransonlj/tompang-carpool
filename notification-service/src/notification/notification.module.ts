@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { NotificationRepository } from './notification.repository';
-import { NotificationGateway } from './notification.gateway';
 import { NotificationController } from './notification.controller';
 import { NotificationService } from './notification.service';
+import { SchemaRegistryModule } from 'src/kafka/schema-registry/schema-registry.module';
+import { KafkaProducerModule } from 'src/kafka/kafka-producer/kafka-producer.module';
 
 @Module({
-  providers: [NotificationGateway, NotificationRepository, NotificationService],
+  imports: [SchemaRegistryModule, KafkaProducerModule],
+  providers: [NotificationRepository, NotificationService],
   controllers: [NotificationController],
   exports: [NotificationService],
 })

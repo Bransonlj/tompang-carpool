@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { ChatMessageSentEvent } from "src/common/events/chat-message-sent.event";
 import { SendSocketEventDto, SocketEventName } from "./dto/send-socket-event.dto";
+import { ChatMessageSentEvent, NotificationReceivedEvent } from "src/common/events";
 
 @Injectable()
 export class EventTranslatorService {
@@ -12,9 +12,21 @@ export class EventTranslatorService {
         messageId: payload.messageId,
         groupChatId: payload.groupChatId,
         senderUserId: payload.senderUserId,
-        createdAt: payload.createdAt,
+        createdAt: new Date(payload.createdAt),
         message: payload.message,
       },
     }));
+  }
+
+  translateNotificationReceived(payload: NotificationReceivedEvent): SendSocketEventDto {
+    return {
+      eventName: SocketEventName.NOTIFICATION,
+      targetUserId: payload.userId,
+      payload: {
+        notificationId: payload.notificationId,
+        createdAt: new Date(payload.createdAt),
+        message: payload.message,
+      },
+    }
   }
 }
