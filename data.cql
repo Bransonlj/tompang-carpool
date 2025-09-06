@@ -1,6 +1,6 @@
 -- Create a keyspace
 CREATE KEYSPACE IF NOT EXISTS notifications WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : '1' };
-
+CREATE KEYSPACE chat WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};
 -- Create a table
 
 CREATE TABLE IF NOT EXISTS notifications.user_notifications (
@@ -10,5 +10,7 @@ CREATE TABLE IF NOT EXISTS notifications.user_notifications (
     message text,
     PRIMARY KEY ((user_id), created_at, notification_id)
 );
+
+
 
 -- Insert some data

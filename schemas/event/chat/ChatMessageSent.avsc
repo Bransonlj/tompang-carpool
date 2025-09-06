@@ -1,0 +1,30 @@
+{
+  "type": "record",
+  "namespace": "com.tompang.carpool.event.chat",
+  "name": "ChatMessageSentEvent",
+  "fields": [
+    {
+        "name": "messageId",
+        "type": "string"
+    },
+    {
+      "name": "groupChatId",
+      "type": "string"
+    },
+    {
+      "name": "senderUserId",
+      "type": "string"
+    },
+    {
+      "name": "message",
+      "type": "string"
+    },
+    {
+        "name": "createdAt",
+        "type": {
+          "type": "long",
+          "logicalType": "local-timestamp-millis"
+        }
+    }
+  ]
+}

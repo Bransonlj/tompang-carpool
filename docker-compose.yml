@@ -71,6 +71,23 @@ services:
     volumes:
       - tompang_postgres_carpool_data:/var/lib/postgresql/data
 
+  postgres-chat-service:
+    container_name: tompang-postgres-chat-service
+    image: postgres:latest
+    ports:
+      - 5444:5432
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: chat-service
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d chat-service"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - tompang_postgres_chat_data:/var/lib/postgresql/data
+
   postgres-driver-service:
     container_name: tompang-postgres-driver-service
     image: postgres:latest
@@ -195,6 +212,7 @@ volumes:
   tompang_kurrentdb_logs:
   tompang_postgres_auth_data:
   tompang_postgres_carpool_data:
+  tompang_postgres_chat_data:
   tompang_postgres_driver_data:
   tompang_postgres_profile_data:
   tompang_zookeeper_data:
