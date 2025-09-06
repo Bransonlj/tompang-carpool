@@ -13,6 +13,8 @@ import com.tompang.carpool.chat_service.group.model.UserTitle;
 import com.tompang.carpool.event.carpool.CarpoolCreatedEvent;
 import com.tompang.carpool.event.ride_request.RideRequestAcceptedEvent;
 
+import jakarta.transaction.Transactional;
+
 @Component
 public class GroupChatProjector {
 
@@ -45,6 +47,7 @@ public class GroupChatProjector {
         repository.save(groupChat); // no need to save user because cascade=all
     }
 
+    @Transactional
     @KafkaListener(topics = KafkaTopics.RideRequest.REQUEST_ACCEPTED, groupId = GROUP_ID)
     public void addRiderToGroup(RideRequestAcceptedEvent event) {
         String groupId = event.getCarpoolId(); // group chat id is carpool id

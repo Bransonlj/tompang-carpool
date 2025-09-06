@@ -1,5 +1,7 @@
 package com.tompang.carpool.chat_service.message;
 
+import java.util.List;
+
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,7 @@ public class ChatMessageOrchestrator {
     }
 
     public ChatMessage sendMessage(SendMessageDto dto) {
+        System.out.println(dto);
         GroupChat groupChat = groupChatQueryService.getGroupChatById(dto.getGroupId());
         GroupChatUser sender;
         try {
@@ -39,13 +42,16 @@ public class ChatMessageOrchestrator {
         } catch (EntityNotFoundException exception) {
             throw new BadRequestException("User is not in group");
         }
+        List<String> groupChatUsers = groupChat.getUsers().stream().map(user -> user.getGroupChatUserId().getUserId()).toList();
         ChatMessage createdMessage = chatMessageService.createMessage(sender.getGroupChatUserId().getGroupId(),  sender.getGroupChatUserId().getUserId(), sender.getTitle(), dto.message);
         kafkaTemplate.send(KafkaTopics.Chat.CHAT_MESSAGE_SENT, ChatMessageSentEvent.newBuilder()
                 .setMessageId(createdMessage.getKey().getMessageId().toString())
                 .setGroupChatId(createdMessage.getKey().getGroupId())
+                .setGroupChatUsers(groupChatUsers)
                 .setSenderUserId(createdMessage.getSenderId())
                 .setCreatedAt(createdMessage.getKey().getCreatedAt())
-                .setMessage(createdMessage.getMessage()));
+                .setMessage(createdMessage.getMessage())
+                .build());
         return createdMessage;
     }
 }

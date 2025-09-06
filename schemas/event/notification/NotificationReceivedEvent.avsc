@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "namespace": "com.tompang.carpool.event.notification",
+  "name": "NotificationReceivedEvent",
+  "fields": [
+    {
+        "name": "notificationId",
+        "type": "string"
+    },
+    {
+      "name": "userId",
+      "type": "string"
+    },
+    {
+      "name": "message",
+      "type": "string"
+    },
+    {
+        "name": "createdAt",
+        "type": {
+            "type": "long",
+            "logicalType": "local-timestamp-millis"
+        }
+    }
+  ]
+}

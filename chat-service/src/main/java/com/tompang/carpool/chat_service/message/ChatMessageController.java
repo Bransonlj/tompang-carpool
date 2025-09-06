@@ -4,13 +4,14 @@ import java.net.URI;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tompang.carpool.chat_service.message.dto.SendMessageDto;
 import com.tompang.carpool.chat_service.message.model.ChatMessage;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -23,7 +24,7 @@ public class ChatMessageController {
     }
 
     @PostMapping("send")
-    public ResponseEntity<Void> sendMessage(@RequestBody SendMessageDto dto) {
+    public ResponseEntity<Void> sendMessage(@RequestBody @Valid SendMessageDto dto) {
         ChatMessage createdMessage = this.chatMessageOrchestrator.sendMessage(dto);
         URI location = URI.create("/api/chat/" + createdMessage.getKey().getMessageId());
         return ResponseEntity.created(location).build();

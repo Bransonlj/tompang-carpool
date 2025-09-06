@@ -12,6 +12,13 @@
       "type": "string"
     },
     {
+      "name": "groupChatUsers",
+      "type": {
+        "type": "array",
+        "items": "string"
+      }
+    },
+    {
       "name": "senderUserId",
       "type": "string"
     },
@@ -20,11 +27,11 @@
       "type": "string"
     },
     {
-        "name": "createdAt",
-        "type": {
-          "type": "long",
-          "logicalType": "local-timestamp-millis"
-        }
+      "name": "createdAt",
+      "type": {
+        "type": "long",
+        "logicalType": "local-timestamp-millis"
+      }
     }
   ]
 }
