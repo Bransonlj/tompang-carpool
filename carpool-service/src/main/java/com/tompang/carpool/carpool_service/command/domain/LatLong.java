@@ -29,4 +29,14 @@ public class LatLong {
     public String toString() {
         return String.format("LatLong{latitude=%.6f, longitude=%.6f}", latitude, longitude);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true; // Same object
+        if (obj == null || getClass() != obj.getClass()) return false; // Different type
+
+        LatLong latLong = (LatLong) obj;
+
+        return latitude == latLong.latitude && longitude == latLong.longitude;
+    }
 }

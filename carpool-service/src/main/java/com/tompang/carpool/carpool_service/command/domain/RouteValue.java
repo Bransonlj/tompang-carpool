@@ -29,6 +29,22 @@ public class RouteValue {
     }
 
     public Route toSchemaRoute() {
-        return new Route(new Location(origin.latitude, origin.longitude), new Location(origin.latitude, origin.longitude));
+        return new Route(new Location(origin.latitude, origin.longitude), new Location(destination.latitude, destination.longitude));
+    }
+
+    @Override
+    public String toString() {
+        return String.format("RouteValue{origin=%s, destination=%s}", origin, destination);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true; // Same object
+        if (obj == null || getClass() != obj.getClass()) return false; // Different type
+
+        RouteValue route = (RouteValue) obj;
+
+        return origin != null && origin.equals(route.origin)
+                && destination != null && destination.equals(route.destination);
     }
 }

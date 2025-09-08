@@ -39,6 +39,58 @@ public class RideRequestAggregate {
     // List of new events to be persisted
     private final List<RideRequestEvent> changes = new ArrayList<>();
 
+    public String getId() {
+        return this.id;
+    }
+
+    public String getRiderId() {
+        return this.riderId;
+    }
+
+    public int getPassengers() {
+        return this.passengers;
+    }
+
+    public List<String> getMatchedCarpoolsCopy() {
+        return new ArrayList<>(this.matchedCarpools);
+    }
+
+    public Optional<String> getAssignedCarpool() {
+        return this.assignedCarpool;
+    }
+
+    public LocalDateTime getStartTime() {
+        return this.startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return this.endTime;
+    }
+
+    public RouteValue getRoute() {
+        return this.route;
+    }
+
+    public RideRequestStatus getStatus() {
+        return this.status;
+    }
+
+    /**
+     * Returns whether RideRequest can be assigned a Carpool by checking if the status is Pending.
+     * @return
+     */
+    public boolean canAssign() {
+        return this.status == RideRequestStatus.PENDING; // TODO check assignedCarpool optional?
+    }
+
+    public List<RideRequestEvent> getUncommittedChanges() {
+        return changes;
+    }
+
+    public void clearUncommittedChanges() {
+        changes.clear();
+    }
+
     public static RideRequestAggregate rehydrate(List<RideRequestEvent> history) {
         RideRequestAggregate rideRequest = new RideRequestAggregate();
         for (RideRequestEvent event : history) {
@@ -47,7 +99,17 @@ public class RideRequestAggregate {
         return rideRequest;
     }
 
+    /**
+     * Command to create a ride-request with the specified details.
+     * Throws exception if startTime is after endTime.
+     * @param command
+     * @return
+     */
     public static RideRequestAggregate createRideRequest(CreateRideRequestCommand command) {
+        if (command.startTime.isAfter(command.endTime)) {
+            throw new RuntimeException("invalid timerange: startTime is after endTime");
+        }
+
         RideRequestAggregate rideRequest = new RideRequestAggregate();
         RideRequestCreatedDomainEvent domainEvent = new RideRequestCreatedDomainEvent(
             new RideRequestCreatedEvent(UUID.randomUUID().toString(), command.riderId, command.passengers, 
@@ -61,7 +123,10 @@ public class RideRequestAggregate {
     }
 
     public void matchRideRequest(MatchRideRequestCommand command) {
-        // TODO perform any validation
+        if (assignedCarpool.isPresent()) {
+            throw new RuntimeException("RideRequest already assigned to a Carpool");
+        }
+
         RideRequestMatchedDomainEvent domainEvent = new RideRequestMatchedDomainEvent(
                 RideRequestMatchedEvent.newBuilder()
                         .setRequestId(command.requestId)
@@ -131,38 +196,6 @@ public class RideRequestAggregate {
                         .setRiderId(this.riderId)
                         .build());
         this.raiseEvent(domainEvent);
-    }
-
-    public String getId() {
-        return this.id;
-    }
-
-    public RideRequestStatus getStatus() {
-        return this.status;
-    }
-
-    public int getPassengers() {
-        return this.passengers;
-    }
-
-    public List<String> getMatchedCarpoolsCopy() {
-        return new ArrayList<>(this.matchedCarpools);
-    }
-
-    /**
-     * Returns whether RideRequest can be assigned a Carpool by checking if the status is Pending.
-     * @return
-     */
-    public boolean canAssign() {
-        return this.status == RideRequestStatus.PENDING;
-    }
-
-    public List<RideRequestEvent> getUncommittedChanges() {
-        return changes;
-    }
-
-    public void clearUncommittedChanges() {
-        changes.clear();
     }
     
     // Raise and apply events
