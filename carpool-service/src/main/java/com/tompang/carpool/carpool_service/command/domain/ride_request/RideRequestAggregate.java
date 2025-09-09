@@ -12,6 +12,9 @@ import com.tompang.carpool.carpool_service.command.command.ride_request.CreateRi
 import com.tompang.carpool.carpool_service.command.command.ride_request.FailRideRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.ride_request.MatchRideRequestCommand;
 import com.tompang.carpool.carpool_service.command.domain.RouteValue;
+import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolNotMatchedException;
+import com.tompang.carpool.carpool_service.command.domain.exception.DomainException;
+import com.tompang.carpool.carpool_service.command.domain.exception.RideRequestAlreadyAssignedException;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestAcceptedDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestCreatedDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestDeclineDomainEvent;
@@ -106,9 +109,7 @@ public class RideRequestAggregate {
      * @return
      */
     public static RideRequestAggregate createRideRequest(CreateRideRequestCommand command) {
-        if (command.startTime.isAfter(command.endTime)) {
-            throw new RuntimeException("invalid timerange: startTime is after endTime");
-        }
+        ensureValidTimeRange(command.startTime, command.endTime);
 
         RideRequestAggregate rideRequest = new RideRequestAggregate();
         RideRequestCreatedDomainEvent domainEvent = new RideRequestCreatedDomainEvent(
@@ -123,9 +124,7 @@ public class RideRequestAggregate {
     }
 
     public void matchRideRequest(MatchRideRequestCommand command) {
-        if (assignedCarpool.isPresent()) {
-            throw new RuntimeException("RideRequest already assigned to a Carpool");
-        }
+        ensureNotAssigned();
 
         RideRequestMatchedDomainEvent domainEvent = new RideRequestMatchedDomainEvent(
                 RideRequestMatchedEvent.newBuilder()
@@ -141,13 +140,8 @@ public class RideRequestAggregate {
      * @param command
      */
     public void failRideRequest(FailRideRequestCommand command) {
-        if (!this.matchedCarpools.isEmpty()) {
-            throw new RuntimeException("RideRequest still has pending carpools matched");
-        }
-
-        if (this.assignedCarpool.isPresent()) {
-            throw new RuntimeException("RideRequest already assigned to a Carpool");
-        }
+        ensureHasNoMatches();
+        ensureNotAssigned();
         
         RideRequestFailedDomainEvent domainEvent = new RideRequestFailedDomainEvent(
                 RideRequestFailedEvent.newBuilder()
@@ -163,13 +157,8 @@ public class RideRequestAggregate {
      * @param command
      */
     public void acceptCarpoolRequest(AcceptCarpoolRequestCommand command) {
-        if (!this.matchedCarpools.contains(command.carpoolId)) {
-            throw new RuntimeException("Carpool and RideRequest do not match");
-        }
-
-        if (this.assignedCarpool.isPresent()) {
-            throw new RuntimeException("RideRequest already assigned to a Carpool");
-        }
+        ensureNotAssigned();
+        ensureHasMatchedCarpool(command.carpoolId); 
 
         RideRequestAcceptedDomainEvent domainEvent = new RideRequestAcceptedDomainEvent(
                 RideRequestAcceptedEvent.newBuilder()
@@ -181,14 +170,9 @@ public class RideRequestAggregate {
     }
 
     public void declineCarpoolRequest(DeclineCarpoolRequestCommand command) {
-        if (!this.matchedCarpools.contains(command.carpoolId)) {
-            throw new RuntimeException("Carpool and RideRequest do not match");
-        }
-
-        if (this.assignedCarpool.isPresent()) {
-            throw new RuntimeException("RideRequest already assigned to a Carpool");
-        }
-
+        ensureNotAssigned();
+        ensureHasMatchedCarpool(command.carpoolId);
+        
         RideRequestDeclineDomainEvent domainEvent = new RideRequestDeclineDomainEvent(
                 RideRequestDeclinedEvent.newBuilder()
                         .setRequestId(command.requestId)
@@ -222,6 +206,31 @@ public class RideRequestAggregate {
             this.matchedCarpools.clear(); // clear list of matched carpools
         } else if (event instanceof RideRequestDeclineDomainEvent e) {
             this.matchedCarpools.remove(e.event.getCarpoolId());
+        }
+    }
+
+    // guards
+    private void ensureNotAssigned() {
+        if (this.getAssignedCarpool().isPresent()) {
+            throw new RideRequestAlreadyAssignedException(this.id);
+        }
+    }
+
+    private void ensureHasMatchedCarpool(String carpoolId) {
+        if (!this.matchedCarpools.contains(carpoolId)) {
+            throw new CarpoolNotMatchedException(this.id, carpoolId);
+        }
+    }
+
+    private void ensureHasNoMatches() {
+        if (!this.matchedCarpools.isEmpty()) {
+            throw new DomainException("RideRequest still has pending carpools matched");
+        }
+    }
+
+    private static void ensureValidTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime.isAfter(endTime)) {
+            throw new DomainException("invalid timerange: startTime is after endTime");
         }
     }
 

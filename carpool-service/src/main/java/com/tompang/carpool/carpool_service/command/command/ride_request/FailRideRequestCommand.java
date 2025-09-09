@@ -1,7 +1,9 @@
 package com.tompang.carpool.carpool_service.command.command.ride_request;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 
+@Builder
 @AllArgsConstructor
 public class FailRideRequestCommand {
     public final String requestId;
