@@ -16,4 +16,14 @@ public class StreamId {
     public String toString() {
         return prefix + CONNECTOR_STRING + aggId;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true; // Same object
+        if (obj == null || getClass() != obj.getClass()) return false; // Different type
+
+        StreamId streamId = (StreamId) obj;
+
+        return toString().equals(streamId.toString());
+    }
 }

@@ -17,6 +17,9 @@ import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolM
 import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestAcceptedDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestDeclinedDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestInvalidatedDomainEvent;
+import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestNotMatchedException;
+import com.tompang.carpool.carpool_service.command.domain.exception.DomainException;
+import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestAlreadyAssignedException;
 import com.tompang.carpool.event.carpool.CarpoolCreatedEvent;
 import com.tompang.carpool.event.carpool.CarpoolMatchedEvent;
 import com.tompang.carpool.event.carpool.CarpoolRequestAcceptedEvent;
@@ -60,7 +63,7 @@ public class CarpoolAggregate {
     }
 
     public void matchRequestToCarpool(MatchCarpoolCommand command) {
-        // TODO validate
+        ensureNotAlreadyAssigned(command.requestId);
         CarpoolMatchedDomainEvent domainEvent = new CarpoolMatchedDomainEvent(
                 CarpoolMatchedEvent.newBuilder()
                         .setCarpoolId(command.carpoolId)
@@ -72,17 +75,9 @@ public class CarpoolAggregate {
 
     public void acceptRequestToCarpool(AcceptCarpoolRequestCommand command, int passengers) {
         // validate if got seats
-        if (this.totalSeats < this.seatsAssigned + passengers) {
-            throw new RuntimeException("Not enough seats available");
-        }
-
-        if (!this.pendingRideRequests.contains(command.requestId)) {
-            throw new RuntimeException("Carpool and RideRequest are not matched");
-        }
-
-        if (this.confirmedRideRequests.contains(command.requestId)) {
-            throw new RuntimeException("Carpool already accepted RideRequest");
-        }
+        ensureEnoughSeats(passengers);
+        ensureNotAlreadyAssigned(command.requestId);
+        ensureMatched(command.requestId);
 
         CarpoolRequestAcceptedDomainEvent domainEvent = new CarpoolRequestAcceptedDomainEvent(
                 CarpoolRequestAcceptedEvent.newBuilder()
@@ -95,13 +90,8 @@ public class CarpoolAggregate {
     }
 
     public void declineRequestToCarpool(DeclineCarpoolRequestCommand command) {
-        if (!this.pendingRideRequests.contains(command.requestId)) {
-            throw new RuntimeException("Carpool and RideRequest are not matched");
-        }
-
-        if (this.confirmedRideRequests.contains(command.requestId)) {
-            throw new RuntimeException("Carpool already accepted RideRequest");
-        }
+        ensureNotAlreadyAssigned(command.requestId);
+        ensureMatched(command.requestId);
 
         CarpoolRequestDeclinedDomainEvent domainEvent = new CarpoolRequestDeclinedDomainEvent(
                 CarpoolRequestDeclinedEvent.newBuilder()
@@ -117,13 +107,8 @@ public class CarpoolAggregate {
      * @param command
      */
     public void invalidateRequestToCarpool(InvalidateCarpoolRequestCommand command) {
-        if (!this.pendingRideRequests.contains(command.requestId)) {
-            throw new RuntimeException("Carpool and RideRequest are not matched");
-        }
-
-        if (this.confirmedRideRequests.contains(command.requestId)) {
-            throw new RuntimeException("Carpool already accepted RideRequest");
-        }
+        ensureNotAlreadyAssigned(command.requestId);
+        ensureMatched(command.requestId);
 
         CarpoolRequestInvalidatedDomainEvent domainEvent = new CarpoolRequestInvalidatedDomainEvent(
                 CarpoolRequestInvalidatedEvent.newBuilder()
@@ -137,6 +122,34 @@ public class CarpoolAggregate {
 
     public String getId() {
         return this.id;
+    }
+
+    public String getDriverId() {
+        return this.driverId;
+    }
+
+    public int getTotalSeats() {
+        return this.totalSeats;
+    }
+
+    public int getSeatsAssigned() {
+        return this.seatsAssigned;
+    }
+
+    public LocalDateTime getArrivalTime() {
+        return this.arrivalTime;
+    }
+
+    public RouteValue getRoute() {
+        return this.route;
+    }
+
+    public List<String> getConfirmedRideRequestsCopy() {
+        return new ArrayList<>(this.confirmedRideRequests);
+    }
+
+    public List<String> getPendingRideRequestsCopy() {
+        return new ArrayList<>(this.pendingRideRequests);
     }
 
     public List<CarpoolDomainEvent> getUncommittedChanges() {
@@ -170,6 +183,25 @@ public class CarpoolAggregate {
             this.pendingRideRequests.remove(e.event.getRideRequestId());
         } else if (event instanceof CarpoolRequestInvalidatedDomainEvent e) {
             this.pendingRideRequests.remove(e.event.getRideRequestId());
+        }
+    }
+
+    // guards
+    private void ensureMatched(String requestId) {
+        if (!this.pendingRideRequests.contains(requestId)) {
+            throw new CarpoolAndRideRequestNotMatchedException(requestId, this.id);
+        }
+    }
+
+    private void ensureNotAlreadyAssigned(String requestId) {
+        if (this.confirmedRideRequests.contains(requestId)) {
+            throw new CarpoolAndRideRequestAlreadyAssignedException(requestId, this.id);
+        }
+    }
+
+    private void ensureEnoughSeats(int passengers) {
+        if (this.totalSeats < this.seatsAssigned + passengers) {
+            throw new DomainException("Not enough seats available");
         }
     }
 

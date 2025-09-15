@@ -21,4 +21,15 @@ public class MatchRideRequestCommand {
         this.requestId = requestId;
         this.matchedCarpoolIds = matchedCarpoolIds;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true; // Same object
+        if (obj == null || getClass() != obj.getClass()) return false; // Different type
+
+        MatchRideRequestCommand command = (MatchRideRequestCommand) obj;
+
+        return matchedCarpoolIds != null && matchedCarpoolIds.equals(command.matchedCarpoolIds) 
+            && requestId != null && requestId.equals(command.requestId);
+    }
 }

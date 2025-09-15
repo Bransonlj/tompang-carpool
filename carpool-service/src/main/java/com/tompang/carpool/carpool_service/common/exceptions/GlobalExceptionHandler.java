@@ -14,8 +14,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(DomainException.class)
-    public ResponseEntity<ErrorResponseDto> handleDomainException(
+    @ExceptionHandler({DomainException.class, BadRequestException.class})
+    public ResponseEntity<ErrorResponseDto> handleBadRequestException(
             ResourceNotFoundException ex, HttpServletRequest request) {
         ErrorResponseDto response = new ErrorResponseDto(
                 Instant.now().toString(),

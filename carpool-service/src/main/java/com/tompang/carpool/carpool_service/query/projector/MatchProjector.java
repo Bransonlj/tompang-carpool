@@ -6,6 +6,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import com.tompang.carpool.carpool_service.common.DomainTopics;
+import com.tompang.carpool.carpool_service.common.exceptions.BadRequestException;
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
 import com.tompang.carpool.carpool_service.query.entity.RideRequestStatus;
@@ -91,8 +92,10 @@ public class MatchProjector {
          * We must clear from the owner-side(carpool) of the join relation
          */
         for (Carpool matchedCarpool : request.getMatchedCarpools()) {
-            matchedCarpool.getPendingRideRequests().remove(request);
-            carpoolRepository.save(matchedCarpool);
+            if (!matchedCarpool.equals(carpool)) {
+                matchedCarpool.getPendingRideRequests().remove(request);
+                carpoolRepository.save(matchedCarpool);
+            }
         }
 
         request.getMatchedCarpools().clear(); 
@@ -121,12 +124,18 @@ public class MatchProjector {
         carpoolRepository.save(carpool);
     }
 
+    @Transactional
     @KafkaListener(topics = DomainTopics.Carpool.CARPOOL_REQUEST_INVALIDATED, groupId = "carpool-service-query")
-    public void handleCarpoolInvalidated(CarpoolRequestInvalidatedEvent event) {
+    public void handleCarpoolRequestInvalidated(CarpoolRequestInvalidatedEvent event) {
         RideRequest request = rideRequestRepository.findById(event.getRideRequestId()).orElseThrow();
         Carpool carpool = carpoolRepository.findById(event.getCarpoolId()).orElseThrow();
+        if (request.getAssignedCarpool() != null && request.getAssignedCarpool().equals(carpool)) {
+            throw new BadRequestException("Cannot invalidate carpool request. Carpool is assigned to RideRequest already.");
+        }
         carpool.getPendingRideRequests().remove(request);
+        request.getMatchedCarpools().remove(carpool);
         carpoolRepository.save(carpool);
+        rideRequestRepository.save(request);
     }
 
 }

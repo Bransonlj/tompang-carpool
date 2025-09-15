@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tompang.carpool.carpool_service.command.domain.RouteValue;
 
+import lombok.Builder;
+
+@Builder
 public class CreateCarpoolCommand {
 
     @JsonCreator

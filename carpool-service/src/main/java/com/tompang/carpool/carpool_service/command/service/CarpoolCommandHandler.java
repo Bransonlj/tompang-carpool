@@ -14,6 +14,7 @@ import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolD
 import com.tompang.carpool.carpool_service.command.domain.ride_request.RideRequestAggregate;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestEvent;
 import com.tompang.carpool.carpool_service.command.repository.EventRepository;
+import com.tompang.carpool.carpool_service.common.exceptions.BadRequestException;
 import com.tompang.carpool.carpool_service.common.kurrent.StreamId;
 
 import io.kurrent.dbclient.ReadResult;
@@ -63,7 +64,7 @@ public class CarpoolCommandHandler {
         RideRequestAggregate request = RideRequestAggregate.rehydrate(requestHistory);
 
         if (!request.canAssign()) {
-            throw new RuntimeException("Domain exception, request cannot be assigned to carpool" + request.getId() + request.getStatus());
+            throw new BadRequestException("Request " + request.getId() + " cannot be assigned a carpool, status: " + request.getStatus());
         }
 
         carpool.acceptRequestToCarpool(command, request.getPassengers());

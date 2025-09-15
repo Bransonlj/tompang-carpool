@@ -20,9 +20,9 @@ import com.tompang.carpool.carpool_service.command.command.ride_request.FailRide
 import com.tompang.carpool.carpool_service.command.command.ride_request.MatchRideRequestCommand;
 import com.tompang.carpool.carpool_service.command.domain.LatLong;
 import com.tompang.carpool.carpool_service.command.domain.RouteValue;
-import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolNotMatchedException;
+import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestNotMatchedException;
 import com.tompang.carpool.carpool_service.command.domain.exception.DomainException;
-import com.tompang.carpool.carpool_service.command.domain.exception.RideRequestAlreadyAssignedException;
+import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestAlreadyAssignedException;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestAcceptedDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestCreatedDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestDeclineDomainEvent;
@@ -80,7 +80,7 @@ public class RideRequestAggregateTest {
         }
 
         @Test
-        void shouldThrowDomainExceptionIfStartTimeAfterEndTime() {
+        void shouldThrowDomainException_whenStartTimeAfterEndTime() {
             // arrange
             CreateRideRequestCommand command = CreateRideRequestCommand.builder()
                 .riderId("rider-123")
@@ -128,7 +128,7 @@ public class RideRequestAggregateTest {
         }
 
         @Test
-        void shouldThrowRideRequestAlreadyAssignedExceptionIfAlreadyAssigned() {
+        void shouldThrowRideRequestAlreadyAssignedException_whenAlreadyAssigned() {
             // arrange
             RideRequestAggregate aggregate = RideRequestAggregateFactory.assigned();
 
@@ -139,10 +139,10 @@ public class RideRequestAggregateTest {
                     .build();
             
             // act + assert
-            RideRequestAlreadyAssignedException ex = assertThrows(RideRequestAlreadyAssignedException.class, () -> {
+            CarpoolAndRideRequestAlreadyAssignedException ex = assertThrows(CarpoolAndRideRequestAlreadyAssignedException.class, () -> {
                 aggregate.matchRideRequest(command);
             });
-            assertEquals(new RideRequestAlreadyAssignedException(aggregate.getId()).getMessage(), ex.getMessage());
+            assertEquals(new CarpoolAndRideRequestAlreadyAssignedException(aggregate.getId()).getMessage(), ex.getMessage());
         }
     }
 
@@ -175,7 +175,7 @@ public class RideRequestAggregateTest {
         }
 
         @Test
-        void shouldThrowDomainExceptionIfHasMatchedCarpools() {
+        void shouldThrowDomainException_whenHasMatchedCarpools() {
             // arrange
             RideRequestAggregate aggregate = RideRequestAggregateFactory.matched();
             FailRideRequestCommand command = FailRideRequestCommand.builder()
@@ -191,7 +191,7 @@ public class RideRequestAggregateTest {
         }
 
         @Test
-        void shouldThrowRideRequestAlreadyAssignedExceptionIfAlreadyAssigned() {
+        void shouldThrowRideRequestAlreadyAssignedException_whenAlreadyAssigned() {
             // arrange
             RideRequestAggregate aggregate = RideRequestAggregateFactory.assigned();
             FailRideRequestCommand command = FailRideRequestCommand.builder()
@@ -200,10 +200,10 @@ public class RideRequestAggregateTest {
                     .build();
 
             // act + assert
-            RideRequestAlreadyAssignedException ex = assertThrows(RideRequestAlreadyAssignedException.class, () -> {
+            CarpoolAndRideRequestAlreadyAssignedException ex = assertThrows(CarpoolAndRideRequestAlreadyAssignedException.class, () -> {
                 aggregate.failRideRequest(command);
             });
-            assertEquals(new RideRequestAlreadyAssignedException(aggregate.getId()).getMessage(), ex.getMessage());
+            assertEquals(new CarpoolAndRideRequestAlreadyAssignedException(aggregate.getId()).getMessage(), ex.getMessage());
         }
     }
 
@@ -238,7 +238,7 @@ public class RideRequestAggregateTest {
         }
 
         @Test
-        void shouldThrowCarpoolNotMatchedExceptionIfAcceptedCarpoolNotInMatched() {
+        void shouldThrowCarpoolNotMatchedException_whenAcceptedCarpoolNotInMatched() {
             // arrange
             RideRequestAggregate aggregate = RideRequestAggregateFactory.matched();
             String notMatchedCarpoolId = "not-matched-carpool-123";
@@ -248,14 +248,14 @@ public class RideRequestAggregateTest {
                     .build();
             
             // act + assert
-            CarpoolNotMatchedException ex = assertThrows(CarpoolNotMatchedException.class, () -> {
+            CarpoolAndRideRequestNotMatchedException ex = assertThrows(CarpoolAndRideRequestNotMatchedException.class, () -> {
                 aggregate.acceptCarpoolRequest(command);
             });
-            assertEquals(new CarpoolNotMatchedException(aggregate.getId(), notMatchedCarpoolId).getMessage(), ex.getMessage());
+            assertEquals(new CarpoolAndRideRequestNotMatchedException(aggregate.getId(), notMatchedCarpoolId).getMessage(), ex.getMessage());
         }
 
         @Test
-        void shouldThrowRideRequestAlreadyAssignedExceptionIfAlreadyAssigned() {
+        void shouldThrowRideRequestAlreadyAssignedException_whenAlreadyAssigned() {
             // arrange
             RideRequestAggregate aggregate = RideRequestAggregateFactory.assigned();
             AcceptCarpoolRequestCommand command = AcceptCarpoolRequestCommand.builder()
@@ -264,10 +264,10 @@ public class RideRequestAggregateTest {
                     .build();
 
             // act + assert
-            RideRequestAlreadyAssignedException ex = assertThrows(RideRequestAlreadyAssignedException.class, () -> {
+            CarpoolAndRideRequestAlreadyAssignedException ex = assertThrows(CarpoolAndRideRequestAlreadyAssignedException.class, () -> {
                 aggregate.acceptCarpoolRequest(command);
             });
-            assertEquals(new RideRequestAlreadyAssignedException(aggregate.getId()).getMessage(), ex.getMessage());
+            assertEquals(new CarpoolAndRideRequestAlreadyAssignedException(aggregate.getId()).getMessage(), ex.getMessage());
         
         }
     }
@@ -300,7 +300,7 @@ public class RideRequestAggregateTest {
         }
 
         @Test
-        void shouldThrowRideRequestAlreadyAssignedExceptionIfAlreadyAssigned() {
+        void shouldThrowRideRequestAlreadyAssignedException_whenAlreadyAssigned() {
             // arrange
             RideRequestAggregate aggregate = RideRequestAggregateFactory.assigned();
             DeclineCarpoolRequestCommand command = DeclineCarpoolRequestCommand.builder()
@@ -309,14 +309,14 @@ public class RideRequestAggregateTest {
                     .build();
 
             // act + assert
-            RideRequestAlreadyAssignedException ex = assertThrows(RideRequestAlreadyAssignedException.class, () -> {
+            CarpoolAndRideRequestAlreadyAssignedException ex = assertThrows(CarpoolAndRideRequestAlreadyAssignedException.class, () -> {
                 aggregate.declineCarpoolRequest(command);
             });
-            assertEquals(new RideRequestAlreadyAssignedException(aggregate.getId()).getMessage(), ex.getMessage());
+            assertEquals(new CarpoolAndRideRequestAlreadyAssignedException(aggregate.getId()).getMessage(), ex.getMessage());
         }
 
         @Test
-        void shouldThrowCarpoolNotMatchedExceptionIfAcceptedCarpoolNotInMatched() {
+        void shouldThrowCarpoolNotMatchedException_whenAcceptedCarpoolNotInMatched() {
             // arrange
             RideRequestAggregate aggregate = RideRequestAggregateFactory.matched();
             String notMatchedCarpoolId = "not-matched-carpool-123";
@@ -326,10 +326,10 @@ public class RideRequestAggregateTest {
                     .build();
             
             // act + assert
-            CarpoolNotMatchedException ex = assertThrows(CarpoolNotMatchedException.class, () -> {
+            CarpoolAndRideRequestNotMatchedException ex = assertThrows(CarpoolAndRideRequestNotMatchedException.class, () -> {
                 aggregate.declineCarpoolRequest(command);
             });
-            assertEquals(new CarpoolNotMatchedException(aggregate.getId(), notMatchedCarpoolId).getMessage(), ex.getMessage());
+            assertEquals(new CarpoolAndRideRequestNotMatchedException(aggregate.getId(), notMatchedCarpoolId).getMessage(), ex.getMessage());
         }
     }
 }

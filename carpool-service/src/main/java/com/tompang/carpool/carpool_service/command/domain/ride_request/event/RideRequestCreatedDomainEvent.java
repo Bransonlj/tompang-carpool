@@ -19,4 +19,19 @@ public class RideRequestCreatedDomainEvent implements RideRequestEvent {
         return this.event;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true; // Same object
+        if (obj == null || getClass() != obj.getClass()) return false; // Different type
+
+        RideRequestCreatedDomainEvent domainEvent = (RideRequestCreatedDomainEvent) obj;
+
+        return domainEvent != null && event.equals(domainEvent.event);
+    }
+
+    @Override
+    public int hashCode() {
+        return event.hashCode();
+    }
+
 }

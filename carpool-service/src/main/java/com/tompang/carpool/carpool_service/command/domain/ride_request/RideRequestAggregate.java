@@ -12,9 +12,9 @@ import com.tompang.carpool.carpool_service.command.command.ride_request.CreateRi
 import com.tompang.carpool.carpool_service.command.command.ride_request.FailRideRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.ride_request.MatchRideRequestCommand;
 import com.tompang.carpool.carpool_service.command.domain.RouteValue;
-import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolNotMatchedException;
+import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestNotMatchedException;
 import com.tompang.carpool.carpool_service.command.domain.exception.DomainException;
-import com.tompang.carpool.carpool_service.command.domain.exception.RideRequestAlreadyAssignedException;
+import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestAlreadyAssignedException;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestAcceptedDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestCreatedDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.ride_request.event.RideRequestDeclineDomainEvent;
@@ -212,13 +212,13 @@ public class RideRequestAggregate {
     // guards
     private void ensureNotAssigned() {
         if (this.getAssignedCarpool().isPresent()) {
-            throw new RideRequestAlreadyAssignedException(this.id);
+            throw new CarpoolAndRideRequestAlreadyAssignedException(this.id);
         }
     }
 
     private void ensureHasMatchedCarpool(String carpoolId) {
         if (!this.matchedCarpools.contains(carpoolId)) {
-            throw new CarpoolNotMatchedException(this.id, carpoolId);
+            throw new CarpoolAndRideRequestNotMatchedException(this.id, carpoolId);
         }
     }
 
