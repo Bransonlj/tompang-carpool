@@ -136,6 +136,10 @@ public class CarpoolAggregate {
         return this.seatsAssigned;
     }
 
+    public int getAvailableSeats() {
+        return this.totalSeats = this.seatsAssigned;
+    }
+
     public LocalDateTime getArrivalTime() {
         return this.arrivalTime;
     }
