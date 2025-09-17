@@ -2,6 +2,8 @@ package com.tompang.carpool.carpool_service.command.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.tompang.carpool.carpool_service.command.command.carpool.AcceptCarpoolRequestCommand;
@@ -22,6 +24,7 @@ import io.kurrent.dbclient.ReadResult;
 @Service
 public class CarpoolCommandHandler {
 
+    private final Logger logger = LoggerFactory.getLogger(CarpoolCommandHandler.class);
     private final EventRepository repository;
     private final KafkaProducerService kafkaProducerService;
 
@@ -31,6 +34,7 @@ public class CarpoolCommandHandler {
     }
 
     public String handleCreateCarpool(CreateCarpoolCommand command) {
+        logger.info("Command executed: " + command);
         CarpoolAggregate carpool = CarpoolAggregate.createCarpool(command);
         repository.appendEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, carpool.getId()), carpool.getUncommittedChanges());
         kafkaProducerService.publishDomainEvents(carpool.getUncommittedChanges());
@@ -38,6 +42,7 @@ public class CarpoolCommandHandler {
     }
 
     public void handleMatchCarpool(MatchCarpoolCommand command) {
+        logger.info("Command executed: " + command);
         ReadResult readResult = repository.readEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, command.carpoolId));
         List<CarpoolDomainEvent> events = repository.deserializeEvents(readResult.getEvents());
         CarpoolAggregate carpool = CarpoolAggregate.rehydrate(events);
@@ -54,6 +59,7 @@ public class CarpoolCommandHandler {
      * @param command
      */
     public void handleAcceptCarpoolRequest(AcceptCarpoolRequestCommand command) {
+        logger.info("Command executed: " + command);
         ReadResult carpoolReadResult = repository.readEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, command.carpoolId));
         ReadResult requestReadResult = repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId));
 
@@ -80,6 +86,7 @@ public class CarpoolCommandHandler {
     }
 
     public void handleDeclineCarpoolRequest(DeclineCarpoolRequestCommand command) {
+        logger.info("Command executed: " + command);
         ReadResult carpoolReadResult = repository.readEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, command.carpoolId));
         ReadResult requestReadResult = repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId));
 
@@ -102,6 +109,7 @@ public class CarpoolCommandHandler {
     }
 
     public void handleInvalidateCarpoolRequest(InvalidateCarpoolRequestCommand command) {
+        logger.info("Command executed: " + command);
         ReadResult carpoolReadResult = repository.readEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, command.carpoolId));
         List<CarpoolDomainEvent> carpoolHistory = repository.deserializeEvents(carpoolReadResult.getEvents());
         CarpoolAggregate carpool = CarpoolAggregate.rehydrate(carpoolHistory);

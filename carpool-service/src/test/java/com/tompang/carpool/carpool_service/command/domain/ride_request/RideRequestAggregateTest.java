@@ -215,6 +215,8 @@ public class RideRequestAggregateTest {
             // arrange
             RideRequestAggregate aggregate = RideRequestAggregateFactory.matched();
             String acceptedCarpooId = aggregate.getMatchedCarpoolsCopy().get(0);
+            List<String> leftoverCarpoolIds = aggregate.getMatchedCarpoolsCopy();
+            leftoverCarpoolIds.remove(acceptedCarpooId);
             AcceptCarpoolRequestCommand command = AcceptCarpoolRequestCommand.builder()
                     .carpoolId(acceptedCarpooId)
                     .requestId(aggregate.getId())
@@ -233,6 +235,7 @@ public class RideRequestAggregateTest {
                     .setRequestId(aggregate.getId())
                     .setCarpoolId(acceptedCarpooId)
                     .setRiderId(aggregate.getRiderId())
+                    .setLeftoverCarpoolIds(leftoverCarpoolIds)
                     .build();
             assertEquals(expectedEvent, aggregate.getUncommittedChanges().get(0).getEvent());
         }
@@ -273,7 +276,7 @@ public class RideRequestAggregateTest {
     }
     
     @Nested
-    @DisplayName("Tests for acceptCarpoolRequest()")
+    @DisplayName("Tests for declineCarpoolRequest()")
     class DeclineCarpoolRequestTests {
         @Test
         void shouldUpdateAggregateAndRaiseRideRequestDeclineDomainEvent() {

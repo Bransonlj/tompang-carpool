@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Builder;
+import lombok.ToString;
 
 @Builder
+@ToString
 public class DeclineCarpoolRequestCommand {
     public final String carpoolId;
     public final String requestId;

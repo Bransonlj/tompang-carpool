@@ -153,17 +153,20 @@ public class RideRequestAggregate {
     }
 
     /**
-     * raises RideRequestAcceptedEvent
+     * raises RideRequestAcceptedEvent, with leftoverCarpoolIds: a list of matched carpools except the accepted carpool
      * @param command
      */
     public void acceptCarpoolRequest(AcceptCarpoolRequestCommand command) {
         ensureNotAssigned();
         ensureHasMatchedCarpool(command.carpoolId); 
 
+        List<String> leftoverCarpools = this.getMatchedCarpoolsCopy();
+        leftoverCarpools.remove(command.carpoolId);
         RideRequestAcceptedDomainEvent domainEvent = new RideRequestAcceptedDomainEvent(
                 RideRequestAcceptedEvent.newBuilder()
                         .setRequestId(command.requestId)
                         .setCarpoolId(command.carpoolId)
+                        .setLeftoverCarpoolIds(leftoverCarpools)
                         .setRiderId(this.riderId).build()
         );
         this.raiseEvent(domainEvent);
@@ -201,9 +204,9 @@ public class RideRequestAggregate {
         } else if (event instanceof RideRequestFailedDomainEvent) {
             this.status = RideRequestStatus.FAILED;
         } else if (event instanceof RideRequestAcceptedDomainEvent e) {
+            this.matchedCarpools.clear(); // clear matched carpools & and assign accepted carpool
             this.assignedCarpool = Optional.of(e.event.getCarpoolId());
             this.status = RideRequestStatus.ASSIGNED;
-            this.matchedCarpools.clear(); // clear list of matched carpools
         } else if (event instanceof RideRequestDeclineDomainEvent e) {
             this.matchedCarpools.remove(e.event.getCarpoolId());
         }

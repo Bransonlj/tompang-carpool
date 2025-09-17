@@ -158,38 +158,16 @@ public class RideRequestProcessManagerTest {
     @DisplayName("tests for handleRideRequestAccepted()")
     class HandleRideRequestAcceptedTests {
 
-        private RideRequestAcceptedEvent event;
-        private List<RideRequestEvent> oldEvents;
-        private List<String> matchedCarpools;
-        private RideRequestAggregate stubAggregate;
-
-        @BeforeEach
-        void setUp() {
-            matchedCarpools = List.of("carpool-1", "carpool-2", "carpool-3");
-            event = RideRequestAcceptedEvent.newBuilder()
+        @Test
+        void shouldInvokeInvalidateCarpoolRequestCommandForLeftoverCarpools() {
+                // Arrange
+                List<String> matchedCarpools = List.of("carpool-1", "carpool-2", "carpool-3");
+                RideRequestAcceptedEvent event = RideRequestAcceptedEvent.newBuilder()
                     .setRequestId("request-1")
                     .setCarpoolId(matchedCarpools.get(0))
+                    .setLeftoverCarpoolIds(List.of(matchedCarpools.get(1), matchedCarpools.get(2)))
                     .setRiderId("rider-1")
-                    .build();
-            // stub repository returned ReadResult & events
-            ReadResult stubReadResult = mock(ReadResult.class);
-            when(eventRepository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, event.getRequestId())))
-                    .thenReturn(stubReadResult);
-            when(stubReadResult.getEvents()).thenReturn(null);
-            when(eventRepository.deserializeEvents(any())).thenAnswer(invocation -> oldEvents);
-
-            // stub aggregate with fixed ID + fake events
-            stubAggregate = mock(RideRequestAggregate.class);
-            when(stubAggregate.getMatchedCarpoolsCopy()).thenReturn(matchedCarpools); 
-        }
-
-        @Test
-        void shouldInvokeInvalidateCarpoolRequestCommandForAllOtherCarpools() {
-            try (MockedStatic<RideRequestAggregate> mockedStatic = mockStatic(RideRequestAggregate.class)) {
-                // Arrange: stub static factory
-                mockedStatic.when(() -> RideRequestAggregate.rehydrate(oldEvents))
-                        .thenReturn(stubAggregate);
-
+                    .build();;
                 // act
                 processManager.handleRideRequestAccepted(event);
 
@@ -208,7 +186,6 @@ public class RideRequestProcessManagerTest {
                                 event.getRequestId(),
                                 "RideRequest has been accepted by another Carpool"))
                 );
-            }
         }
     }
 

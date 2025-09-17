@@ -5,12 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Command to invalidate a request to a carpool.
  */
 @EqualsAndHashCode
 @Builder
+@ToString
 public class InvalidateCarpoolRequestCommand {
     public final String carpoolId;
     public final String requestId;

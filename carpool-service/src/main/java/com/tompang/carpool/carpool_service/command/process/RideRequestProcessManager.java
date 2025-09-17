@@ -81,24 +81,22 @@ public class RideRequestProcessManager {
 
     /**
      * When a request is accepted by a carpool, the commands invoked by the aggregates produce a REQUEST_ACCEPTED and CARPOOL_REQUEST_ACCEPTED event.
-     * Both of these event can be used to trigger this process, but we shall just use REQUEST_ACCEPTED.
+     * Both of these event can be used to trigger this process, but we shall just use REQUEST_ACCEPTED as it contains the ids of the leftover carpools to invalidate.
      * The process will then call an InvalidateCarpoolRequestCommand to all other carpools matched with that request.
      * @param event
      */
     @KafkaListener(topics = DomainTopics.RideRequest.REQUEST_ACCEPTED, groupId = "carpool-service-consumer")
     public void handleRideRequestAccepted(RideRequestAcceptedEvent event) {
-        ReadResult readResult = eventRepository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, event.getRequestId()));
-        List<RideRequestEvent> history = eventRepository.deserializeEvents(readResult.getEvents());
-        RideRequestAggregate request = RideRequestAggregate.rehydrate(history);
-        for (String carpoolId : request.getMatchedCarpoolsCopy()) {
-            // invoke command for each carpool that is not the accepted carpool
-            if (!carpoolId.equals(event.getCarpoolId())) {
+        for (String carpoolId : event.getLeftoverCarpoolIds()) {
+            try {
                 carpoolCommandHandler.handleInvalidateCarpoolRequest(
                     new InvalidateCarpoolRequestCommand(carpoolId, event.getRequestId(), "RideRequest has been accepted by another Carpool")
                 );
+            } catch (Exception exception) {
+                logger.error(carpoolId, exception);
             }
-        }
 
+        }
     }
 
     /**
