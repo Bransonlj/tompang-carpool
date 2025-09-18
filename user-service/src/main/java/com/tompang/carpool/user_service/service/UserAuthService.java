@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.tompang.carpool.user_service.dto.LoginResponseDto;
 import com.tompang.carpool.user_service.dto.RegisterRequestDto;
@@ -14,6 +15,7 @@ import com.tompang.carpool.user_service.model.User;
 import com.tompang.carpool.user_service.model.UserRole;
 import com.tompang.carpool.user_service.repository.UserRepository;
 
+@Service
 public class UserAuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;

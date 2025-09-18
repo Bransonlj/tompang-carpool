@@ -38,21 +38,21 @@ services:
       CQLSH_PORT: 9042
 
   postgres-auth-service:
-    container_name: tompang-postgres-auth-service
+    container_name: tompang-postgres-user-service
     image: postgres:latest
     ports:
       - 5441:5432
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: auth-service
+      POSTGRES_DB: user-service
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d auth-service"]
+      test: ["CMD-SHELL", "pg_isready -U user -d user-service"]
       interval: 10s
       timeout: 5s
       retries: 3
     volumes:
-      - tompang_postgres_auth_data:/var/lib/postgresql/data
+      - tompang_postgres_user_data:/var/lib/postgresql/data
 
   postgres-carpool-service:
     container_name: tompang-postgres-carpool-service
@@ -104,23 +104,6 @@ services:
       retries: 3
     volumes:
       - tompang_postgres_driver_data:/var/lib/postgresql/data
-
-  postgres-profile-service:
-    container_name: tompang-postgres-profile-service
-    image: postgres:latest
-    ports:
-      - 5442:5432
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: profile-service
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d profile-service"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    volumes:
-      - tompang_postgres_profile_data:/var/lib/postgresql/data
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -210,11 +193,10 @@ volumes:
   tompang_kurrentdb_data:
   tompang_cassandra_data:
   tompang_kurrentdb_logs:
-  tompang_postgres_auth_data:
+  tompang_postgres_user_data:
   tompang_postgres_carpool_data:
   tompang_postgres_chat_data:
   tompang_postgres_driver_data:
-  tompang_postgres_profile_data:
   tompang_zookeeper_data:
   tompang_zookeeper_log:
   tompang_kafka_data:

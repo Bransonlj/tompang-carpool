@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Configuration;
 public class RouteConfig {
 
         @Bean
-        public RouteLocator authServiceRoute(RouteLocatorBuilder builder) {
+        public RouteLocator userServiceRoute(RouteLocatorBuilder builder) {
                 return builder.routes()
-                        .route("auth-service", r -> 
-                                r.path("/api/auth/**")
+                        .route("user-service", r -> 
+                                r.path("/api/user/**")
                                 .uri("http://localhost:4002"))
                         .build();
         }
@@ -45,9 +45,9 @@ public class RouteConfig {
         }
 
         @Bean
-        public RouteLocator notificationServiceRoute(RouteLocatorBuilder builder) {
+        public RouteLocator websocketServiceRoute(RouteLocatorBuilder builder) {
                 return builder.routes()
-                        .route("notification-service", r -> 
+                        .route("websocket-service", r -> 
                                 r.path("/socket.io/**")
                                 .uri("http://localhost:4100"))
                         .build();

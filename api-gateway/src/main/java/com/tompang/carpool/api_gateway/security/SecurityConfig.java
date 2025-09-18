@@ -24,8 +24,9 @@ public class SecurityConfig {
     return http
       .csrf(csrf -> csrf.disable())
       .authorizeExchange(auth -> auth
-          .pathMatchers("/api/auth/public/**").permitAll()
-          .pathMatchers("/api/auth/admin/**").hasRole("ADMIN")  // only admins
+          .pathMatchers("/api/user/auth/public/**").permitAll()
+          .pathMatchers("/api/user/auth/admin/**").hasRole("ADMIN") // only admins
+          .pathMatchers("/api/user/profile/**").hasAnyRole("USER", "ADMIN")
           .pathMatchers("/api/driver/admin/**").hasAnyRole("ADMIN")
           .pathMatchers("/socket.io/**").hasAnyRole("USER", "ADMIN")
           .anyExchange().hasRole("USER")
