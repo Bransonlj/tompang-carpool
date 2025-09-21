@@ -1,0 +1,43 @@
+title Create & Match Ride Request
+
+actor RiderUser
+
+participantgroup Command
+participant RideRequestCommandController
+participant CarpoolCommandHandler
+participant RideRequestCommandHandler
+participant RideRequestProcessManager
+participant RideRequestAggregate
+participant EventRepository
+end
+rparticipant Kafka
+
+participantgroup Query
+participant CarpoolQueryService
+participant RideRequestProjector
+participant RideRequestQueryRepository
+end
+
+
+RiderUser->RideRequestCommandController:create(CreateRideRequestCommand)
+RideRequestCommandController->RideRequestCommandHandler:handleCreateRideRequest(CreateRideRequestCommand)
+RideRequestCommandHandler->RideRequestAggregate:createRideRequest(CreateRideRequestCommand)
+RideRequestCommandHandler<--RideRequestAggregate:rideRequestAggregate
+RideRequestCommandHandler->EventRepository:appendEvents(RideRequestCreatedEvent)
+RideRequestCommandHandler->Kafka:RideRequestCreatedEvent
+RideRequestCommandController<--RideRequestCommandHandler:rideRequestAggregate.getId()
+destroy RideRequestAggregate
+Kafka->RideRequestProjector:handleRideRequestCreated(RideRequestCreatedEvent)
+RideRequestProjector->RideRequestQueryRepository:save(RideRequest)
+RideRequestProcessManager<-Kafka:handleRideRequestCreated(RideRequestCreatedEvent)
+RideRequestProcessManager->CarpoolQueryService:getCarpoolsByRouteInRangeWithSeats()
+RideRequestProcessManager<--CarpoolQueryService:matchingCarpools: List<Carpool>
+alt exception || matchingCarpools.isEmpty()
+RideRequestCommandHandler<-RideRequestProcessManager:handleFailRideRequest(FailRideRequestCommand)
+else 
+
+loop for carpool in matchingCarpools
+CarpoolCommandHandler<-RideRequestProcessManager:handleMatchCarpool(MatchCarpoolCommand)
+end
+RideRequestCommandHandler<-RideRequestProcessManager:handleMatchRideRequest(MatchRideRequestCommand)
+end

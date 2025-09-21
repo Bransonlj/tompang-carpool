@@ -1,0 +1,27 @@
+title Create Carpool
+
+actor DriverUser
+
+participantgroup Command
+participant CarpoolCommandController
+participant CarpoolCommandHandler
+participant CarpoolAggregate
+participant EventRepository
+end
+rparticipant Kafka
+
+participantgroup Query
+participant CarpoolProjector
+participant CarpoolQueryRepository
+end
+
+DriverUser->CarpoolCommandController:create(CreateCarpoolCommand)
+CarpoolCommandController->CarpoolCommandHandler:handleCreateCarpool(CreateCarpoolCommand)
+CarpoolCommandHandler->CarpoolAggregate:createCarpool(CreateCarpoolCommand)
+CarpoolCommandHandler<-CarpoolAggregate:carpoolAggregate
+CarpoolCommandHandler->EventRepository:appendEvents(CarpoolCreatedEvent)
+CarpoolCommandHandler->Kafka:CarpoolCreatedEvent
+CarpoolCommandController<--CarpoolCommandHandler:carpoolAggregate.getId()
+
+Kafka->CarpoolProjector:handleCarpoolCreated(CarpoolCreatedEvent)
+CarpoolProjector->CarpoolQueryRepository:save(Carpool)

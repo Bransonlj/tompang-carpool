@@ -1,0 +1,37 @@
+title Handle Match Ride Request
+
+participantgroup Command
+participant RideRequestProcessManager
+participant RideRequestCommandHandler
+participant RideRequestAggregate
+participant EventRepository
+end
+rparticipant Kafka
+
+participantgroup Query
+participant MatchProjector
+participant CarpoolQueryRepository
+participant RideRequestQueryRepository
+end
+RideRequestProcessManager->RideRequestCommandHandler:handleMatchRideRequest(MatchRideRequestCommand)
+RideRequestCommandHandler->EventRepository:readEvents("ride-request", id)
+RideRequestCommandHandler<--EventRepository:events: List<RideRequestDomainEvent>
+RideRequestCommandHandler->RideRequestAggregate:rehydrate(events)
+RideRequestCommandHandler<--RideRequestAggregate:rideRequestAggregate
+RideRequestCommandHandler->RideRequestAggregate:matchRideRequest(MatchRideRequestCommand)
+RideRequestCommandHandler->RideRequestAggregate:getUncommittedChanges()
+RideRequestCommandHandler<--RideRequestAggregate:RideRequestMatchedEvent
+destroy RideRequestAggregate
+RideRequestCommandHandler->EventRepository:appendEvents(RideRequestMatchedEvent)
+RideRequestCommandHandler->Kafka:RideRequestMatchedEvent
+Kafka->MatchProjector:RideRequestMatchedEvent
+MatchProjector->RideRequestQueryRepository:findById(requestId)
+MatchProjector<--RideRequestQueryRepository:rideRequest
+loop for carpool in event.matchedCarpools
+MatchProjector->CarpoolQueryRepository:findById(carpool.id)
+MatchProjector<--CarpoolQueryRepository:carpool
+MatchProjector->MatchProjector:matchRequestAndCarpoolTogether(carpool, rideRequest)
+note right of MatchProjector:only matched if not already matched
+MatchProjector->CarpoolQueryRepository:save(carpool)
+end
+MatchProjector->RideRequestQueryRepository:save(rideRequest)

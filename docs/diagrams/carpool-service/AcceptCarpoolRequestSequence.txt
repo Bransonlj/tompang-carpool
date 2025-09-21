@@ -1,0 +1,62 @@
+title Accept Carpool Request
+
+actor DriverUser
+
+participantgroup Command
+participant CarpoolCommandController
+participant RideRequestProcessManager
+participant CarpoolCommandHandler
+participant CarpoolAggregate
+participant RideRequestAggregate
+participant EventRepository
+end
+rparticipant Kafka
+
+participantgroup Query
+participant MatchProjector
+participant CarpoolQueryRepository
+participant RideRequestQueryRepository
+end
+DriverUser->CarpoolCommandController:acceptRequest\n(AcceptCarpool-\nRequestCommand)
+CarpoolCommandController->CarpoolCommandHandler:handleAcceptCarpoolRequest\n(AcceptCarpoolRequestCommand)
+
+CarpoolCommandHandler->EventRepository:readEvents("ride-request", id)
+CarpoolCommandHandler<--EventRepository:events: List<RideRequestDomainEvent>
+CarpoolCommandHandler->EventRepository:readEvents("carpool", id)
+CarpoolCommandHandler<--EventRepository:events: List<CarpoolDomainEvent>
+CarpoolCommandHandler->RideRequestAggregate:rehydrate(events)
+CarpoolCommandHandler<--RideRequestAggregate:rideRequestAggregate
+CarpoolCommandHandler->CarpoolAggregate:rehydrate(events)
+CarpoolCommandHandler<--CarpoolAggregate:carpoolAggregate
+alt if !rideRequestAggregate.canAssign()
+CarpoolCommandController<-CarpoolCommandHandler:throw BadRequestException
+DriverUser<-CarpoolCommandController:400 Bad Request
+else 
+
+CarpoolCommandHandler->CarpoolAggregate:acceptRequestToCarpool\n(AcceptCarpoolRequestCommand)
+CarpoolCommandHandler->RideRequestAggregate:acceptCarpoolRequest(AcceptCarpoolRequestCommand)
+CarpoolCommandHandler->CarpoolAggregate:getUncommittedChanges()
+CarpoolCommandHandler<--CarpoolAggregate:CarpoolRequestAcceptedEvent
+CarpoolCommandHandler->RideRequestAggregate:getUncommittedChanges()
+CarpoolCommandHandler<--RideRequestAggregate:RideRequestAcceptedEvent
+destroy CarpoolAggregate
+destroy RideRequestAggregate
+CarpoolCommandHandler->EventRepository:appendEvents(CarpoolRequestAcceptedEvent, RideRequestAcceptedEvent)
+CarpoolCommandHandler->Kafka:CarpoolRequestAcceptedEvent, RideRequestAcceptedEvent
+end
+Kafka->MatchProjector:RideRequest-\nAcceptedEvent
+MatchProjector->CarpoolQueryRepository:findById(id)
+MatchProjector<--CarpoolQueryRepository:carpool
+MatchProjector->RideRequestQueryRepository:findById(id)
+MatchProjector<--RideRequestQueryRepository:rideRequest
+loop for mc in request.getMatchedCarpools()
+MatchProjector->MatchProjector:remove rideRequest from \nmc.pendingRideRequests
+MatchProjector->CarpoolQueryRepository:save(mc)
+end
+MatchProjector->MatchProjector:update rideRequest\nand carpool
+MatchProjector->RideRequestQueryRepository:save(rideRequest)
+MatchProjector->CarpoolQueryRepository:save(carpool)
+RideRequestProcessManager<-Kafka:RideRequestAcceptedEvent
+loop for carpoolId in event.leftoverCarpoolIds
+RideRequestProcessManager->CarpoolCommandHandler:handleInvalidateCarpoolRequest\n(InvalidateCarpoolRequestCommand)
+end

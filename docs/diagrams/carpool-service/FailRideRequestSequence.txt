@@ -1,0 +1,30 @@
+title Fail Ride Request
+
+participantgroup Command
+participant RideRequestProcessManager
+participant RideRequestCommandHandler
+participant RideRequestAggregate
+participant EventRepository
+end
+rparticipant Kafka
+
+participantgroup Query
+participant RideRequestProjector
+participant RideRequestQueryRepository
+end
+RideRequestProcessManager->RideRequestCommandHandler:handleFailRideRequest(FailRideRequestCommand)
+RideRequestCommandHandler->EventRepository:readEvents("ride-request", id)
+RideRequestCommandHandler<--EventRepository:events: List<RideRequestDomainEvent>
+RideRequestCommandHandler->RideRequestAggregate:rehydrate(events)
+RideRequestCommandHandler<--RideRequestAggregate:rideRequestAggregate
+RideRequestCommandHandler->RideRequestAggregate:failRideRequest(FailRideRequestCommand)
+RideRequestCommandHandler->RideRequestAggregate:getUncommittedChanges()
+RideRequestCommandHandler<--RideRequestAggregate:RideRequestFailedEvent
+destroy RideRequestAggregate
+RideRequestCommandHandler->EventRepository:appendEvents(RideRequestFailedEvent)
+RideRequestCommandHandler->Kafka:RideRequestFailedEvent
+Kafka->RideRequestProjector:RideRequestFailedEvent
+RideRequestProjector->RideRequestQueryRepository:findById(requestId)
+RideRequestProjector<--RideRequestQueryRepository:rideRequest
+RideRequestProjector->RideRequestProjector:rideRequest.setStatus(FAILED)
+RideRequestProjector->RideRequestQueryRepository:save(rideRequest)
