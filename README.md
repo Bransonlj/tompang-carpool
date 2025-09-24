@@ -61,7 +61,11 @@ When the `CreateCarpoolCommand` is invoked, the command handler creates a `Carpo
 
 ![Create and Match RideRequest Sequence Diagram](./docs/diagrams/carpool-service/CreateAndMatchRideRequestSequence.png)
 
-When the `CreateRideRequestCommand` is invoked, the command handler creates a `RideRequestAggregate` using the command. The aggregate raises the `RideRequestCreatedEvent` which is appended to the event repository and published to Kafka. On the Query side, the projector consumes this events and updates the query view database accordingly. The `RideRequestProcessManager` also consumes this event and is responsible for matching the ride request with suitable carpools after it is created. It queries the `CarpoolQueryService` on the query side to find matching carpools based on  the ride request details like timerange & route. If no matching carpools are found, the ride request is marked as failed by invoking the `FailRideRequestCommand`. Else, for each matching carpool, the `MatchCarpoolCommand` is invoked between that carpool and the ride request. Finally the `MatchRideRequestCommand` is also invoked for the ride request.
+When the `CreateRideRequestCommand` is invoked, the command handler creates a `RideRequestAggregate` using the command. The aggregate raises the `RideRequestCreatedEvent` which is appended to the event repository and published to Kafka. On the Query side, the projector consumes this events and updates the query view database accordingly. 
+
+The `RideRequestProcessManager` also consumes this event and is responsible for matching the ride request with suitable carpools after it is created. It queries the `CarpoolQueryService` on the query side to find matching carpools based on  the ride request details like timerange & route. If no matching carpools are found, the ride request is marked as failed by invoking the `FailRideRequestCommand`. Else, for each matching carpool, the `MatchCarpoolCommand` is invoked between that carpool and the ride request. Finally the `MatchRideRequestCommand` is also invoked for the ride request.
+
+`RideRequestProcessManager` queries from `CarpoolQueryService` despite having to cross the command-query boundary because it is too costly to rehydrate all carpools in order to find matches to the created Ride Request. Therefore we query from the query-side projection to find matches, which is only eventually consistent but sufficient for this purpose.
 
 ### Handle MatchCarpoolCommand
 

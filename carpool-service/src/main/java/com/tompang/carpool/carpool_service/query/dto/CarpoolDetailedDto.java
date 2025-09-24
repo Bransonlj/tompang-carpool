@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 public class CarpoolDetailedDto extends CarpoolSummaryDto {
-    public final List<RideRequestSummaryDto> pendingRequets;
+    public final List<RideRequestSummaryDto> pendingRequests;
     public final List<RideRequestSummaryDto> confirmedRequests;
 
     public static CarpoolDetailedDto fromEntity(Carpool carpool) {
@@ -20,7 +20,7 @@ public class CarpoolDetailedDto extends CarpoolSummaryDto {
                 .driverId(carpool.getDriverId())
                 .arrivalTime(carpool.getArrivalTime())
                 .route(new RouteDto(carpool.getOrigin(), carpool.getDestination(), carpool.getOriginEventualAddress(), carpool.getDestinationEventualAddress()))
-                .pendingRequets(carpool.getPendingRideRequests().stream()
+                .pendingRequests(carpool.getPendingRideRequests().stream()
                     .map(request -> RideRequestSummaryDto.fromEntity(request)).toList())
                 .confirmedRequests(carpool.getConfirmedRideRequests().stream()
                     .map(request -> RideRequestSummaryDto.fromEntity(request)).toList())   
