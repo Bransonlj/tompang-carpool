@@ -1,6 +1,4 @@
-import Avatar, { type AvatarProps, type AvatarTypeMap } from "@mui/material/Avatar";
-import type { OverridableComponent } from "@mui/material/OverridableComponent";
-import type { PropsWithoutRef } from "react";
+import Avatar, { type AvatarProps } from "@mui/material/Avatar";
 
 function stringToColor(string: string) {
   let hash = 0;

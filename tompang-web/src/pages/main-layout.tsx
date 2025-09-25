@@ -38,7 +38,7 @@ function HideOnScroll(props: Props) {
 export default function MainLayout(props: Props) {
 
   const navigate = useNavigate();
-  const { isAuthenticated, currentUserId, logout } = useAuth();
+  const { isAuthenticated, authToken, currentUserId, logout } = useAuth();
 
   return (
     <div className='flex flex-col h-full'>
@@ -61,7 +61,7 @@ export default function MainLayout(props: Props) {
             <div>
               {
                 isAuthenticated 
-                  ? <ToolbarProfile userId={currentUserId} onLogout={logout} /> 
+                  ? <ToolbarProfile userId={currentUserId} token={authToken} onLogout={logout} /> 
                   : <ButtonGroup variant="contained" color="info">
                     <Button onClick={() => navigate("/auth/login")}>Login</Button>
                     <Button onClick={() => navigate("/auth/register")}>Register</Button>

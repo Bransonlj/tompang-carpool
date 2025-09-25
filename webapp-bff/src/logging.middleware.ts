@@ -18,20 +18,6 @@ export class LoggingMiddleware implements NestMiddleware {
       )}`,
     );
 
-    // Hook into response
-    res.on('finish', () => {
-      const responseTime = Date.now() - start;
-      const { statusCode } = res;
-
-      let level: 'log' | 'warn' | 'error' = 'log';
-      if (statusCode >= 500) level = 'error';
-      else if (statusCode >= 400) level = 'warn';
-
-      this.logger[level](
-        `Response: ${method} ${originalUrl} | Status: ${statusCode} | ${responseTime}ms`,
-      );
-    });
-
     next();
   }
 }

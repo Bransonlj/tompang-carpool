@@ -1,6 +1,3 @@
-import { useEffect, useState } from "react";
-import { type CarpoolSummary } from "../../../api/services/carpool/types";
-import { type RideRequestSummary } from "../../../api/services/ride-request/types";
 import { getCarpoolsByUser } from "../../../api/services/carpool/carpool.service";
 import { useAuth } from "../../../context/auth-context";
 import { getRideRequestsByUser } from "../../../api/services/ride-request/ride-request.service";
@@ -9,6 +6,8 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import TripCard from "../components/trip-card";
 import { useNavigate } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -34,25 +33,48 @@ function CustomTabPanel(props: TabPanelProps) {
 
 export default function CarpoolListPage() {
   const [mode, setMode] = useState<number>(0); // 0 = carpool, 1 = ride request
-  const { isAuthenticated, isDriver, currentUserId } = useAuth();
-  const [carpools, setCarpools] = useState<CarpoolSummary[]>([]);
-  const [rideRequests, setRideRequests] = useState<RideRequestSummary[]>([]);
+  const { isAuthenticated, isDriver, currentUserId, authToken } = useAuth();
 
   const navigate = useNavigate();
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setMode(newValue);
   };
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      if (isDriver) {
-        getCarpoolsByUser(currentUserId).then(res => setCarpools(res));
+  const {
+    data: carpools,
+    isPending: isCarpoolsPending,
+    isError: isCarpoolsError,
+    error: carpoolsError,
+  } = useQuery({
+    queryKey: ["carpool-user", currentUserId],
+    queryFn: () => {
+      if (!isAuthenticated) {
+        throw new Error("Must login to view carpools");
       }
 
-      getRideRequestsByUser(currentUserId).then(res => setRideRequests(res));
-    }
+      if (!isDriver) {
+        throw new Error("Must be driver to have carpools");
+      }
 
-  }, [])
+      return getCarpoolsByUser(currentUserId, authToken);
+    }
+  });
+
+  const {
+    data: rideRequests,
+    isPending: isRideRequestsPending,
+    isError: isRideRequestsError,
+    error: rideRequestsError,
+  } = useQuery({
+    queryKey: ["ride-request-user", currentUserId],
+    queryFn: () => {
+      if (!isAuthenticated) {
+        throw new Error("Must login to view requests");
+      }
+
+      return getRideRequestsByUser(currentUserId, authToken);
+    }
+  });
 
   return (
     <div className="w-full">
@@ -63,40 +85,48 @@ export default function CarpoolListPage() {
       <CustomTabPanel value={mode} index={0}>
         <div>
           {
-            carpools.length === 0 && "No Carpools"
-          }
-          {
-            carpools.map(carpool => <TripCard
-              key={carpool.id} 
-              tripData={{
-                originAddress: carpool.originAddress,
-                destinationAddress: carpool.destinationAddress,
-                startTime: new Date(carpool.arrivalTime),
-                seats: { current: carpool.seatsAssigned, total: carpool.totalSeats }
-              }}
-              onClick={() => navigate(`/carpool/${carpool.id}`)}
-            />)
+            isCarpoolsPending 
+              ? "Loading"
+              : isCarpoolsError
+              ? carpoolsError.message
+              : carpools.length === 0
+              ? "No Ride Requests"
+              : carpools.map(carpool => <TripCard
+                key={carpool.id} 
+                tripData={{
+                  originAddress: carpool.originAddress,
+                  destinationAddress: carpool.destinationAddress,
+                  startTime: new Date(carpool.arrivalTime),
+                  seats: { current: carpool.seatsAssigned, total: carpool.totalSeats }
+                }}
+                onClick={() => navigate(`/carpool/${carpool.id}`)}
+              />
+            )
           }
         </div>
       </CustomTabPanel>
       <CustomTabPanel value={mode} index={1}>
         <div>
           {
-            rideRequests.length === 0 && "No Ride Requests"
-          }
-          {
-            rideRequests.map(rideRequest => <TripCard 
-              key={rideRequest.id}
-              tripData={{
-                originAddress: rideRequest.originAddress,
-                destinationAddress: rideRequest.destinationAddress,
-                startTime: new Date(rideRequest.startTime),
-                endTime: new Date(rideRequest.endTime),
-                seats: rideRequest.passengers,
-                status: rideRequest.status,
-              }}
-              onClick={() => navigate(`/carpool/ride/${rideRequest.id}`)}
-            />)
+            isRideRequestsPending 
+              ? "Loading"
+              : isRideRequestsError
+              ? rideRequestsError.message
+              : rideRequests.length === 0
+              ? "No Ride Requests"
+              : rideRequests.map(rideRequest => <TripCard 
+                  key={rideRequest.id}
+                  tripData={{
+                    originAddress: rideRequest.originAddress,
+                    destinationAddress: rideRequest.destinationAddress,
+                    startTime: new Date(rideRequest.startTime),
+                    endTime: new Date(rideRequest.endTime),
+                    seats: rideRequest.passengers,
+                    status: rideRequest.status,
+                  }}
+                  onClick={() => navigate(`/carpool/ride/${rideRequest.id}`)}
+                />
+              )
           }
         </div>
       </CustomTabPanel>

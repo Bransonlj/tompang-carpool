@@ -4,10 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import TripCard from "../components/trip-card";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
+import { useAuth } from "../../../context/auth-context";
 
 export default function CarpoolDetailPage() {
 
   const { id } = useParams();
+    const { isAuthenticated, authToken } = useAuth();
 
   const {
     data,
@@ -17,11 +19,11 @@ export default function CarpoolDetailPage() {
   } = useQuery({
     queryKey: ["carpool-id", id],
     queryFn: () => {
-      if (!id) {
+      if (!id || !isAuthenticated) {
         throw new Error("Carpool Id required");
       }
 
-      return getCarpoolById(id)
+      return getCarpoolById(id, authToken)
     }
   })
 

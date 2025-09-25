@@ -3,9 +3,11 @@ import { useParams } from "react-router";
 import { getUserById } from "../../../api/services/user/user.service";
 import UserAvatar from "../../../components/user-avatar";
 import Divider from "@mui/material/Divider";
+import { useAuth } from "../../../context/auth-context";
 
 export default function UserProfilePage() {
   const { id } = useParams();
+  const { isAuthenticated, authToken } = useAuth();
 
   const {
     data,
@@ -15,11 +17,11 @@ export default function UserProfilePage() {
   } = useQuery({
     queryKey: ["user-id", id],
     queryFn: () => {
-      if (!id) {
+      if (!id || !isAuthenticated) {
         throw new Error("User Id required");
       }
 
-      return getUserById(id)
+      return getUserById(id, authToken)
     }
   })
 

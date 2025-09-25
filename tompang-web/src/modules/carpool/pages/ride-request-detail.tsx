@@ -4,10 +4,12 @@ import { getRideRequestById } from "../../../api/services/ride-request/ride-requ
 import Divider from "@mui/material/Divider";
 import TripCard from "../components/trip-card";
 import RideRequestStatusLabel from "../components/ride-request-status-label";
+import { useAuth } from "../../../context/auth-context";
 
 export default function RideRequestDetailPage() {
   
   const { id } = useParams();
+  const { isAuthenticated, authToken } = useAuth();
 
   const {
     data,
@@ -17,11 +19,11 @@ export default function RideRequestDetailPage() {
   } = useQuery({
     queryKey: ["ride-request-id", id],
     queryFn: () => {
-      if (!id) {
+      if (!id || !isAuthenticated) {
         throw new Error("Ride Request Id required");
       }
 
-      return getRideRequestById(id)
+      return getRideRequestById(id, authToken);
     }
   })
 

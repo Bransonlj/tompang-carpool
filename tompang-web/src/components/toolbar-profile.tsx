@@ -14,11 +14,13 @@ import { useNavigate } from "react-router";
 
 interface ToolbarProfile {
   userId: string;
+  token: string;
   onLogout?: () => void;
 }
 
 export default function ToolbarProfile({
   userId,
+  token,
   onLogout,
 }: ToolbarProfile) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -51,7 +53,7 @@ export default function ToolbarProfile({
     error,
   } = useQuery({
     queryKey: ["user-id", userId],
-    queryFn: () => getUserById  (userId)
+    queryFn: () => getUserById(userId, token),
   })
 
   if (isPending) {
