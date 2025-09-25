@@ -37,7 +37,7 @@ services:
       CQLSH_HOST: cassandra-tompang
       CQLSH_PORT: 9042
 
-  postgres-auth-service:
+  postgres-user-service:
     container_name: tompang-postgres-user-service
     image: postgres:latest
     ports:

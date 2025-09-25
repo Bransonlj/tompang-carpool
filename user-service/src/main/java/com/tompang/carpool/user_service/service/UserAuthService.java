@@ -36,6 +36,8 @@ public class UserAuthService {
         }
 
         User user = User.builder()
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
                 .email(dto.getEmail())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .build(); // default role is user

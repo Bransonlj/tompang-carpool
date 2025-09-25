@@ -42,6 +42,9 @@ public class User {
     public String firstName;
     public String lastName;
 
+    @Builder.Default
+    public boolean hasProfilePicture = false; 
+
     // null if user not a driver
     @Builder.Default
     public String driverId = null;

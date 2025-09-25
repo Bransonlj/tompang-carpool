@@ -2,32 +2,27 @@ package com.tompang.carpool.user_service.dto;
 
 import com.tompang.carpool.user_service.model.User;
 
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
 public class UserProfileDto {
-    public final String firstName;
-    public final String lastName;
-    public final String email;
+    public String firstName;
+    public String lastName;
+    public String email;
 
     // null if user not a driver
-    public final String driverId;
+    public String driverId;
 
-    public UserProfileDto(
-        String firstName,
-        String lastName,
-        String email,
-        String driverId
-    ) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.driverId = driverId;
-    }
+    public String profilePictureUrl;
 
     public static UserProfileDto fromEntity(User user) {
-        return new UserProfileDto(
-            user.getFirstName(),
-            user.getLastName(),
-            user.getEmail(),
-            user.getDriverId()
-        );
+        return UserProfileDto.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .driverId(user.getDriverId())
+                .build();
     }
 }

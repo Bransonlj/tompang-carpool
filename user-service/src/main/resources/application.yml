@@ -24,6 +24,11 @@ spring:
         schema.registry.url: http://localhost:8081
         specific.avro.reader: true
 
+  servlet:
+    multipart:
+      max-file-size: 5MB # Limit individual file size to 5MB
+      max-request-size: 5MB # Limit total request size (if multiple files)
+
 jwt:
   secret-key: this_is_a_secure_and_long_enough_key_for_HS256
 
