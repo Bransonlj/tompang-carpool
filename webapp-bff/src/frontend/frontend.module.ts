@@ -4,6 +4,7 @@ import { BackendModule } from 'src/backend/backend.module';
 import { RideRequestController } from './ride-request/ride-request.controller';
 import { AuthController } from './auth/auth.controller';
 import { UserController } from './user/user.controller';
+import { DriverController } from './driver/driver.controller';
 
 @Module({
   imports: [BackendModule],
@@ -11,7 +12,9 @@ import { UserController } from './user/user.controller';
     CarpoolController, 
     RideRequestController, 
     AuthController, 
-    UserController,
-  ]
+    UserController, 
+    DriverController,
+  ],
+  providers: []
 })
 export class FrontendModule {}
