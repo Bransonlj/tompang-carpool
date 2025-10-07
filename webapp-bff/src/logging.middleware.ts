@@ -15,7 +15,7 @@ export class LoggingMiddleware implements NestMiddleware {
         req.params,
       )} | Query: ${JSON.stringify(req.query)} | Body: ${JSON.stringify(
         req.body,
-      )}`,
+      )} | Authorization: ${JSON.stringify(req.headers.authorization)}`,
     );
 
     next();

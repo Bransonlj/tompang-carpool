@@ -1,4 +1,4 @@
-import { IsString } from "class-validator";
+import { isString, IsString } from "class-validator";
 
 export class RegisterDriverDto {
   @IsString()
@@ -22,4 +22,10 @@ export class DriverRegistrationResponseDto {
     vehicleModel: string;
     createdAt: Date;
     status: string;
+    imageUrl: string;
+}
+
+export class ManualRejectRequestDto {
+  @IsString()
+  rejectReason: string;
 }

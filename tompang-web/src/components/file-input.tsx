@@ -1,18 +1,14 @@
 import type { ChangeEvent } from "react";
-import { formatFileSize, useSingleFileUpload } from "../../../hooks/use-file-upload";
-import Button from "@mui/material/Button";
+import { formatFileSize, useSingleFileUpload } from "../hooks/use-file-upload";
 import Alert from "@mui/material/Alert";
 
 interface FileInputProps {
   fileType?: "image";
-  onUpload: (file: File) => void;
-  uploadDisabled?: boolean;
+  onFileChange?: (file: File) => void;
 }
 
 export default function FileInput({
   fileType="image",
-  onUpload,
-  uploadDisabled,
 }: FileInputProps) {
   const { file, preview, uploadFile, uploadError } = useSingleFileUpload({
     fileType,
@@ -24,12 +20,6 @@ export default function FileInput({
       uploadFile(selectedFile);
     }
   };
-
-  const handleUpload = () => {
-    if (file) {
-      onUpload(file);
-    }
-  }
 
   return (
     <div>
@@ -46,7 +36,6 @@ export default function FileInput({
             <span>Last Modified: {new Date(file.lastModified).toLocaleString()}</span>
           </div>
       }
-      <Button onClick={handleUpload} disabled={!file || uploadDisabled}>Upload</Button>
       {
         uploadError && <Alert severity="error">{ uploadError }</Alert>
       }

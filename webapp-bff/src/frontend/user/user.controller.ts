@@ -9,7 +9,7 @@ export class UserController {
   async getUserById(@Param("id") userId: string): Promise<UserProfile> {
     return {
       id: "u23b",
-      name: "johny fairplay",
+      name: "test user",
       profileImgUrl: "buhhuhasdbse"
     }
   }

@@ -16,4 +16,5 @@ export type DriverRegistrationResponseDto = {
     vehicleModel: string;
     createdAt: string;
     status: string;
+    imageUrl: string;
 }

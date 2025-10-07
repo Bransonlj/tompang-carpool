@@ -16,7 +16,8 @@ export class DriverController {
         vehicleMake: "Toyota",
         vehicleModel: "Atlas",
         createdAt: new Date(),
-        status: "PENDING" // PENDING, PENDING_MANUAL_REVIEW, SUCCESS, FAILED
+        status: "PENDING", // PENDING, PENDING_MANUAL_REVIEW, SUCCESS, FAILED
+        imageUrl: "testimage"
       },
     ];
   }

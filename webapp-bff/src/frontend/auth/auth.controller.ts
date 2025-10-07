@@ -7,9 +7,9 @@ export class AuthController {
   @Post("login")
   async login(@Body() dto: LoginRequestDto): Promise<LoginResponseDto> {
     return {
-      userId: "buh",
+      userId: "test-user-id",
       token: "huh",
-      roles: ["USER", "DRIVER"],
+      roles: ["USER", "DRIVER", "ADMIN"],
     }
   }
 

@@ -1,14 +1,16 @@
 import { useState } from "react";
 import TextField from "@mui/material/TextField";
-import FileInput from "./file-input";
+import FileInput from "../../../components/file-input";
 import { useMutation } from "@tanstack/react-query";
 import { registerDriver } from "../../../api/services/driver/driver.service";
 import { useAuth } from "../../../context/auth-context";
 import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
 
 export default function DriverRegistrationForm() {
 
   const { isAuthenticated, currentUserId, authToken } = useAuth();
+  const [ file, setFile ] = useState<File | null>(null);
   const [vehicleRegistrationNumber, setVehicleRegistrationNumber] = useState<string>("");
   const [vehicleMake, setVehicleMake] = useState<string>("");
   const [vehicleModel, setVehicleModel] = useState<string>("");
@@ -18,8 +20,8 @@ export default function DriverRegistrationForm() {
     onSuccess: () => alert("Registration created")
   })
 
-  const handleUpload = (file: File) => {
-    if (isAuthenticated) {
+  const handleUpload = () => {
+    if (file && isAuthenticated) {
       uploadMutation.mutate({
         file,
         vehicleMake,
@@ -54,7 +56,8 @@ export default function DriverRegistrationForm() {
         value={vehicleModel}
         onChange={(e) => setVehicleModel(e.target.value)}
       />
-      <FileInput onUpload={handleUpload} uploadDisabled={uploadMutation.isPending}/>
+      <FileInput onFileChange={setFile} />
+      <Button onClick={handleUpload} disabled={uploadMutation.isPending}>Submit</Button>
       {
         uploadMutation.isError && <Alert severity="error">{ uploadMutation.error.message }</Alert>
       }

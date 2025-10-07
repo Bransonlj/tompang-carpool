@@ -44,7 +44,12 @@ export default function ToolbarProfile({
     handleClose();
     navigate(`/u/account`);
   }
-  const {} = useAuth()
+
+  const handleClickAdmin = () => {
+    handleClose();
+    navigate("/admin");
+  }
+  const { isAdmin } = useAuth()
 
   const {
     data,
@@ -116,6 +121,11 @@ export default function ToolbarProfile({
         <MenuItem onClick={handleClickAccount}>
           <Avatar /> My account
         </MenuItem>
+        {
+          isAdmin && <MenuItem onClick={handleClickAdmin}>
+            <Avatar /> Admin
+          </MenuItem>
+        }
         <Divider />
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>

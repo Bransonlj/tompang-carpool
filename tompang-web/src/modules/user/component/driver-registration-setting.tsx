@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../../context/auth-context";
 import { getDriverRegistrationByUserId } from "../../../api/services/driver/driver.service";
 import DriverRegistrationForm from "./driver-registration-form";
+import DriverRegistrationCard from "./driver-registration-card";
 
 export function DriverRegistrationSettings() {
   const { isAuthenticated, currentUserId, authToken } = useAuth();
@@ -34,16 +35,9 @@ export function DriverRegistrationSettings() {
     <div>
       <div>
         {
-          registrations?.map(registration => (
-            <div>
-              <span>Registration no. : {registration.vehicleRegistrationNumber}</span>
-              <span>Make : {registration.vehicleMake}</span>
-              <span>Model : {registration.vehicleModel}</span>
-              <span>Status : {registration.status}</span>
-              <span>Created at. : {new Date(registration.createdAt).toLocaleString()}</span>
-            </div>
-          ))
-            
+          registrations.map(registration => (
+            <DriverRegistrationCard key={registration.id} registration={registration} />
+          ))   
         }
       </div>
       <DriverRegistrationForm />
