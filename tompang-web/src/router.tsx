@@ -13,6 +13,7 @@ import ForbiddenPage from "./pages/forbidden";
 import NotFound from "./pages/not-found";
 import DriverRegistrationAdminPage from "./modules/admin/pages/driver-registration-admin";
 import AdminDashboard from "./modules/admin/pages/admin-dashboard";
+import GroupChatPage from "./modules/chat/pages/group-chat";
 
 function RequireAuth() {
   const { isAuthenticated } = useAuth();
@@ -65,6 +66,9 @@ export default function Router() {
             <Route index element={<CarpoolListPage />} />
             <Route path="ride/:id" element={<RideRequestDetailPage />} />
             <Route path=":id" element={<CarpoolDetailPage />} />
+          </Route>
+          <Route path="chat">
+            <Route path=":gid" element={<GroupChatPage />} />
           </Route>
         </Route>
 

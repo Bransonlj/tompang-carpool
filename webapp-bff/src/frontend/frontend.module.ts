@@ -6,6 +6,8 @@ import { AuthController } from './auth/auth.controller';
 import { UserController } from './user/user.controller';
 import { DriverController } from './driver/driver.controller';
 import { AdminDriverController } from './driver/admin-driver.controller';
+import { ChatController } from './chat/chat.controller';
+import { NotificationController } from './notification/notification.controller';
 
 @Module({
   imports: [BackendModule],
@@ -16,6 +18,8 @@ import { AdminDriverController } from './driver/admin-driver.controller';
     UserController, 
     DriverController,
     AdminDriverController,
+    ChatController,
+    NotificationController,
   ],
   providers: []
 })

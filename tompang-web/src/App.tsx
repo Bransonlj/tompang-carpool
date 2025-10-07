@@ -6,6 +6,7 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import { AuthProvider } from './context/auth-context';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
             <BrowserRouter>
               <Router />
             </BrowserRouter>
+            <Toaster />
           </SocketProvider>
         </AuthProvider>
       </QueryClientProvider>

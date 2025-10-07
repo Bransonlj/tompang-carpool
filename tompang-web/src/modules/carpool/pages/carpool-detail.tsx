@@ -1,15 +1,18 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { getCarpoolById } from "../../../api/services/carpool/carpool.service";
 import { useQuery } from "@tanstack/react-query";
 import TripCard from "../components/trip-card";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import { useAuth } from "../../../context/auth-context";
+import IconButton from "@mui/material/IconButton";
+import { MessageCircleMore } from "lucide-react";
 
 export default function CarpoolDetailPage() {
 
   const { id } = useParams();
-    const { isAuthenticated, authToken } = useAuth();
+  const { isAuthenticated, authToken } = useAuth();
+  const navigate = useNavigate();
 
   const {
     data,
@@ -42,14 +45,18 @@ export default function CarpoolDetailPage() {
         alt="Map snapshot"
         className="w-full h-full object-cover"
       />
-      <div className="flex flex-col">
-        <h2 className="text-lg font-semibold" >
-          {data.destinationAddress}
-        </h2>
-        <span className="block ">From: {data.originAddress}</span>
-        <span className="block text-sm text-gray-500">
-          {new Date(data.arrivalTime).toLocaleString()}
-        </span>
+      <div className="flex">
+        <div className="flex flex-col mr-auto">
+          <h2 className="text-lg font-semibold" >
+            {data.destinationAddress}
+          </h2>
+          <span className="block ">From: {data.originAddress}</span>
+          <span className="block text-sm text-gray-500">
+            {new Date(data.arrivalTime).toLocaleString()}
+          </span>
+        </div>
+        <Divider orientation="vertical" flexItem />
+        <IconButton onClick={() => navigate(`/chat/${data.id}`)}><MessageCircleMore /></IconButton>
       </div>
       <Divider />
       <div>

@@ -9,6 +9,7 @@ import { useAuth } from '../context/auth-context';
 import ToolbarProfile from '../components/toolbar-profile';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import Button from '@mui/material/Button';
+import ToolbarNotification from '../components/toolbar-notification';
 
 interface Props {
   /**
@@ -58,14 +59,17 @@ export default function MainLayout(props: Props) {
                 }
               >carpools</NavLink>
             </div>
-            <div>
+            <div className='flex gap-2'>
               {
                 isAuthenticated 
-                  ? <ToolbarProfile userId={currentUserId} token={authToken} onLogout={logout} /> 
+                  ? <>
+                      <ToolbarNotification userId={currentUserId} authToken={authToken} />
+                      <ToolbarProfile userId={currentUserId} token={authToken} onLogout={logout} /> 
+                    </>
                   : <ButtonGroup variant="contained" color="info">
-                    <Button onClick={() => navigate("/auth/login")}>Login</Button>
-                    <Button onClick={() => navigate("/auth/register")}>Register</Button>
-                  </ButtonGroup>
+                      <Button onClick={() => navigate("/auth/login")}>Login</Button>
+                      <Button onClick={() => navigate("/auth/register")}>Register</Button>
+                    </ButtonGroup>
                 }
             </div>
           </Toolbar>
