@@ -33,6 +33,12 @@ public class ChatMessageOrchestrator {
         this.kafkaTemplate = kafkaTemplate;
     }
 
+    /**
+     * Checks if user is in the target group before creating the message and publishing to kafka.
+     * Throws BadRequestException if user is not in the group.
+     * @param dto
+     * @return
+     */
     public ChatMessage sendMessage(SendMessageDto dto) {
         System.out.println(dto);
         GroupChat groupChat = groupChatQueryService.getGroupChatById(dto.getGroupId());
@@ -43,7 +49,7 @@ public class ChatMessageOrchestrator {
             throw new BadRequestException("User is not in group");
         }
         List<String> groupChatUsers = groupChat.getUsers().stream().map(user -> user.getGroupChatUserId().getUserId()).toList();
-        ChatMessage createdMessage = chatMessageService.createMessage(sender.getGroupChatUserId().getGroupId(),  sender.getGroupChatUserId().getUserId(), sender.getTitle(), dto.message);
+        ChatMessage createdMessage = chatMessageService.createMessage(sender.getGroupChatUserId().getGroupId(), sender.getGroupChatUserId().getUserId(), sender.getTitle(), dto.message);
         kafkaTemplate.send(KafkaTopics.Chat.CHAT_MESSAGE_SENT, ChatMessageSentEvent.newBuilder()
                 .setMessageId(createdMessage.getKey().getMessageId().toString())
                 .setGroupChatId(createdMessage.getKey().getGroupId())

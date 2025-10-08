@@ -1,6 +1,7 @@
 package com.tompang.carpool.chat_service.message;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -28,5 +29,9 @@ public class ChatMessageService {
         
         ChatMessage savedMessage = this.repository.save(chatMessage);
         return savedMessage;
+    }
+
+    public List<ChatMessage> getMessagesByGroupId(String groupId) {
+        return this.repository.findByKeyGroupIdOrderByKeyCreatedAtAsc(groupId);
     }
 }
