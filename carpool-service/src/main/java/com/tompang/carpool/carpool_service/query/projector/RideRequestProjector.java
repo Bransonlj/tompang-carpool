@@ -48,8 +48,8 @@ public class RideRequestProjector {
         );
         geocodeJobService.createReverseGeocodeJob(
             new ReverseGeocodeJobDto(
-                event.getRoute().getOrigin().getLatitude(), 
-                event.getRoute().getOrigin().getLongitude(), 
+                event.getRoute().getDestination().getLatitude(), 
+                event.getRoute().getDestination().getLongitude(), 
                 GeocodeEntity.RIDEREQUEST, request.getId(), GeocodeEntityField.DESTINATION
             )
         );

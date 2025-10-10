@@ -5,6 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tompang.carpool.geospatial.enums.GeocodeEntity;
 import com.tompang.carpool.geospatial.enums.GeocodeEntityField;
 
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+
+@Builder
+@EqualsAndHashCode
 public class ReverseGeocodeJobDto {
     public final double latitude;
     public final double longitude;
