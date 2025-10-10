@@ -21,7 +21,8 @@ public class RouteDto {
     public final Location destination;
 
     public RouteDto(Point origin, Point destination, EventualAddress originAddress, EventualAddress destinationAddress) {
-        this.origin = new Location(origin.getX(), origin.getY(), originAddress.toString());
-        this.destination = new Location(destination.getX(), destination.getY(), destinationAddress.toString());
+        // x = longitude, y = latitude
+        this.origin = new Location(origin.getY(), origin.getX(), originAddress.toString());
+        this.destination = new Location(destination.getY(), destination.getX(), destinationAddress.toString());
     }
 }
