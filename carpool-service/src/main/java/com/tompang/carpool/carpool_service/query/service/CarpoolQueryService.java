@@ -33,4 +33,8 @@ public class CarpoolQueryService {
     ) {
         return repository.findCarpoolsByRouteInRangeWithSeats(origin, destination, rangeMeters, startTime, endTime, seatsNeeded);
     }
+
+    public List<Carpool> getCarpoolByDriverId(String driverId) {
+        return this.repository.findAllByDriverId(driverId);
+    }
 }

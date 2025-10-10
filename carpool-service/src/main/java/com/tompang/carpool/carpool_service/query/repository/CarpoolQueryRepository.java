@@ -28,4 +28,6 @@ public interface CarpoolQueryRepository extends JpaRepository<Carpool, String> {
         @Param("endTime") LocalDateTime endTime,
         @Param("seatsNeeded") int seatsNeeded
     );
+
+    List<Carpool> findAllByDriverId(String driverId);
 }
