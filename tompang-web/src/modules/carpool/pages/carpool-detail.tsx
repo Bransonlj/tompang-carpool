@@ -2,11 +2,13 @@ import { useNavigate, useParams } from "react-router";
 import { getCarpoolById } from "../../../api/services/carpool/carpool.service";
 import { useQuery } from "@tanstack/react-query";
 import TripCard from "../components/trip-card";
-import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import { useAuth } from "../../../context/auth-context";
 import IconButton from "@mui/material/IconButton";
 import { MessageCircleMore } from "lucide-react";
+import { LatLng } from "leaflet";
+import CarpoolRequestAction from "../components/carpool-request-action";
+import RoutePreview from "../components/route-preview";
 
 export default function CarpoolDetailPage() {
 
@@ -19,6 +21,7 @@ export default function CarpoolDetailPage() {
     isPending,
     isError,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["carpool-id", id],
     queryFn: () => {
@@ -40,10 +43,10 @@ export default function CarpoolDetailPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <img
-        src={"buh"}
-        alt="Map snapshot"
-        className="w-full h-full object-cover"
+      <RoutePreview 
+        origin={new LatLng(data.originLatLng.lat, data.originLatLng.lng)} 
+        destination={new LatLng(data.destinationLatLng.lat, data.destinationLatLng.lng)}
+        className="w-full h-72"
       />
       <div className="flex">
         <div className="flex flex-col mr-auto">
@@ -81,7 +84,7 @@ export default function CarpoolDetailPage() {
       <Divider />
       <div>
         <h2 className="font-semibold text-lg">Pending Requests</h2>
-        {data.confirmedRides.map(ride => (
+        {data.pendingRequests.map(ride => (
           <div className="flex gap-2">
             <TripCard 
               key={ride.id}
@@ -93,11 +96,8 @@ export default function CarpoolDetailPage() {
                 seats: ride.passengers,
                 owner: ride.rider,
               }}
+              options={<CarpoolRequestAction carpoolId={data.id} requestId={ride.id} onSuccess={refetch} />}
             />
-            <div className="flex items-center gap-2">
-              <Button color="success" variant="contained">Accept</Button>
-              <Button color="error" variant="contained">Decline</Button>
-            </div>
           </div>
         ))}
       </div>

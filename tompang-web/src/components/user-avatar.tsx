@@ -22,7 +22,7 @@ function stringToColor(string: string) {
 
 interface UserAvatarProps extends AvatarProps {
   name: string;
-  src: string;
+  src: string | undefined;
 }
 
 export default function UserAvatar({

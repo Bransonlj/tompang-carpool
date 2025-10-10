@@ -1,19 +1,26 @@
 import { useState } from "react";
 import { useAuth } from "../context/auth-context";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import toast from "react-hot-toast";
+import Alert from "@mui/material/Alert";
 
 export default function RegisterPage() {
-  const { register } = useAuth();
+  const { register, isRegisterPending, registerError } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    register({
+    const success = await register({
       email, password, firstName, lastName
     });
+    if (success) {
+      toast.success("Account registered successfully!");
+      navigate("/auth/login");
+    }
   };
 
   return (
@@ -52,11 +59,15 @@ export default function RegisterPage() {
           className="w-full px-3 py-2 border rounded-lg mb-4"
         />
         <button
+          disabled={isRegisterPending}
           type="submit"
           className="w-full bg-green-500 text-white px-4 py-2 rounded-lg"
         >
           Register
         </button>
+        {
+          registerError && <Alert severity="error">{ registerError }</Alert>
+        }
         <p className="mt-4 text-sm text-gray-600">
           Already have an account?{" "}
           <Link to="/auth/login" className="text-blue-500 underline">

@@ -11,6 +11,40 @@ export type CarpoolSummary = {
 }
 
 export type CarpoolDetail = CarpoolSummary & {
+  destinationLatLng: {
+    lat: number;
+    lng: number;
+  };
+  originLatLng: {
+    lat: number;
+    lng: number;
+  };
   confirmedRides: (RideRequestSummary & { rider: UserData })[];
   pendingRequests: (RideRequestSummary & { rider: UserData })[];
+}
+
+export type CreateCarpoolDto = {
+  driverId: string;
+  seats: number;
+  arrivalTime: Date;
+  route: {
+    origin: {
+      latitude: number;
+      longitude: number;
+    };
+    destination: {
+      latitude: number;
+      longitude: number;
+    };
+  };
+}
+
+export type AcceptCarpoolRequestDto = {
+  carpoolId: string;
+  requestId: string;
+}
+
+export type DeclineCarpoolRequestDto = {
+  carpoolId: string;
+  requestId: string;
 }

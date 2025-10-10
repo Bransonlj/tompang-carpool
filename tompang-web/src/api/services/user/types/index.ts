@@ -1,7 +1,7 @@
 export type UserProfile = {
   id: string;
   name: string;
-  profileImgUrl: string;
+  profileImgUrl: string | undefined;
 }
 
 export type uploadProfilePictureDto = {

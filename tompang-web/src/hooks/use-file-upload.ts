@@ -13,10 +13,16 @@ interface UseSingleFileUploadParams {
 interface UseSingleFileUploadHook {
   file: File | null,
   uploadFile: (uploadedFile: File) => void;
+  clearFile: () => void;
   preview: string | null;
   uploadError: string | null;
 }
 
+/**
+ * Util function to convert filesize number to formatted string.
+ * @param bytes 
+ * @returns 
+ */
 export function formatFileSize(bytes: number) {
   if (bytes === 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB", "PB"];
@@ -57,6 +63,20 @@ export function useSingleFileUpload({
       setPreview(objectUrl);
       setUploadError(null);
     };
+
+    function clearFile() {
+      setFile(null);
+      setUploadError(null);
+      setPreview(prev => {
+        if (prev) {
+          // cleanup
+          URL.revokeObjectURL(prev);
+        }
+
+        return null;
+      });
+
+    }
   
     // Clean up object URL to avoid memory leaks
     useEffect(() => {
@@ -70,6 +90,7 @@ export function useSingleFileUpload({
     return {
       file,
       uploadFile,
+      clearFile,
       preview,
       uploadError,
     }

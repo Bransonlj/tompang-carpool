@@ -58,7 +58,7 @@ export default function ProfilePictureSettings() {
         className="mt-2 max-w-xs rounded shadow"
       />
       <FileInput onFileChange={setFile} />
-      <Button onClick={handleUpload}>Upload</Button>
+      <Button onClick={handleUpload} disabled={!file || !isAuthenticated}>Upload</Button>
       {
         uploadMutation.isError && <Alert severity="error">{ uploadMutation.error.message }</Alert>
       }

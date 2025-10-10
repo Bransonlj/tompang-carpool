@@ -35,7 +35,7 @@ export default function UserProfilePage() {
 
   return (
     <div className="flex gap-4">
-      <UserAvatar name={data.name} src={data.profileImgUrl} />
+      <UserAvatar name={data.name} src={data.profileImgUrl} sx={{ width: 200, height: 200 }}/>
       <Divider orientation="vertical" flexItem  />
       <div>
         <h2 className="font-bold text-xl">{data.name}</h2>

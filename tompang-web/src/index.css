@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 /* Apply styles to the root element of the React app */
 html, body, #root {
   width: 100%;

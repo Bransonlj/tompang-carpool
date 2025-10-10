@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useAuth } from "../context/auth-context";
 import { Link } from "react-router";
+import Alert from "@mui/material/Alert";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, isLoginPending, loginError } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
@@ -34,11 +35,15 @@ export default function LoginPage() {
           className="w-full px-3 py-2 border rounded-lg mb-4"
         />
         <button
+          disabled={isLoginPending}
           type="submit"
-          className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg"
+          className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:cursor-pointer"
         >
           Login
         </button>
+        {
+          loginError && <Alert severity="error">{ loginError }</Alert>
+        }
         <p className="mt-4 text-sm text-gray-600">
           Don’t have an account?{" "}
           <Link to="/auth/register" className="text-blue-500 underline">

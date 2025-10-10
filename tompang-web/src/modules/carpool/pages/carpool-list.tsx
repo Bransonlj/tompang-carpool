@@ -5,9 +5,10 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import TripCard from "../components/trip-card";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import Button from "@mui/material/Button";
+import { Plus } from "lucide-react";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -32,12 +33,17 @@ function CustomTabPanel(props: TabPanelProps) {
 }
 
 export default function CarpoolListPage() {
-  const [mode, setMode] = useState<number>(0); // 0 = carpool, 1 = ride request
-  const { isAuthenticated, isDriver, currentUserId, authToken } = useAuth();
+  const { isAuthenticated, currentUserId, authToken } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams({ view: "carpool" });
 
   const navigate = useNavigate();
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setMode(newValue);
+  const mode: number = searchParams.get("view") === "ride-request" ? 1 : 0 // 0 = carpool, 1 = ride request
+  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setSearchParams((searchParams) => {
+    searchParams.set("view", newValue === 0 ? "carpool" : "ride-request");
+    return searchParams;
+  });
+
   };
 
   const {
@@ -52,12 +58,8 @@ export default function CarpoolListPage() {
         throw new Error("Must login to view carpools");
       }
 
-      if (!isDriver) {
-        throw new Error("Must be driver to have carpools");
-      }
-
       return getCarpoolsByUser(currentUserId, authToken);
-    }
+    },
   });
 
   const {
@@ -83,6 +85,7 @@ export default function CarpoolListPage() {
           <Tab label="Ride Reqeusts"/>
       </Tabs>
       <CustomTabPanel value={mode} index={0}>
+        <Button variant="contained" onClick={() => navigate("/carpool/new")}>New <Plus /></Button>
         <div>
           {
             isCarpoolsPending 
@@ -90,7 +93,7 @@ export default function CarpoolListPage() {
               : isCarpoolsError
               ? carpoolsError.message
               : carpools.length === 0
-              ? "No Ride Requests"
+              ? "No Carpools"
               : carpools.map(carpool => <TripCard
                 key={carpool.id} 
                 tripData={{
@@ -106,6 +109,7 @@ export default function CarpoolListPage() {
         </div>
       </CustomTabPanel>
       <CustomTabPanel value={mode} index={1}>
+        <Button variant="contained" onClick={() => navigate("/carpool/ride/new")}>New <Plus /></Button>
         <div>
           {
             isRideRequestsPending 

@@ -9,8 +9,7 @@ export async function uploadProfilePicture(dto: uploadProfilePictureDto): Promis
   const formData = new FormData();
   formData.append("file", dto.file);
   formData.append("id", dto.userId)
-  await api.post(`api/user/profile/pic`, formData, authHeader(dto.token, "multipart/form-data"));
-  return;
+  return await api.post(`api/user/profile/pic`, formData, authHeader(dto.token, "multipart/form-data"));
 }
 
 export async function test() {

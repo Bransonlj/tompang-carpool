@@ -14,6 +14,31 @@ export type RideRequestSummary = {
 }
 
 export type RideRequestDetail = RideRequestSummary & {
+  destinationLatLng: {
+    lat: number;
+    lng: number;
+  };
+  originLatLng: {
+    lat: number;
+    lng: number;
+  };
   assignedCarpool?: CarpoolSummary & { driver: UserData; };
   pendingCarpools: (CarpoolSummary & { driver: UserData; })[];
+}
+
+export type CreateRideRequestDto = {
+  riderId: string;
+  passengers: number;
+  startTime: Date;
+  endTime: Date;
+  route: {
+    origin: {
+      latitude: number;
+      longitude: number;
+    };
+    destination: {
+      latitude: number;
+      longitude: number;
+    };
+  };
 }

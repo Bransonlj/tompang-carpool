@@ -41,6 +41,13 @@ type TAuthContext = (UnauthenticatedAuthState | AuthenticatedAuthState) & TBaseA
 
 const LocalStorageUserKey = 'auth-user-token'
 
+const UNAUTHENTICATED_AUTH_STATE: UnauthenticatedAuthState = {
+  currentUserId: null,
+  authToken: null,
+  currentUserRoles: null,
+  isAuthenticated: false,
+};
+
 const AuthContext = createContext<TAuthContext>({
   currentUserId: null,
   currentUserRoles: null,
@@ -64,12 +71,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: React.ReactNode}) {
 
-  const [authState, setAuthState] = useState<UnauthenticatedAuthState | AuthenticatedAuthState>({
-    currentUserId: null,
-    authToken: null,
-    currentUserRoles: null,
-    isAuthenticated: false,
-  })
+  const [authState, setAuthState] = useState<UnauthenticatedAuthState | AuthenticatedAuthState>(getAuthStateFromLocalStorage())
 
   const [loginError, setLoginError] = useState<string>("");
   const [isLoginPending, setLoginPending] = useState<boolean>(false);
@@ -121,12 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode}) {
    * Remove token from localstorage and reset auth react state to nulls.
    */
   const logout = useCallback((): void => {
-    setAuthState({
-      currentUserId: null,
-      currentUserRoles: null,
-      authToken: null,
-      isAuthenticated: false,
-    });
+    setAuthState(UNAUTHENTICATED_AUTH_STATE);
     localStorage.removeItem(LocalStorageUserKey);
     //disconnect();
   }, []);
@@ -135,8 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode}) {
   const isDriver = useMemo(() => authState.currentUserRoles?.includes("DRIVER") ?? false, [authState]);
   const isAdmin = useMemo(() => authState.currentUserRoles?.includes("ADMIN") ?? false, [authState]);
 
-  useEffect(() => {
-    // Check local storage for token & try to login with it
+  function getAuthStateFromLocalStorage(): UnauthenticatedAuthState | AuthenticatedAuthState {
     const token = (localStorage.getItem(LocalStorageUserKey));
     if (token) {
       try {
@@ -145,25 +141,26 @@ export function AuthProvider({ children }: { children: React.ReactNode}) {
           // jtw expired
           localStorage.removeItem(LocalStorageUserKey);
           alert("login session has expired");
-          logout()
+          return UNAUTHENTICATED_AUTH_STATE;
         } else {
           // login from cookies
-          setAuthState({
+          return {
             currentUserId: payload.sub,
             currentUserRoles: payload.roles,
             authToken: token,
             isAuthenticated: true,
-          });
-          //connect(user.userId);
+          };
         }
       } catch (error) {
         // cant decode
         localStorage.removeItem(LocalStorageUserKey);
         console.warn("Error decoding jwt token from storage");
-        logout();
+        return UNAUTHENTICATED_AUTH_STATE;
       }
+    } else {
+      return UNAUTHENTICATED_AUTH_STATE;
     }
-  }, []);
+  }
 
   const value = useMemo(
     () => ({

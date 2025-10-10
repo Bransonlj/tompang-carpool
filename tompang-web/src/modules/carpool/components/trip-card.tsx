@@ -4,6 +4,7 @@ import UserLink from "../../../components/user-link";
 import RideRequestStatusLabel from "./ride-request-status-label";
 import type { RideRequestStatus } from "../../../api/services/ride-request/types";
 import Divider from "@mui/material/Divider";
+import type { ReactNode } from "react";
 
 type TripData = {
   originAddress: string;
@@ -18,6 +19,7 @@ type TripData = {
 interface TripCardProps {
   tripData: TripData;
   onClick?: () => void;
+  options?: ReactNode;
 }
 
 function formatSeats(seats: number | { total: number; current: number; }) {
@@ -31,6 +33,7 @@ function formatSeats(seats: number | { total: number; current: number; }) {
 export default function TripCard({
   tripData,
   onClick,
+  options,
 }: TripCardProps) {
   return (
     <div className="flex p-4 bg-stone-50 shadow-lg rounded-sm w-full max-w-4xl">
@@ -45,20 +48,18 @@ export default function TripCard({
 
       <div className={`w-3/4 p-4 relative flex flex-col gap-2 ${onClick && "hover:cursor-pointer"}`} onClick={onClick}>
         {/* Title + Utility Button */}
-        <div className="flex justify-between items-start">
-          <div className="flex flex-col truncate max-w-[80%]">
+        <div className="flex items-start">
+          <div className="flex flex-col truncate max-w-[80%] mr-auto">
             <h2 className="text-lg font-semibold" >
               {tripData.destinationAddress}
             </h2>
             <span className="block ">From: {tripData.originAddress}</span>
-            <span className="block text-sm text-gray-500">
-              {tripData.startTime.toLocaleString()} {tripData.endTime && `- ${tripData.endTime.toLocaleString()}`}
-            </span>
           </div>
-          <button className="p-2 rounded-full hover:bg-gray-100">
-            <MoreVertical className="w-5 h-5 text-gray-600" />
-          </button>
+          { options }
         </div>
+        <span className="block text-sm text-gray-500">
+          {tripData.startTime.toLocaleString()} {tripData.endTime && `- ${tripData.endTime.toLocaleString()}`}
+        </span>
         <Divider />
         {/* Details */}
         <div className="mt-3 flex gap-1 text-sm text-gray-700">

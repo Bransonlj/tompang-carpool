@@ -5,6 +5,8 @@ import Divider from "@mui/material/Divider";
 import TripCard from "../components/trip-card";
 import RideRequestStatusLabel from "../components/ride-request-status-label";
 import { useAuth } from "../../../context/auth-context";
+import RoutePreview from "../components/route-preview";
+import { LatLng } from "leaflet";
 
 export default function RideRequestDetailPage() {
   
@@ -37,10 +39,10 @@ export default function RideRequestDetailPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <img
-        src={"buh"}
-        alt="Map snapshot"
-        className="w-full h-full object-cover"
+      <RoutePreview
+        origin={new LatLng(data.originLatLng.lat, data.originLatLng.lng)} 
+        destination={new LatLng(data.destinationLatLng.lat, data.destinationLatLng.lng)}
+        className="w-full h-72"
       />
       <div className="flex flex-col">
         <h2 className="text-lg font-semibold" >
