@@ -1,6 +1,9 @@
 package com.tompang.carpool.user_service.service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +44,23 @@ public class UserProfileService {
     } catch (IOException exception) {
       throw new RuntimeException("Error uploading image");
     }
+  }
+
+  public Map<String, UserProfileDto> getUserProfilesMappedByIds(List<String> ids) {
+    List<User> users = repository.findAllById(ids);
+    Map<String, UserProfileDto> userMap = new HashMap<>();
+    UserProfileDto dto;
+    for (User user : users) {
+      dto = UserProfileDto.fromEntity(user);
+      if (user.hasProfilePicture) {
+        String profilePictureUrl = s3Service.getFileUrl(user.getId(), S3Service.Directory.PROFILE_PICTURE);
+        dto.setProfilePictureUrl(profilePictureUrl);
+      }
+
+      userMap.put(user.getId(), dto);
+    }
+
+    return userMap;
   }
 
 }
