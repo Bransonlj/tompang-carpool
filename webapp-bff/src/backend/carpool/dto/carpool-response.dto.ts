@@ -27,7 +27,7 @@ export class CarpoolSummaryDto {
 
 export class CarpoolDetailedDto extends CarpoolSummaryDto {
   @ValidateNested({ each: true })   // list of nested DTOs
-  @Type(() => RideRequestSummaryDto)         // tells transformer to map into OrderItemDto[]
+  @Type(() => RideRequestSummaryDto)
   pendingRequests: RideRequestSummaryDto[];
 
   @ValidateNested({ each: true })

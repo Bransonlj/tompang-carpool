@@ -1,100 +1,109 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { CarpoolService } from 'src/backend/carpool/carpool.service';
-import { CarpoolDetail, CarpoolSummary } from './dto';
+import { AcceptCarpoolDto, CarpoolDetail, CarpoolSummary, CreateCarpoolDto, DeclineCarpoolDto } from './dto';
+import { UserService } from 'src/backend/user/user.service';
 
 @Controller('api/carpool')
 export class CarpoolController {
   constructor(
-    private carpoolService: CarpoolService
+    private carpoolService: CarpoolService,
+    private userService: UserService,
   ) {}
 
   @Get("user/:id")
-  async getCarpoolsByUser(@Param('id') userId: string): Promise<CarpoolSummary[]> {
-    return [
-      {
-        id: "123",
-        originAddress: "green tower block 44 upper low street",
-        destinationAddress: "white harbour road post office building B",
-        arrivalTime: new Date().toISOString(),
-        totalSeats: 5,
-        seatsAssigned: 2,
-      },
-      {
-        id: "456",
-        originAddress: "22 blue street",
-        destinationAddress: "red robin",
-        arrivalTime: new Date().toISOString(),
-        totalSeats: 5,
-        seatsAssigned: 1,
-      }
-    ];
+  async getCarpoolsByUser(@Param('id') userId: string, @Headers("Authorization") authHeader: string): Promise<CarpoolSummary[]> {
+    const carpools = await this.carpoolService.getCarpoolsByUserId(userId, authHeader);
+    return carpools.map(carpool => ({
+      id: carpool.id,
+      seatsAssigned: carpool.seatsAssigned,
+      totalSeats: carpool.totalSeats,
+      arrivalTime: carpool.arrivalTime,
+      originAddress: carpool.route.origin.address,
+      destinationAddress: carpool.route.destination.address,
+    }))
   }
 
   @Get(":id")
-  async getCarpoolById(@Param('id') carpoolId: string): Promise<CarpoolDetail> {
+  async getCarpoolById(@Param('id') carpoolId: string, @Headers("Authorization") authHeader: string): Promise<CarpoolDetail> {
+    const carpool = await this.carpoolService.getCarpoolById(carpoolId, authHeader);
+    const passengerIds = new Set([
+      ...carpool.pendingRequests.map(ride => ride.riderId), 
+      ...carpool.confirmedRequests.map(ride => ride.riderId)
+    ]);
+    const userProfileIdMap = await this.userService.getUserProfilesFromIdsByBatch(passengerIds, authHeader);
+    const confirmedRides: CarpoolDetail["confirmedRides"] = carpool.confirmedRequests.map(ride => ({
+      id: ride.id,
+      passengers: ride.passengers,
+      originAddress: ride.route.origin.address,
+      destinationAddress: ride.route.destination.address,
+      startTime: ride.startTime,
+      endTime: ride.endTime,
+      status: ride.status,
+      rider: {
+        id: ride.riderId,
+        name: Boolean(userProfileIdMap[ride.riderId]) 
+          ? userProfileIdMap[ride.riderId].fullName
+          : "[Unknown]"
+      },
+    }));
+
+    const pendingRequests: CarpoolDetail["pendingRequests"] = carpool.pendingRequests.map(ride => ({
+      id: ride.id,
+      passengers: ride.passengers,
+      originAddress: ride.route.origin.address,
+      destinationAddress: ride.route.destination.address,
+      startTime: ride.startTime,
+      endTime: ride.endTime,
+      status: ride.status,
+      rider: {
+        id: ride.riderId,
+        name: Boolean(userProfileIdMap[ride.riderId]) 
+          ? userProfileIdMap[ride.riderId].fullName
+          : "[Unknown]"
+      },
+    }));
+
     return {
-      id: "123",
-      originAddress: "green tower block 44 upper low street",
-      destinationAddress: "white harbour road post office building B",
-      arrivalTime: new Date().toISOString(),
-      totalSeats: 5,
-      seatsAssigned: 2,
-      pendingRequests: [
-        {
-          id: "456",
-          originAddress: "green tower block 44 upper low street",
-          destinationAddress: "white harbour road post office building B",
-          startTime: new Date().toISOString(),
-          endTime: new Date().toISOString(),
-          passengers: 2,
-          status: 'PENDING',
-          rider: {
-            id: "rider-222",
-            name: "bobby",
-          }
-        },
-        {
-          id: "123",
-          originAddress: "green tower block 44",
-          destinationAddress: "white harbour road",
-          startTime: new Date().toISOString(),
-          endTime: new Date().toISOString(),
-          passengers: 2,
-          status: 'PENDING',
-          rider: {
-            id: "rider-213",
-            name: "tommy",
-          }
-        },
-      ],
-      confirmedRides: [
-        {
-          id: "456",
-          originAddress: "green tower block 44 upper low street",
-          destinationAddress: "white harbour road post office building B",
-          startTime: new Date().toISOString(),
-          endTime: new Date().toISOString(),
-          passengers: 2,
-          status: 'PENDING',
-          rider: {
-            id: "rider-222",
-            name: "bobby",
-          }
-        },
-        {
-          id: "123",
-          originAddress: "green tower block 44",
-          destinationAddress: "white harbour road",
-          startTime: new Date().toISOString(),
-          endTime: new Date().toISOString(),
-          passengers: 2,
-          status: 'PENDING',
-          rider: {
-            id: "rider-213",
-            name: "tommy",
-          }
-        },
-      ],
-    }
+      id: carpool.id,
+      seatsAssigned: carpool.seatsAssigned,
+      totalSeats: carpool.totalSeats,
+      arrivalTime: carpool.arrivalTime,
+      originAddress: carpool.route.origin.address,
+      originLatLng: {
+        lat: carpool.route.origin.latitude,
+        lng: carpool.route.origin.longitude,
+      },
+      destinationAddress: carpool.route.destination.address,
+      destinationLatLng: {
+        lat: carpool.route.destination.latitude,
+        lng: carpool.route.destination.longitude,
+      },
+      confirmedRides,
+      pendingRequests,
+    };
+  }
+
+  @Post()
+  async createCarpool(
+    @Body() dto: CreateCarpoolDto, 
+    @Headers("Authorization") authHeader: string
+  ): Promise<void> {
+    return await this.carpoolService.createCarpool(dto, authHeader);
+  }
+
+  @Post("request/accept")
+  async acceptCarpoolRequest(
+    @Body() dto: AcceptCarpoolDto,
+    @Headers("Authorization") authHeader: string
+  ): Promise<void> {
+    return await this.carpoolService.acceptRequest(dto, authHeader);
+  }
+
+  @Post("request/decline")
+  async declineCarpoolRequest(
+    @Body() dto: DeclineCarpoolDto,
+    @Headers("Authorization") authHeader: string
+  ): Promise<void> {
+    return await this.carpoolService.declineRequest(dto, authHeader);
   }
 }

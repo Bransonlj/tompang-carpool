@@ -1,6 +1,9 @@
 import { Type } from "class-transformer";
 import { IsDate, IsNumber, IsString, ValidateNested } from "class-validator";
 import { RouteDto } from "./route.dto";
+import { CarpoolSummaryDto } from "./carpool-response.dto";
+
+export type RideRequestStatus = "PENDING" | "ASSIGNED" | "FAILED";
 
 export class RideRequestSummaryDto {
   @IsString()
@@ -25,5 +28,15 @@ export class RideRequestSummaryDto {
   route: RouteDto;
 
   @IsString()
-  status: string;
+  status: RideRequestStatus;
+}
+
+export class RideRequestDetailedDto extends RideRequestSummaryDto {
+  @ValidateNested({ each: true })   // list of nested DTOs
+  @Type(() => CarpoolSummaryDto)
+  matchedCarpools: CarpoolSummaryDto[];
+
+  @ValidateNested()
+  @Type(() => RideRequestSummaryDto)
+  assignedCarpool: CarpoolSummaryDto | null;
 }
