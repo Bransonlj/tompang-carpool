@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tompang.carpool.chat_service.group.GroupChatQueryService;
+import com.tompang.carpool.chat_service.message.dto.GroupChatResponseDto;
+import com.tompang.carpool.chat_service.message.dto.ChatMessageResponseDto;
+import com.tompang.carpool.chat_service.message.dto.GroupMemberDto;
 import com.tompang.carpool.chat_service.message.dto.SendMessageDto;
 import com.tompang.carpool.chat_service.message.model.ChatMessage;
 
@@ -23,17 +27,22 @@ public class ChatMessageController {
 
     private final ChatMessageOrchestrator chatMessageOrchestrator;
     private final ChatMessageService chatMessageService;
+    private final GroupChatQueryService groupChatQueryService;
 
-    public ChatMessageController(ChatMessageOrchestrator chatMessageOrchestrator, ChatMessageService chatMessageService) {
+    public ChatMessageController(ChatMessageOrchestrator chatMessageOrchestrator, ChatMessageService chatMessageService, GroupChatQueryService groupChatQueryService) {
         this.chatMessageOrchestrator = chatMessageOrchestrator;
         this.chatMessageService = chatMessageService;
+        this.groupChatQueryService = groupChatQueryService;
     }
 
-    @GetMapping("messages/{gid}")
-    public ResponseEntity<List<ChatMessage>> getMessagesByGroupId(@PathVariable String gid) {
-        return ResponseEntity.ok(chatMessageService.getMessagesByGroupId(gid));
+    @GetMapping("group/{gid}")
+    public ResponseEntity<GroupChatResponseDto> getGroupChatData(@PathVariable String gid) {
+        List<ChatMessageResponseDto> messages = chatMessageService.getMessagesByGroupId(gid).stream()
+                .map(chat -> ChatMessageResponseDto.fromEntity(chat)).toList();
+
+        List<GroupMemberDto> groupMembers = groupChatQueryService.getGroupChatById(gid).getUsers().stream().map(user -> GroupMemberDto.builder().userId(user.getGroupChatUserId().getUserId()).userTitle(user.getTitle()).build()).toList();
+        return ResponseEntity.ok(GroupChatResponseDto.builder().groupId(gid).messages(messages).members(groupMembers).build());
     }
-    
 
     @PostMapping("send")
     public ResponseEntity<Void> sendMessage(@RequestBody @Valid SendMessageDto dto) {

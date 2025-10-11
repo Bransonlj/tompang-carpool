@@ -49,7 +49,7 @@ public class ChatMessageOrchestrator {
             throw new BadRequestException("User is not in group");
         }
         List<String> groupChatUsers = groupChat.getUsers().stream().map(user -> user.getGroupChatUserId().getUserId()).toList();
-        ChatMessage createdMessage = chatMessageService.createMessage(sender.getGroupChatUserId().getGroupId(), sender.getGroupChatUserId().getUserId(), sender.getTitle(), dto.message);
+        ChatMessage createdMessage = chatMessageService.createMessage(sender.getGroupChatUserId().getGroupId(), sender.getGroupChatUserId().getUserId(), dto.message);
         kafkaTemplate.send(KafkaTopics.Chat.CHAT_MESSAGE_SENT, ChatMessageSentEvent.newBuilder()
                 .setMessageId(createdMessage.getKey().getMessageId().toString())
                 .setGroupChatId(createdMessage.getKey().getGroupId())

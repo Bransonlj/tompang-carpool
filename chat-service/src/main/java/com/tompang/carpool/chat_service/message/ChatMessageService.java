@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.tompang.carpool.chat_service.group.model.UserTitle;
 import com.tompang.carpool.chat_service.message.model.ChatMessage;
 import com.tompang.carpool.chat_service.message.model.ChatMessageKey;
 
@@ -19,11 +18,10 @@ public class ChatMessageService {
         this.repository = repository;
     }
 
-    public ChatMessage createMessage(String groupId, String senderId, UserTitle userTitle, String message) {
+    public ChatMessage createMessage(String groupId, String senderId, String message) {
         ChatMessage chatMessage = ChatMessage.builder()
                 .key(new ChatMessageKey(groupId, LocalDateTime.now(), UUID.randomUUID()))
                 .senderId(senderId)
-                .senderTitle(userTitle)
                 .message(message)
                 .build();
         
