@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { getRideRequestById } from "../../../api/services/ride-request/ride-request.service";
 import Divider from "@mui/material/Divider";
 import TripCard from "../components/trip-card";
@@ -7,11 +7,14 @@ import RideRequestStatusLabel from "../components/ride-request-status-label";
 import { useAuth } from "../../../context/auth-context";
 import RoutePreview from "../components/route-preview";
 import { LatLng } from "leaflet";
+import IconButton from "@mui/material/IconButton";
+import { MessageCircleMore } from "lucide-react";
 
 export default function RideRequestDetailPage() {
   
   const { id } = useParams();
   const { isAuthenticated, authToken } = useAuth();
+  const navigate = useNavigate();
 
   const {
     data,
@@ -69,6 +72,11 @@ export default function RideRequestDetailPage() {
               },
               owner: data.assignedCarpool.driver
             }}
+            options={
+              <IconButton onClick={() => navigate(`/chat/${data.assignedCarpool?.id}`, { state: { from: "ride-request", id } })}>
+                <MessageCircleMore />
+              </IconButton>
+            }
           />
         </>
       }

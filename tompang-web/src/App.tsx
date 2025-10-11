@@ -10,6 +10,7 @@ import { Toaster } from 'react-hot-toast';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { NotificationProvider } from './context/notification-context';
+import { ChatProvider } from './modules/chat/context/chat-context';
 
 function App() {
 
@@ -28,11 +29,13 @@ function App() {
           <SocketProvider>
             <AuthProvider>
               <NotificationProvider>
-                <BrowserRouter>
-                  <Router />
-                </BrowserRouter>
-                <Toaster />
-                <Toaster toasterId="notification" position="bottom-right" reverseOrder={false} toastOptions={{duration: 8000}} />
+                <ChatProvider>
+                  <BrowserRouter>
+                    <Router />
+                    <Toaster />
+                    <Toaster toasterId="notification" position="bottom-right" reverseOrder={false} toastOptions={{duration: 8000}} />
+                  </BrowserRouter>
+                </ChatProvider>
               </NotificationProvider>
             </AuthProvider>
           </SocketProvider>

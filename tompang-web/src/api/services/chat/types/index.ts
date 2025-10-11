@@ -6,12 +6,21 @@ export type SendMessageDto = {
 
 export type SenderTitle = "RIDER" | "DRIVER";
 
-export type MessageResponseDto = {
-  groupId: string;
+export type ChatMessage = {
   messageId: string;
   createdAt: string;
   senderId: string;
-  senderName: string;
-  senderTitle: SenderTitle;
   message: string;
+}
+
+export type GroupChatDataResponseDto = {
+  groupId: string;
+  members: {
+    [id: string]: {
+      senderName: string;
+      senderTitle: SenderTitle;
+      senderProfilePicture: string | undefined;
+    }
+  };
+  messages: ChatMessage[];
 }

@@ -36,7 +36,6 @@ export function NotificationProvider({ children }: { children: ReactNode}) {
   useEffect(() => {
     if (isConnected) {
       socket?.on("notification", (notif: NotificationPayload) => {
-        console.log("notification received", notif);
         toast((t) => <NotificationToast payload={notif} onClick={() => toast.dismiss(t.id)} />, {
           toasterId: "notification"
         });

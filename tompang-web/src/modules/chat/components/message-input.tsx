@@ -8,10 +8,12 @@ import toast from "react-hot-toast";
 
 interface MessageInputProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
   targetGroupId: string;
+  onMessageSent?: (message: string) => void;
 }
 
 export default function MessageInput({
   targetGroupId,
+  onMessageSent,
   className,
   ...props
 }: MessageInputProps) {
@@ -20,13 +22,19 @@ export default function MessageInput({
   const { currentUserId, isAuthenticated, authToken } = useAuth();
 
   const mutation = useMutation({
-    mutationFn: () => {
+    mutationFn: (message: string) => {
       if (!isAuthenticated) throw new Error("Must be authentitcated");
       return ChatService.sendChatMessage({ groupId: targetGroupId, senderId: currentUserId, message }, authToken);
     },
-    onError: (err) => {
+    onMutate() {
+      setMessage("");
+    },
+    onError(err) {
       toast.error(err.message)
     },
+    onSuccess(_data, message) {
+      onMessageSent?.(message);
+    }
   });
 
   return (
@@ -40,7 +48,7 @@ export default function MessageInput({
         maxRows={5}/>
       <Button 
       className="flex-none "
-        onClick={() => mutation.mutate()} 
+        onClick={() => mutation.mutate(message)} 
         disabled={mutation.isPending || !message} 
         variant="contained"
         color={mutation.isError ? "error" : "primary"}

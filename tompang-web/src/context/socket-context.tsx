@@ -12,6 +12,11 @@ interface SocketContextInterface {
 
 const SocketContext = createContext<SocketContextInterface | undefined>(undefined);
 
+export const SocketEvent = {
+  NOTIFICATION: "notification",
+  CHAT_MESSAGE: "chat-message",
+} as const;
+
 export function useSocket() {
   const context = useContext(SocketContext);
   if (context === undefined) {

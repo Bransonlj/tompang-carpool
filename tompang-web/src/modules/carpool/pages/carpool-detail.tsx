@@ -59,7 +59,7 @@ export default function CarpoolDetailPage() {
           </span>
         </div>
         <Divider orientation="vertical" flexItem />
-        <IconButton onClick={() => navigate(`/chat/${data.id}`)}><MessageCircleMore /></IconButton>
+        <IconButton onClick={() => navigate(`/chat/${data.id}`, { state: { from: "carpool", id } })}><MessageCircleMore /></IconButton>
       </div>
       <Divider />
       <div>
