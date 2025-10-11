@@ -6,19 +6,18 @@ const URL = 'http://localhost:4500'; // TODO: Update this
 interface SocketContextInterface {
   socket: Socket | null;
   isConnected: boolean;
-  connect: (userId: string) => void;
+  connect: (authToken: string) => void;
   disconnect: () => void;
 }
 
-const SocketContext = createContext<SocketContextInterface>({
-  socket: null,
-  isConnected: false,
-  connect: () => {},
-  disconnect: () => {}
-});
+const SocketContext = createContext<SocketContextInterface | undefined>(undefined);
 
 export function useSocket() {
-  return useContext(SocketContext);
+  const context = useContext(SocketContext);
+  if (context === undefined) {
+    throw new Error('useSocket must be used within an SocketProvider');
+  }
+  return context;
 }
 
 export function SocketProvider({ children }: { children: ReactNode}) {
@@ -26,23 +25,24 @@ export function SocketProvider({ children }: { children: ReactNode}) {
   const socketRef = useRef<Socket>(null);
 
   function handleConnect() {
-    console.log("connected");
+    console.log("socket connected");
     setIsConnected(true);
   }
   function handleDisonnect() {
-    console.log("disconnected");
+    console.log("socket disconnected");
     setIsConnected(false);
   }
 
   function handleError(err: any) {
-    console.log(`connection error: ${err.message}`);
+    console.log(`socket connection error: ${err.message}`);
   }
 
-  function connect(token: string) {
+  function connect(authToken: string) {
+    console.log("Connect called")
     socketRef.current = io(URL, {
-      autoConnect: false, // connect on login
+      autoConnect: false, // connect manually on login
       extraHeaders: {
-        Authorization: `Bearer ${token}`, // pass jwt
+        Authorization: `Bearer ${authToken}`, // pass jwt
       },
     });
 

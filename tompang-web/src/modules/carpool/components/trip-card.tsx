@@ -48,12 +48,12 @@ export default function TripCard({
 
       <div className={`w-3/4 p-4 relative flex flex-col gap-2 ${onClick && "hover:cursor-pointer"}`} onClick={onClick}>
         {/* Title + Utility Button */}
-        <div className="flex items-start">
-          <div className="flex flex-col truncate max-w-[80%] mr-auto">
-            <h2 className="text-lg font-semibold" >
+        <div className="flex items-start gap-2">
+          <div className="flex flex-col max-w-[80%] mr-auto">
+            <h2 className="text-lg font-semibold break-words" >
               {tripData.destinationAddress}
             </h2>
-            <span className="block ">From: {tripData.originAddress}</span>
+            <span className="block break-words">From: {tripData.originAddress}</span>
           </div>
           { options }
         </div>

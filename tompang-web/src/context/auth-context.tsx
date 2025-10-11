@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { jwtDecode, type JwtPayload } from "jwt-decode";
 import { useSocket } from "./socket-context";
 import type { LoginRequestDto, RegisterRequestDto, UserRole } from "../api/services/auth/types";
@@ -48,37 +48,35 @@ const UNAUTHENTICATED_AUTH_STATE: UnauthenticatedAuthState = {
   isAuthenticated: false,
 };
 
-const AuthContext = createContext<TAuthContext>({
-  currentUserId: null,
-  currentUserRoles: null,
-  authToken: null,
-  isAuthenticated: false,
-  login: async () => false, // Default value to indicate that login failed
-  register: async () => false, // Default value to indicate that registration failed
-  logout: () => {}, // Default empty function for logout
-  loginError: '',
-  registerError: '',
-  isLoginPending: false,
-  isRegisterPending: false,
-  isAdmin: false,
-  isUser: false,
-  isDriver: false,
-});
+const AuthContext = createContext<TAuthContext | undefined>(undefined);
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAth must be used within an AuthProvider');
+  }
+  return context;
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode}) {
-
-  const [authState, setAuthState] = useState<UnauthenticatedAuthState | AuthenticatedAuthState>(getAuthStateFromLocalStorage())
+  const { socket, connect, disconnect } = useSocket();
+  const [authState, setAuthState] = useState<UnauthenticatedAuthState | AuthenticatedAuthState>(() => {
+    const state = getAuthStateFromLocalStorage();
+    if (state.authToken) { // authenticated auth state
+      onLogin(state.authToken);
+    }
+    return state;
+  })
 
   const [loginError, setLoginError] = useState<string>("");
   const [isLoginPending, setLoginPending] = useState<boolean>(false);
   const [registerError, setRegisterError] = useState<string>(""); 
   const [isRegisterPending, setRegisterPending] = useState<boolean>(false);
 
-  // const { connect, disconnect } = useSocket(); // TODO use socket for notif
+  function onLogin(token: string) {
+    connect(token);
+    console.log(socket?.id ?? "no socket buh");
+  }
 
   const login = useCallback(async (loginDto: LoginRequestDto): Promise<boolean> => {
     setLoginError("");
@@ -95,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode}) {
       // save token to cookies
       localStorage.setItem(LocalStorageUserKey, data.token);
       setLoginPending(false);
-      //connect(data.userId);
+      onLogin(data.token);
       return true;
     } catch (error: any) {
       setLoginError(error.message);
@@ -125,13 +123,17 @@ export function AuthProvider({ children }: { children: React.ReactNode}) {
   const logout = useCallback((): void => {
     setAuthState(UNAUTHENTICATED_AUTH_STATE);
     localStorage.removeItem(LocalStorageUserKey);
-    //disconnect();
+    disconnect();
   }, []);
 
   const isUser = useMemo(() => authState.currentUserRoles?.includes("USER") ?? false, [authState]);
   const isDriver = useMemo(() => authState.currentUserRoles?.includes("DRIVER") ?? false, [authState]);
   const isAdmin = useMemo(() => authState.currentUserRoles?.includes("ADMIN") ?? false, [authState]);
 
+  /**
+   * util function to get AuthState from local storage
+   * @returns 
+   */
   function getAuthStateFromLocalStorage(): UnauthenticatedAuthState | AuthenticatedAuthState {
     const token = (localStorage.getItem(LocalStorageUserKey));
     if (token) {
@@ -143,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode}) {
           alert("login session has expired");
           return UNAUTHENTICATED_AUTH_STATE;
         } else {
-          // login from cookies
+          // get state from cookies
           return {
             currentUserId: payload.sub,
             currentUserRoles: payload.roles,

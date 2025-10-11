@@ -57,14 +57,16 @@ export default function ToolbarNotification({
           horizontal: 'center',
         }}
       >
-        <div className="p-2 max-h-96 overflow-y-auto">
+        <div className="max-h-96 overflow-y-auto w-64 flex flex-col">
           {
             isPending 
               ? <CircularProgress />
               : isError
               ? <Alert color="error">{ error.message }</Alert>
-              : notifications.map(notification => (
-                <div key={notification.notificationId}>
+              : notifications.length === 0
+              ? <h2 className="text-center p-2">No notifications</h2>
+              : notifications.map((notification, index) => (
+                <div key={notification.notificationId} className={`${index % 2 === 0 ? "bg-gray-50" : "bg-gray-200"} p-2`}>
                   <h2>{ notification.message }</h2>
                   <h3>{ new Date(notification.createdAt).toLocaleString() }</h3>
                 </div>
