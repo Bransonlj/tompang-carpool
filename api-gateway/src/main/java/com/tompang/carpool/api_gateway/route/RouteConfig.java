@@ -45,6 +45,15 @@ public class RouteConfig {
         }
 
         @Bean
+        public RouteLocator notificationServiceRoute(RouteLocatorBuilder builder) {
+                return builder.routes()
+                        .route("notification-service", r -> 
+                                r.path("/api/notification/**")
+                                .uri("http://localhost:4007"))
+                        .build();
+        }
+
+        @Bean
         public RouteLocator websocketServiceRoute(RouteLocatorBuilder builder) {
                 return builder.routes()
                         .route("websocket-service", r -> 
