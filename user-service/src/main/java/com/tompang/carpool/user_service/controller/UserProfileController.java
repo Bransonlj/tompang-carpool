@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.tompang.carpool.user_service.dto.UserProfileBatchRequestDto;
 import com.tompang.carpool.user_service.dto.UserProfileDto;
 import com.tompang.carpool.user_service.exception.BadRequestException;
 import com.tompang.carpool.user_service.service.UserProfileService;
