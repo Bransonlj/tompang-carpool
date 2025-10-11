@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { NotificationService } from './notification.service';
-import { CreateUserNotificationDto } from './dto/user-notification';
+import { CreateUserNotificationDto, UserNotificationDto } from './dto/user-notification';
 
 @Controller('/api/notification')
 export class NotificationController {
@@ -15,9 +15,8 @@ export class NotificationController {
   }
 
   @Get("user/:id")
-  async testCass(@Param('id') userId: string) {
-    const notifications = await this.notificationService.getNotificationsByUser(userId);
-    return notifications;
+  async getNotificationsByUserId(@Param('id') userId: string): Promise<UserNotificationDto[]> {
+    return await this.notificationService.getNotificationsByUser(userId);;
   }
 
 }
