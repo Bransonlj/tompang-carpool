@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { RideRequestDetail, RideRequestSummary } from './dto';
-import { CarpoolService } from 'src/backend/carpool/carpool.service';
 import { UserService } from 'src/backend/user/user.service';
 import { RideRequestService } from 'src/backend/carpool/ride-request.service';
 import { CreateRideRequestDto } from './dto/create-ride-request.dto';
@@ -33,7 +32,7 @@ export class RideRequestController {
       ...rideRequest.matchedCarpools.map(carpool => carpool.driverId), 
       ...(rideRequest.assignedCarpool?.driverId ? [rideRequest.assignedCarpool.driverId] : []),
     ]);
-    const userProfileIdMap = await this.userService.getUserProfilesFromIdsByBatch(driverIds, authHeader);
+    const userProfileIdMap = await this.userService.getUserProfilesFromIdsByBatch({ ids: Array.from(driverIds), includePhoto: false }, authHeader);
     const assignedCarpool: RideRequestDetail["assignedCarpool"] = !!rideRequest.assignedCarpool
       ? {
         id: rideRequest.assignedCarpool.id,

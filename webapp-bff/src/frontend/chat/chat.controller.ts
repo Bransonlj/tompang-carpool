@@ -16,7 +16,7 @@ export class ChatController {
   async getGroupMessages(@Param("gid") groupId: string, @Headers("Authorization") authHeader: string): Promise<GroupChatDataResponseDto> {
     const groupChatData = await this.chatService.getGroupChatData(groupId, authHeader);
     const userIds = new Set(groupChatData.members.map(member => member.userId));
-    const userProfiles = await this.userService.getUserProfilesFromIdsByBatch(userIds, authHeader);
+    const userProfiles = await this.userService.getUserProfilesFromIdsByBatch({ ids: Array.from(userIds), includePhoto: true }, authHeader);
 
     const members: MembersMap = groupChatData.members.reduce((acc, member) => {
       acc[member.userId] = {

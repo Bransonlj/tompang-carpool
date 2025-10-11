@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { AxiosError } from 'axios';
-import { ErrorResponseDto, LoginRequestDto, LoginResponseDto, RegisterRequestDto, UserProfileBatchResponseDto, UserProfileResponseDto } from './dto';
+import { ErrorResponseDto, LoginRequestDto, LoginResponseDto, RegisterRequestDto, UserprofileBatchRequestDto, UserProfileBatchResponseDto, UserProfileResponseDto } from './dto';
 import { firstValueFrom } from 'rxjs';
 import { authorizationHeader } from '../util';
 import { plainToInstance } from 'class-transformer';
@@ -26,10 +26,10 @@ export class UserService {
     }
   }
 
-  async getUserProfilesFromIdsByBatch(ids: Set<string>, authorization: string): Promise<UserProfileBatchResponseDto> {
+  async getUserProfilesFromIdsByBatch(dto: UserprofileBatchRequestDto, authorization: string): Promise<UserProfileBatchResponseDto> {
     try {
       const response = await firstValueFrom(
-        this.http.post(`api/user/profile/batch`, Array.from(ids), authorizationHeader(authorization)),
+        this.http.post(`api/user/profile/batch`, dto, authorizationHeader(authorization)),
       );
 
       return plainToInstance(UserProfileBatchResponseDto, response.data, {

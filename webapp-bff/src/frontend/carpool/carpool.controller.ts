@@ -30,7 +30,7 @@ export class CarpoolController {
       ...carpool.pendingRequests.map(ride => ride.riderId), 
       ...carpool.confirmedRequests.map(ride => ride.riderId)
     ]);
-    const userProfileIdMap = await this.userService.getUserProfilesFromIdsByBatch(passengerIds, authHeader);
+    const userProfileIdMap = await this.userService.getUserProfilesFromIdsByBatch({ ids: Array.from(passengerIds), includePhoto: false }, authHeader);
     const confirmedRides: CarpoolDetail["confirmedRides"] = carpool.confirmedRequests.map(ride => ({
       id: ride.id,
       passengers: ride.passengers,

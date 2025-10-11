@@ -46,13 +46,19 @@ public class UserProfileService {
     }
   }
 
-  public Map<String, UserProfileDto> getUserProfilesMappedByIds(List<String> ids) {
+  /**
+   * Fetches and returns a map of UserProfiles from the list of user ids.
+   * @param ids
+   * @param includePhoto whether to generate and include the photo url.
+   * @return
+   */
+  public Map<String, UserProfileDto> getUserProfilesMappedByIds(List<String> ids, boolean includePhoto) {
     List<User> users = repository.findAllById(ids);
     Map<String, UserProfileDto> userMap = new HashMap<>();
     UserProfileDto dto;
     for (User user : users) {
       dto = UserProfileDto.fromEntity(user);
-      if (user.hasProfilePicture) {
+      if (includePhoto && user.hasProfilePicture) {
         String profilePictureUrl = s3Service.getFileUrl(user.getId(), S3Service.Directory.PROFILE_PICTURE);
         dto.setProfilePictureUrl(profilePictureUrl);
       }

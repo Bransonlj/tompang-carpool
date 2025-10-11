@@ -5,12 +5,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tompang.carpool.user_service.dto.BatchUserProfileRequestDto;
 import com.tompang.carpool.user_service.dto.UserProfileDto;
 import com.tompang.carpool.user_service.exception.BadRequestException;
 import com.tompang.carpool.user_service.service.UserProfileService;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
@@ -37,8 +37,8 @@ public class UserProfileController {
   }
 
   @PostMapping("batch")
-  public ResponseEntity<Map<String, UserProfileDto>> getUsersByIds(@RequestBody List<String> ids) {
-    return ResponseEntity.ok(userProfileService.getUserProfilesMappedByIds(ids));
+  public ResponseEntity<Map<String, UserProfileDto>> getUsersByIds(@RequestBody BatchUserProfileRequestDto dto) {
+    return ResponseEntity.ok(userProfileService.getUserProfilesMappedByIds(dto.ids, dto.includePhoto));
   }
 
   @PostMapping(value = "picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
