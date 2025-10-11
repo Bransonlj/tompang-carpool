@@ -1,22 +1,22 @@
-import { IsString } from "class-validator";
+import { UserTitle } from "src/backend/chat/dto";
 
-export class SendMessageDto {
-  @IsString()
-  groupId: string;
-
-  @IsString()
-  senderId: string;
-
-  @IsString()
-  message: string;
-}
-
-export class MessageResponseDto {
-  groupId: string;
+export class ChatMessage {
   messageId: string;
   createdAt: Date;
   senderId: string;
-  senderName: string;
-  senderTitle: "RIDER" | "DRIVER";
   message: string;
+}
+
+export type MembersMap = {
+  [id: string]: {
+    senderName: string;
+    senderTitle: UserTitle;
+    senderProfilePicture: string | undefined;
+  };
+};
+
+export class GroupChatDataResponseDto {
+  groupId: string;
+  members: MembersMap;
+  messages: ChatMessage[];
 }

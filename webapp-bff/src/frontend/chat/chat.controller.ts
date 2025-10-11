@@ -1,64 +1,41 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { MessageResponseDto, SendMessageDto } from './dto';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
+import { GroupChatDataResponseDto, MembersMap } from './dto';
+import { ChatService } from 'src/backend/chat/chat.service';
+import { UserService } from 'src/backend/user/user.service';
+import { SendMessageDto } from 'src/backend/chat/dto';
 
 @Controller('api/chat')
 export class ChatController {
 
-  @Get("messages/:gid")
-  async getGroupMessages(@Param("gid") groupId: string): Promise<MessageResponseDto[]> {
-    return [
-      {
-        groupId: "carpool-123",
-        messageId: "1",
-        senderId: "user-123",
-        senderName: "Bob Tan",
-        senderTitle: "DRIVER",
-        createdAt: new Date(),
-        message: "welcome to my carpool",
-      },
-      {
-        groupId: "carpool-123",
-        messageId: "2",
-        senderId: "test-user-id",
-        senderName: "Testy Tester",
-        senderTitle: "RIDER",
-        createdAt: new Date(),
-        message: "thanks for accepting me",
-      },
-      {
-        groupId: "carpool-123",
-        messageId: "3",
-        senderId: "user-345",
-        senderName: "User Bob",
-        senderTitle: "RIDER",
-        createdAt: new Date(),
-        message: "hello",
-      },
-            {
-        groupId: "carpool-123",
-        messageId: "3",
-        senderId: "user-345",
-        senderName: "User Bob",
-        senderTitle: "RIDER",
-        createdAt: new Date(),
-        message: "hello",
-      },
-            {
-        groupId: "carpool-123",
-        messageId: "3",
-        senderId: "user-345",
-        senderName: "User Bob",
-        senderTitle: "RIDER",
-        createdAt: new Date(),
-        message: "hello",
-      },
+  constructor(
+    private chatService: ChatService,
+    private userService: UserService,
+  ) {}
 
-    ]
+  @Get("group/:gid")
+  async getGroupMessages(@Param("gid") groupId: string, @Headers("Authorization") authHeader: string): Promise<GroupChatDataResponseDto> {
+    const groupChatData = await this.chatService.getGroupChatData(groupId, authHeader);
+    const userIds = new Set(groupChatData.members.map(member => member.userId));
+    const userProfiles = await this.userService.getUserProfilesFromIdsByBatch(userIds, authHeader);
+
+    const members: MembersMap = groupChatData.members.reduce((acc, member) => {
+      acc[member.userId] = {
+        senderName: userProfiles[member.userId]?.fullName ?? "Unknown",
+        senderTitle: member.userTitle,
+        senderProfilePicture: userProfiles[member.userId]?.profilePictureUrl ?? undefined,
+      };
+      return acc;
+    }, {} as MembersMap);
+    return {
+      groupId,
+      members,
+      messages: groupChatData.messages,
+    };
   }
 
   @Post("send")
-  async sendChatMessage(@Body() dto: SendMessageDto): Promise<void> {
-    
+  async sendChatMessage(@Body() dto: SendMessageDto, @Headers("Authorization") authHeader: string): Promise<void> {
+    return await this.chatService.sendMessage(dto, authHeader);
   }
 
 }

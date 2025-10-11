@@ -5,6 +5,7 @@ import { RideRequestService } from './carpool/ride-request.service';
 import { UserService } from './user/user.service';
 import { HttpLoggingService } from './http-logging.service';
 import { NotificationService } from './notification/notification.service';
+import { ChatService } from './chat/chat.service';
 
 @Module({
   imports: [HttpModule.register({
@@ -15,13 +16,15 @@ import { NotificationService } from './notification/notification.service';
     CarpoolService, 
     RideRequestService, 
     UserService, 
-    NotificationService,
+    NotificationService, 
+    ChatService,
   ],
   exports: [
     CarpoolService,  
     RideRequestService,
     UserService,
     NotificationService,
+    ChatService,
   ],
 })
 export class BackendModule {}

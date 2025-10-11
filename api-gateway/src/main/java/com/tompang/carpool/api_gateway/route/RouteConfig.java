@@ -54,6 +54,15 @@ public class RouteConfig {
         }
 
         @Bean
+        public RouteLocator chatServiceRoute(RouteLocatorBuilder builder) {
+                return builder.routes()
+                        .route("chat-service", r -> 
+                                r.path("/api/chat/**")
+                                .uri("http://localhost:4006"))
+                        .build();
+        }
+
+        @Bean
         public RouteLocator websocketServiceRoute(RouteLocatorBuilder builder) {
                 return builder.routes()
                         .route("websocket-service", r -> 
