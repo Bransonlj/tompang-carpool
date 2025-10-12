@@ -18,11 +18,11 @@ public class DriverRegistrationResponseDto {
     public String vehicleModel;
     public LocalDateTime createdAt;
     public RegistrationStatus status;
-    
-    public String signedImageUrl;
+    public String rejectedReason; // null if not failed status
+    public String signedImageUrl; // null if not provided
 
     public static DriverRegistrationResponseDto fromEntity(DriverRegistration driver) {
-        return DriverRegistrationResponseDto.builder()
+        DriverRegistrationResponseDto dto = DriverRegistrationResponseDto.builder()
             .id(driver.getId())
             .userId(driver.getUserId())
             .vehicleRegistrationNumber(driver.getVehicleRegistrationNumber())
@@ -31,5 +31,16 @@ public class DriverRegistrationResponseDto {
             .createdAt(driver.getCreatedAt())
             .status(driver.getRegistrationStatus())
             .build();
+        
+        if (driver.getRegistrationStatus().equals(RegistrationStatus.FAILED)) {
+            if (driver.getManualReview() != null && driver.getManualReview().getFailReason() != null) {
+                dto.setRejectedReason(driver.getManualReview().getFailReason());
+            } else {
+                // automatically rejected
+                dto.setRejectedReason("Automatic validation failed");
+            }
+        }
+
+        return dto;
     }
 }

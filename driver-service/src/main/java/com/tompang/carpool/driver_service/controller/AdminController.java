@@ -15,6 +15,7 @@ import com.tompang.carpool.driver_service.dto.DriverRegistrationResponseDto;
 import com.tompang.carpool.driver_service.dto.admin.ManualRejectRequestDto;
 import com.tompang.carpool.driver_service.exception.AccessDeniedException;
 import com.tompang.carpool.driver_service.service.DriverAdminService;
+import com.tompang.carpool.driver_service.service.S3Service;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
@@ -23,9 +24,11 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 public class AdminController {
 
     private final DriverAdminService adminService;
+    private final S3Service s3Service;
 
-    public AdminController(DriverAdminService adminService) {
+    public AdminController(DriverAdminService adminService, S3Service s3Service) {
         this.adminService = adminService;
+        this.s3Service = s3Service;
     }
 
     private void verifyAdminRole(String roles) {
@@ -43,7 +46,14 @@ public class AdminController {
         return ResponseEntity.ok().body(
             adminService.getAllPendingManualReview()
                 .stream()
-                .map(registration -> DriverRegistrationResponseDto.fromEntity(registration))
+                .map(registration -> {
+                    DriverRegistrationResponseDto dto = DriverRegistrationResponseDto.fromEntity(registration);
+                    dto.setSignedImageUrl(s3Service.getFileUrl(S3Service.Key.builder()
+                            .dir(S3Service.DRIVER_FOLDER)
+                            .id(registration.getId())
+                            .build()));
+                    return dto;
+                })
                 .toList());
     }
 

@@ -1,6 +1,7 @@
 package com.tompang.carpool.driver_service.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,8 @@ import com.tompang.carpool.driver_service.service.DriverRegistrationService;
 import com.tompang.carpool.driver_service.service.S3Service;
 import com.tompang.carpool.driver_service.service.VerificationService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/driver")
 public class DriverController {
@@ -31,6 +34,28 @@ public class DriverController {
         this.s3Service = s3Service;
         this.driverService = driverService;
         this.verificationService = verificationService;
+    }
+
+    /**
+     * Returns all registrations made by the user, without imageUrl.
+     * @param uid
+     * @return
+     */
+    @GetMapping("user/{uid}")
+    public ResponseEntity<List<DriverRegistrationResponseDto>> getDriverRegistrationByUserId(
+        @PathVariable String uid
+    ) {
+        List<DriverRegistration> registrations = driverService.getRegistrationByUserId(uid);
+        return ResponseEntity.ok().body(registrations.stream()
+                .map(registration -> {
+                    DriverRegistrationResponseDto dto = DriverRegistrationResponseDto.fromEntity(registration);
+                    dto.setSignedImageUrl(s3Service.getFileUrl(S3Service.Key.builder()
+                            .dir(S3Service.DRIVER_FOLDER)
+                            .id(registration.getId())
+                            .build()));
+                    return dto;
+                })
+                .toList());
     }
 
     @GetMapping("{id}")
@@ -50,7 +75,7 @@ public class DriverController {
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> registerDriver(
             @RequestPart("image") MultipartFile file,
-            @RequestPart("data") RegisterDriverRequestDto dto) throws Exception {
+            @RequestPart("data") @Valid RegisterDriverRequestDto dto) throws Exception {
 
         // Check file is not empty
         if (file.isEmpty()) {

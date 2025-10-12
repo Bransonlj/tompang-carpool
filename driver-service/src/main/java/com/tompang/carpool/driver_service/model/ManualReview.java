@@ -25,7 +25,7 @@ public class ManualReview {
     private Long id;
     private String reviewerId;
     private boolean isApproved;
-    private String failReason;
+    private String failReason; // null if not approved
     private LocalDateTime createdAt;
 
 }

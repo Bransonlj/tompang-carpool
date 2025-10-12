@@ -45,13 +45,19 @@ public class VerificationService {
             throw exception;
         }
 
-        rabbitTemplate.convertAndSend(RabbitConfig.DRIVER_VERIFICATION_JOB_QUEUE, new DriverVerificationJobDto(
-                driverRegistrationId, dto.getVehicleRegistrationNumber(),
-                S3Service.Key.builder()
-                        .dir(S3Service.DRIVER_FOLDER)
-                        .id(driverRegistrationId)
-                        .build().toString()
-        ));
+
+        // create job if not require manual review
+        if (!dto.isRequireManualReview()) {
+            rabbitTemplate.convertAndSend(RabbitConfig.DRIVER_VERIFICATION_JOB_QUEUE, new DriverVerificationJobDto(
+                    driverRegistrationId, dto.getVehicleRegistrationNumber(),
+                    S3Service.Key.builder()
+                            .dir(S3Service.DRIVER_FOLDER)
+                            .id(driverRegistrationId)
+                            .build().toString()
+            ));
+        }
+
+
 
         return driverRegistrationId;
     }

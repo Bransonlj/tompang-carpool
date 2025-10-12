@@ -3,7 +3,6 @@ package com.tompang.carpool.driver_service.model;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -31,8 +30,6 @@ public class DriverRegistration {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-
-    @Column(unique = true) // 1 validation per user
     private String userId;
     private String vehicleRegistrationNumber;
     private String vehicleMake;

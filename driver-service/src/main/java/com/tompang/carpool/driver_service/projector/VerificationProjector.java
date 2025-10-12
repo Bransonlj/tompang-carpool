@@ -1,5 +1,7 @@
 package com.tompang.carpool.driver_service.projector;
 
+import java.util.List;
+
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,8 @@ import com.tompang.carpool.driver_service.model.RegistrationStatus;
 import com.tompang.carpool.driver_service.repository.DriverRegistrationRepository;
 import com.tompang.carpool.driver_service.service.KafkaProducerService;
 
+import jakarta.transaction.Transactional;
+
 @Component
 public class VerificationProjector {
 
@@ -24,6 +28,7 @@ public class VerificationProjector {
         this.kafkaProducerService = kafkaProducerService;
     }
 
+    @Transactional
     @RabbitListener(queues = RabbitConfig.DRIVER_VERIFICATION_RESULT_QUEUE)
     public void handleVerificationCompleted(DriverVerificationResultDto dto) {
         DriverRegistration driver = registrationRepository.findById(dto.driverRegistrationId)
@@ -32,7 +37,18 @@ public class VerificationProjector {
             throw new BadRequestException("Cannot auto update registration status that is not 'PENDING'");
         }
                 
+        // update registration status
         if (dto.result.equals(VerificationResult.VALID)) {
+            // update old success registration to inactive
+            List<DriverRegistration> registrations = registrationRepository.findAllByUserIdAndRegistrationStatus(driver.getUserId(), RegistrationStatus.SUCCESS);
+            for (DriverRegistration registration : registrations) {
+                if (registration.getRegistrationStatus().equals(RegistrationStatus.SUCCESS) 
+                        && !registration.getId().equals(driver.getId())) {
+                    registration.setRegistrationStatus(RegistrationStatus.INACTIVE);
+                    registrationRepository.save(registration);
+                }
+            }
+
             driver.setRegistrationStatus(RegistrationStatus.SUCCESS);
         } else if (dto.result.equals(VerificationResult.UNSURE)) {
             driver.setRegistrationStatus(RegistrationStatus.PENDING_MANUAL_REVIEW);
@@ -42,6 +58,7 @@ public class VerificationProjector {
 
         registrationRepository.save(driver);
 
+        // produce kafka event
         if (dto.result.equals(VerificationResult.VALID)) {
             kafkaProducerService.produceDriverRegistrationApproved(driver.getId(), driver.getUserId());
         } else if (dto.result.equals(VerificationResult.INVALID)) {

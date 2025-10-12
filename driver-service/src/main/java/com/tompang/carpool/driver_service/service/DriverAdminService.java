@@ -35,6 +35,16 @@ public class DriverAdminService {
             throw new BadRequestException("Cannot manually accept driver registration that is not pending manual review. Status: " + registration.getRegistrationStatus());
         }
 
+        // update old success registration to inactive
+        List<DriverRegistration> registrations = registrationRepository.findAllByUserIdAndRegistrationStatus(registration.getUserId(), RegistrationStatus.SUCCESS);
+        for (DriverRegistration oldRegistration : registrations) {
+            if (oldRegistration.getRegistrationStatus().equals(RegistrationStatus.SUCCESS) 
+                    && !oldRegistration.getId().equals(registration.getId())) {
+                oldRegistration.setRegistrationStatus(RegistrationStatus.INACTIVE);
+                registrationRepository.save(oldRegistration);
+            }
+        }
+
         registration.setRegistrationStatus(RegistrationStatus.SUCCESS);
         registration.setManualReview(ManualReview.builder()
             .reviewerId(adminId)

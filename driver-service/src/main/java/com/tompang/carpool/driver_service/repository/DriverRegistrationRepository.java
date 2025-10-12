@@ -10,4 +10,8 @@ import com.tompang.carpool.driver_service.model.RegistrationStatus;
 public interface DriverRegistrationRepository extends JpaRepository<DriverRegistration, String> {
 
     List<DriverRegistration> findAllByRegistrationStatus(RegistrationStatus registrationStatus);
+
+    List<DriverRegistration> findAllByUserId(String userId);
+
+    List<DriverRegistration> findAllByUserIdAndRegistrationStatus(String userId, RegistrationStatus registrationStatus);
 }
