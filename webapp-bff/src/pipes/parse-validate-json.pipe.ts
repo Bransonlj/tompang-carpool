@@ -23,7 +23,7 @@ export class ParseAndValidateJsonPipe implements PipeTransform {
     const errors = validateSync(object, { whitelist: true, forbidNonWhitelisted: true });
 
     if (errors.length > 0) {
-      throw new BadRequestException(errors);
+      throw new BadRequestException(errors.join("|"));
     }
 
     return object;

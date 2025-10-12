@@ -1,34 +1,51 @@
-import { Body, Controller, Get, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { DriverRegistrationResponseDto, RegisterDriverDto } from './dto';
+import { DriverRegistrationResponseDto } from './dto';
 import { ParseAndValidateJsonPipe } from 'src/pipes/parse-validate-json.pipe';
+import { DriverService } from 'src/backend/driver/driver.service';
+import { RegisterDriverRequestDto } from 'src/backend/driver/dto';
 
 @Controller('api/driver')
 export class DriverController {
+
+  constructor(
+    private driverService: DriverService,
+  ) {}
   
-  @Get('registration/:userid')
-  async getRegistrationByUserId(@Param("userid") userId: string): Promise<DriverRegistrationResponseDto[]> {
-    return [
-      {
-        id: "driver-reg-123",
-        userId: "bob-123456",
-        vehicleRegistrationNumber: "SGT1230K",
-        vehicleMake: "Toyota",
-        vehicleModel: "Atlas",
-        createdAt: new Date(),
-        status: "PENDING", // PENDING, PENDING_MANUAL_REVIEW, SUCCESS, FAILED
-        imageUrl: "testimage"
-      },
-    ];
+  @Get('registration/user/:userid')
+  async getRegistrationsByUserId(
+    @Param("userid") userId: string, 
+    @Headers("Authorization") authHeader: string,
+  ): Promise<DriverRegistrationResponseDto[]> {
+    const registrations = await this.driverService.getDriverRegistrationsByUserId(userId, authHeader);
+    return registrations.map(registration => ({
+      ...registration,
+      rejectedReason: registration.rejectedReason ?? undefined,
+      imageUrl: registration.signedImageUrl ?? undefined,
+    }));
+  }
+
+  @Get('registration/:rid')
+  async getRegistrationById(
+    @Param("rid") rid: string, 
+    @Headers("Authorization") authHeader: string,
+  ): Promise<DriverRegistrationResponseDto> {
+    const registration = await this.driverService.getDriverRegistrationById(rid, authHeader);
+    return {
+      ...registration,
+      rejectedReason: registration.rejectedReason ?? undefined,
+      imageUrl: registration.signedImageUrl ?? undefined,
+    };
   }
 
   @Post('register')
   @UseInterceptors(FileInterceptor('file'))
   async uploadProfilePicture(
     @UploadedFile() file: Express.Multer.File,
-    @Body('dto', new ParseAndValidateJsonPipe(RegisterDriverDto))
-    dto: RegisterDriverDto,
+    @Body('dto', new ParseAndValidateJsonPipe(RegisterDriverRequestDto)) dto: RegisterDriverRequestDto,
+    @Headers("Authorization") authHeader: string,
   ) {
-    console.log(`uploaded: ${file.filename} ${file.size} ${JSON.stringify(dto)}`);
+    console.log(dto)
+    return await this.driverService.createDriverRegistration(dto, file, authHeader);
   }
 }

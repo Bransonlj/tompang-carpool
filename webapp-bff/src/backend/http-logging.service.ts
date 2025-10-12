@@ -13,7 +13,7 @@ export class HttpLoggingService implements OnModuleInit {
 
     // Request interceptor
     axios.interceptors.request.use((config) => {
-      this.logger.log(`➡️  [${config.method?.toUpperCase()}] ${config.url}`);
+      this.logger.log(`➡️  [${config.method?.toUpperCase()}] ${config.url} | Authorization: ${config.headers.Authorization}`);
       return config;
     });
   }

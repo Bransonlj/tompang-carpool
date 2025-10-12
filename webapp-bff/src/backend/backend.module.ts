@@ -6,6 +6,8 @@ import { UserService } from './user/user.service';
 import { HttpLoggingService } from './http-logging.service';
 import { NotificationService } from './notification/notification.service';
 import { ChatService } from './chat/chat.service';
+import { DriverService } from './driver/driver.service';
+import { DriverAdminService } from './driver/driver-admin.service';
 
 @Module({
   imports: [HttpModule.register({
@@ -17,7 +19,9 @@ import { ChatService } from './chat/chat.service';
     RideRequestService, 
     UserService, 
     NotificationService, 
-    ChatService,
+    ChatService, 
+    DriverService,
+    DriverAdminService,
   ],
   exports: [
     CarpoolService,  
@@ -25,6 +29,8 @@ import { ChatService } from './chat/chat.service';
     UserService,
     NotificationService,
     ChatService,
+    DriverService,
+    DriverAdminService,
   ],
 })
 export class BackendModule {}
