@@ -6,7 +6,11 @@ export type RegisterDriverDto = {
   vehicleRegistrationNumber: string;
   vehicleMake: string;
   vehicleModel: string;
+
+  requireManualReview?: boolean;
 }
+
+export type DriverRegistrationStatus = "PENDING" | "PENDING_MANUAL_REVIEW" | "SUCCESS" | "FAILED" | "INACTIVE";
 
 export type DriverRegistrationResponseDto = {
     id: string;
@@ -15,6 +19,7 @@ export type DriverRegistrationResponseDto = {
     vehicleMake: string;
     vehicleModel: string;
     createdAt: string;
-    status: string;
-    imageUrl: string;
+    status: DriverRegistrationStatus;
+    rejectedReason: string | undefined;
+    imageUrl: string | undefined;
 }
