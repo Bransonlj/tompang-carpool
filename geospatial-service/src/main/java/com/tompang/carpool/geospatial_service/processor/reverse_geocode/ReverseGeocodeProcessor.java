@@ -1,4 +1,4 @@
-package com.tompang.carpool.geospatial_service.reverse_geocode;
+package com.tompang.carpool.geospatial_service.processor.reverse_geocode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import com.tompang.carpool.geospatial_service.common.exception.OnemapApiExceptio
 import com.tompang.carpool.geospatial_service.config.RabbitConfig;
 import com.tompang.carpool.geospatial_service.onemap.OnemapService;
 import com.tompang.carpool.geospatial_service.onemap.dto.OnemapGeocodeResponseDto;
-import com.tompang.carpool.geospatial_service.reverse_geocode.dto.ReverseGeocodeJobDto;
+import com.tompang.carpool.geospatial_service.processor.reverse_geocode.dto.ReverseGeocodeJobDto;
 
 
 /**

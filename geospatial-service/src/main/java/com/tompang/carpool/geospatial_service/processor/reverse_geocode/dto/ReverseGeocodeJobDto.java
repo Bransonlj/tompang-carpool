@@ -1,4 +1,4 @@
-package com.tompang.carpool.geospatial_service.reverse_geocode.dto;
+package com.tompang.carpool.geospatial_service.processor.reverse_geocode.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
