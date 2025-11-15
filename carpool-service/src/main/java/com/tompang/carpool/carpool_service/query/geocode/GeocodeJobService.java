@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.tompang.carpool.carpool_service.config.RabbitConfig;
 import com.tompang.carpool.carpool_service.query.geocode.dto.ReverseGeocodeJobDto;
+import com.tompang.carpool.carpool_service.query.geocode.dto.StaticMapJobDto;
 
 @Service
 public class GeocodeJobService {
@@ -16,5 +17,9 @@ public class GeocodeJobService {
 
     public void createReverseGeocodeJob(ReverseGeocodeJobDto data) {
         rabbitTemplate.convertAndSend(RabbitConfig.REVERSE_GEOCODE_QUEUE, data);
+    }
+
+    public void createStaticMapJob(StaticMapJobDto data) {
+        rabbitTemplate.convertAndSend(RabbitConfig.STATIC_MAP_QUEUE, data);
     }
 }

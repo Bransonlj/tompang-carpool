@@ -9,6 +9,7 @@ import com.tompang.carpool.carpool_service.query.entity.RideRequest;
 import com.tompang.carpool.carpool_service.query.entity.RideRequestStatus;
 import com.tompang.carpool.carpool_service.query.geocode.GeocodeJobService;
 import com.tompang.carpool.carpool_service.query.geocode.dto.ReverseGeocodeJobDto;
+import com.tompang.carpool.carpool_service.query.geocode.dto.StaticMapJobDto;
 import com.tompang.carpool.carpool_service.query.repository.RideRequestQueryRepository;
 import com.tompang.carpool.event.ride_request.RideRequestCreatedEvent;
 import com.tompang.carpool.event.ride_request.RideRequestFailedEvent;
@@ -52,6 +53,26 @@ public class RideRequestProjector {
                 event.getRoute().getDestination().getLongitude(), 
                 GeocodeEntity.RIDEREQUEST, request.getId(), GeocodeEntityField.DESTINATION
             )
+        );
+
+        // create static map jobs
+        geocodeJobService.createStaticMapJob(
+            StaticMapJobDto.builder()
+                .latitude(event.getRoute().getOrigin().getLatitude())
+                .longitude(event.getRoute().getOrigin().getLongitude())
+                .entity(GeocodeEntity.RIDEREQUEST)
+                .entityId(request.getId())
+                .field(GeocodeEntityField.ORIGIN)
+                .build()
+        );
+        geocodeJobService.createStaticMapJob(
+            StaticMapJobDto.builder()
+                .latitude(event.getRoute().getDestination().getLatitude())
+                .longitude(event.getRoute().getDestination().getLongitude())
+                .entity(GeocodeEntity.RIDEREQUEST)
+                .entityId(request.getId())
+                .field(GeocodeEntityField.DESTINATION)
+                .build()
         );
     }
 

@@ -12,10 +12,16 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
 
     public static final String REVERSE_GEOCODE_QUEUE = "reverseGeocodeQueue";
+    public static final String STATIC_MAP_QUEUE = "staticMapQueue";
 
     @Bean
     public Queue reverseGeocodeQueue() {
         return new Queue(REVERSE_GEOCODE_QUEUE);
+    }
+
+    @Bean
+    public Queue staticMapQueue() {
+        return new Queue(STATIC_MAP_QUEUE);
     }
 
     @Bean

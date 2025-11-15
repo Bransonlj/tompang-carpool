@@ -19,6 +19,8 @@ public class RideRequestSummaryDto {
     public final LocalDateTime endTime;
     public final RouteDto route;
     public final RideRequestStatus status;
+    public String originImageUrl;
+    public String destinationImageUrl;
 
     public static RideRequestSummaryDto fromEntity(RideRequest request) {
         if (request == null) return null;
@@ -31,5 +33,13 @@ public class RideRequestSummaryDto {
                 .route(new RouteDto(request.getOrigin(), request.getDestination(), request.getOriginEventualAddress(), request.getDestinationEventualAddress()))
                 .status(request.getStatus())
                 .build();
+    }
+
+    public void setOriginImageUrl(String originImageUrl) {
+        this.originImageUrl = originImageUrl;
+    }
+
+    public void setDestinationImageUrl(String destinationImageUrl) {
+        this.destinationImageUrl = destinationImageUrl;
     }
 }

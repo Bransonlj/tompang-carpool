@@ -78,6 +78,9 @@ public class RideRequest {
     @OnDelete(action = OnDeleteAction.NO_ACTION)
     private Carpool assignedCarpool;
 
+    private String originImageKey;
+    private String destinationImageKey;
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true; // Same object

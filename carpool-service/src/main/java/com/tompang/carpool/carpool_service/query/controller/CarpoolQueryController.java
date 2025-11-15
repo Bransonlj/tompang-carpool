@@ -1,7 +1,6 @@
 package com.tompang.carpool.carpool_service.query.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,10 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tompang.carpool.carpool_service.common.exceptions.ResourceNotFoundException;
 import com.tompang.carpool.carpool_service.query.dto.CarpoolDetailedDto;
 import com.tompang.carpool.carpool_service.query.dto.CarpoolSummaryDto;
-import com.tompang.carpool.carpool_service.query.entity.Carpool;
 import com.tompang.carpool.carpool_service.query.service.CarpoolQueryService;
 
 @RestController
@@ -27,21 +24,13 @@ public class CarpoolQueryController {
 
     @GetMapping("{id}")
     public ResponseEntity<CarpoolDetailedDto> getCarpoolById(@PathVariable String id) {
-        Optional<Carpool> carpool = carpoolQueryService.getCarpoolById(id);
-        if (carpool.isEmpty()) {
-            throw new ResourceNotFoundException("Carpool not found: " + id);
-        }
-
-        return ResponseEntity.ok(CarpoolDetailedDto.fromEntity(carpool.get()));
+        CarpoolDetailedDto dto = carpoolQueryService.getCarpoolById(id);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("driver/{id}")
     public ResponseEntity<List<CarpoolSummaryDto>> getCarpoolByDriverId(@PathVariable String id) {
-        List<CarpoolSummaryDto> carpoolDtos = carpoolQueryService.getCarpoolByDriverId(id)
-                .stream()
-                .map(carpool -> CarpoolSummaryDto.fromEntity(carpool))
-                .toList();
-
+        List<CarpoolSummaryDto> carpoolDtos = carpoolQueryService.getCarpoolByDriverId(id);
         return ResponseEntity.ok(carpoolDtos);
     }
 

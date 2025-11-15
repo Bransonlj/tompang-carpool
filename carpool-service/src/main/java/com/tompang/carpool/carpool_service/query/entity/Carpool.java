@@ -73,6 +73,9 @@ public class Carpool {
     )
     private Set<RideRequest> pendingRideRequests = new HashSet<>();
 
+    private String originImageKey;
+    private String destinationImageKey;
+
     public void incrementSeatsAssigned(int seats) {
         this.seatsAssigned += seats;
     }

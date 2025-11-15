@@ -11,6 +11,7 @@ import com.tompang.carpool.carpool_service.query.entity.RideRequest;
 import com.tompang.carpool.carpool_service.query.repository.CarpoolQueryRepository;
 import com.tompang.carpool.carpool_service.query.repository.RideRequestQueryRepository;
 import com.tompang.carpool.geospatial.ReverseGeocodeCompletedEvent;
+import com.tompang.carpool.geospatial.StaticMapCompletedEvent;
 import com.tompang.carpool.geospatial.enums.GeocodeEntity;
 import com.tompang.carpool.geospatial.enums.GeocodeEntityField;
 
@@ -55,6 +56,31 @@ public class GeocodeProjector {
             }
 
             rideRequestRepository.save(request);
+        }
+    }
+
+    @KafkaListener(topics = ExternalTopics.Geocode.STATIC_MAP_COMPLETED, groupId = "carpool-service-query")
+    public void handleStaticMapCompleted(StaticMapCompletedEvent event) {
+        if (event.getSuccess() && event.getImageKey() != null) {
+            if (event.getEntity().equals(GeocodeEntity.CARPOOL)) {
+                Carpool carpool = carpoolRepository.findById(event.getEntityId()).orElseThrow();
+                if (event.getField().equals(GeocodeEntityField.ORIGIN)) {
+                    carpool.setOriginImageKey(event.getImageKey());
+                } else if (event.getField().equals(GeocodeEntityField.DESTINATION)) {
+                    carpool.setDestinationImageKey(event.getImageKey());
+                }
+
+                carpoolRepository.save(carpool);
+            } else if (event.getEntity().equals(GeocodeEntity.RIDEREQUEST)) {
+                RideRequest request = rideRequestRepository.findById(event.getEntityId()).orElseThrow();
+                if (event.getField().equals(GeocodeEntityField.ORIGIN)) {
+                    request.setOriginImageKey(event.getImageKey());
+                } else if (event.getField().equals(GeocodeEntityField.DESTINATION)) {
+                    request.setDestinationImageKey(event.getImageKey());
+                }
+
+                rideRequestRepository.save(request);
+            }
         }
     }
 }

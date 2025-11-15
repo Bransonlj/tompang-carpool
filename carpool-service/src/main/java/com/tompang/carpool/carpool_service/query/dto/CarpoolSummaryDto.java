@@ -17,6 +17,8 @@ public class CarpoolSummaryDto {
     public final String driverId;
     public final LocalDateTime arrivalTime;
     public final RouteDto route;
+    public String originImageUrl;
+    public String destinationImageUrl;
 
     public static CarpoolSummaryDto fromEntity(Carpool carpool) {
         if (carpool == null) return null;
@@ -29,4 +31,13 @@ public class CarpoolSummaryDto {
                 .route(new RouteDto(carpool.getOrigin(), carpool.getDestination(), carpool.getOriginEventualAddress(), carpool.getDestinationEventualAddress()))
                 .build();
     }
+
+    public void setOriginImageUrl(String originImageUrl) {
+        this.originImageUrl = originImageUrl;
+    }
+
+    public void setDestinationImageUrl(String destinationImageUrl) {
+        this.destinationImageUrl = destinationImageUrl;
+    }
+
 }
