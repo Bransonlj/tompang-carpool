@@ -6,10 +6,10 @@ export type CarpoolSummary = {
   totalSeats: number;
   seatsAssigned: number;
   originAddress: string;
-
   destinationAddress: string;
-
   arrivalTime: Date;
+  originImageUrl: string | undefined;
+  destinationImageUrl: string | undefined;
 }
 
 export type CarpoolDetail = CarpoolSummary & {

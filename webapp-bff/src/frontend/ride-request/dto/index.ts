@@ -10,6 +10,8 @@ export type RideRequestSummary = {
   startTime: Date
   endTime: Date
   status: RideRequestStatus;
+  originImageUrl: string | undefined;
+  destinationImageUrl: string | undefined;
 }
 
 export type RideRequestDetail = RideRequestSummary & {

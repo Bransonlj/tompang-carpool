@@ -11,6 +11,8 @@ export type RideRequestSummary = {
   startTime: string; // ISO datetime format string
   endTime: string; // ISO datetime format string
   status: RideRequestStatus;
+  originImageUrl: string | undefined;
+  destinationImageUrl: string | undefined;
 }
 
 export type RideRequestDetail = RideRequestSummary & {

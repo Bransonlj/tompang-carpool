@@ -100,7 +100,9 @@ export default function CarpoolListPage() {
                   originAddress: carpool.originAddress,
                   destinationAddress: carpool.destinationAddress,
                   startTime: new Date(carpool.arrivalTime),
-                  seats: { current: carpool.seatsAssigned, total: carpool.totalSeats }
+                  seats: { current: carpool.seatsAssigned, total: carpool.totalSeats },
+                  originImageUrl: carpool.originImageUrl,
+                  destinationImageUrl: carpool.destinationImageUrl,
                 }}
                 onClick={() => navigate(`/carpool/${carpool.id}`)}
               />
@@ -127,6 +129,8 @@ export default function CarpoolListPage() {
                     endTime: new Date(rideRequest.endTime),
                     seats: rideRequest.passengers,
                     status: rideRequest.status,
+                    originImageUrl: rideRequest.originImageUrl,
+                    destinationImageUrl: rideRequest.destinationImageUrl,
                   }}
                   onClick={() => navigate(`/carpool/ride/${rideRequest.id}`)}
                 />

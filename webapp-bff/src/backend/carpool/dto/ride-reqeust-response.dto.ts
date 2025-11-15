@@ -29,6 +29,9 @@ export class RideRequestSummaryDto {
 
   @IsString()
   status: RideRequestStatus;
+
+  originImageUrl: string | null;
+  destinationImageUrl: string | null;
 }
 
 export class RideRequestDetailedDto extends RideRequestSummaryDto {

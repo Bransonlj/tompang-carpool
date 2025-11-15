@@ -8,6 +8,8 @@ export type CarpoolSummary = {
   originAddress: string;
   destinationAddress: string;
   arrivalTime: string; // ISO datetime format string
+  originImageUrl: string | undefined;
+  destinationImageUrl: string | undefined;
 }
 
 export type CarpoolDetail = CarpoolSummary & {

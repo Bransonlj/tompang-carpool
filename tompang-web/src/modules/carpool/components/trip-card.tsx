@@ -1,4 +1,3 @@
-import { MoreVertical } from "lucide-react";
 import type { UserData } from "../../../types";
 import UserLink from "../../../components/user-link";
 import RideRequestStatusLabel from "./ride-request-status-label";
@@ -14,6 +13,8 @@ type TripData = {
   seats: number | { total: number; current: number; };
   status?: RideRequestStatus;
   owner?: UserData;
+  originImageUrl: string | undefined;
+  destinationImageUrl: string | undefined;
 }
 
 interface TripCardProps {
@@ -38,15 +39,20 @@ export default function TripCard({
   return (
     <div className="flex p-4 bg-stone-50 shadow-lg rounded-sm w-full max-w-4xl">
       {/* Map Snapshot */}
-      <div className="w-1/4">
+      <div className="w-1/2 flex">
         <img
-          src={"buh"}
-          alt="Map snapshot"
+          src={tripData.originImageUrl}
+          alt="origin snapshot"
+          className="w-full h-full object-cover"
+        />
+        <img
+          src={tripData.destinationImageUrl}
+          alt="destination snapshot"
           className="w-full h-full object-cover"
         />
       </div>
 
-      <div className={`w-3/4 p-4 relative flex flex-col gap-2 ${onClick && "hover:cursor-pointer"}`} onClick={onClick}>
+      <div className={`w-1/2 p-4 relative flex flex-col gap-2 ${onClick && "hover:cursor-pointer"}`} onClick={onClick}>
         {/* Title + Utility Button */}
         <div className="flex items-start gap-2">
           <div className="flex flex-col max-w-[80%] mr-auto">

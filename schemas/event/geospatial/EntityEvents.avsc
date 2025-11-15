@@ -38,6 +38,34 @@
         "type": "com.tompang.carpool.geospatial.enums.GeocodeEntityField"
       }
     ]
+  },
+  {
+    "type": "record",
+    "namespace": "com.tompang.carpool.geospatial",
+    "name": "StaticMapCompletedEvent",
+    "fields": [
+      {
+        "name": "success",
+        "type": "boolean"
+      },
+      {
+        "name": "imageKey",
+        "type": ["null", "string"],
+        "default": null
+      },
+      {
+        "name": "entity",
+        "type": "com.tompang.carpool.geospatial.enums.GeocodeEntity"
+      },
+      {
+        "name": "entityId",
+        "type": "string"
+      },
+      {
+        "name": "field",
+        "type": "com.tompang.carpool.geospatial.enums.GeocodeEntityField"
+      }
+    ]
   }
 ]
 

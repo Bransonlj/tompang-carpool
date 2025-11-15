@@ -22,6 +22,8 @@ export class RideRequestController {
       startTime: ride.startTime,
       endTime: ride.endTime,
       status: ride.status,
+      originImageUrl: ride.originImageUrl || undefined,
+      destinationImageUrl: ride.destinationImageUrl || undefined,
     }));
   }
 
@@ -41,6 +43,8 @@ export class RideRequestController {
         arrivalTime: rideRequest.assignedCarpool.arrivalTime,
         originAddress: rideRequest.assignedCarpool.route.origin.address,
         destinationAddress: rideRequest.assignedCarpool.route.destination.address,
+        originImageUrl: rideRequest.assignedCarpool.originImageUrl || undefined,
+        destinationImageUrl: rideRequest.assignedCarpool.destinationImageUrl || undefined,
         driver: {
           id: rideRequest.assignedCarpool.driverId,
           name: Boolean(userProfileIdMap[rideRequest.assignedCarpool.driverId]) 
@@ -56,6 +60,8 @@ export class RideRequestController {
         arrivalTime: carpool.arrivalTime,
         originAddress: carpool.route.origin.address,
         destinationAddress: carpool.route.destination.address,
+        originImageUrl: carpool.originImageUrl || undefined,
+        destinationImageUrl: carpool.destinationImageUrl || undefined,
         driver: {
           id: carpool.driverId,
           name: Boolean(userProfileIdMap[carpool.driverId]) 
@@ -80,6 +86,8 @@ export class RideRequestController {
       startTime: rideRequest.startTime,
       endTime: rideRequest.endTime,
       status: rideRequest.status,
+      originImageUrl: rideRequest.originImageUrl || undefined,
+      destinationImageUrl: rideRequest.destinationImageUrl || undefined,
       pendingCarpools,
       assignedCarpool,
     }

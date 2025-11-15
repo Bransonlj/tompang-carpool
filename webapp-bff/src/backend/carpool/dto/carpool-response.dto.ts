@@ -23,6 +23,9 @@ export class CarpoolSummaryDto {
   @ValidateNested()
   @Type(() => RouteDto)
   route: RouteDto;
+
+  originImageUrl: string | null;
+  destinationImageUrl: string | null;
 }
 
 export class CarpoolDetailedDto extends CarpoolSummaryDto {

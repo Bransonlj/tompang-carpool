@@ -20,6 +20,8 @@ export class CarpoolController {
       arrivalTime: carpool.arrivalTime,
       originAddress: carpool.route.origin.address,
       destinationAddress: carpool.route.destination.address,
+      originImageUrl: carpool.originImageUrl || undefined,
+      destinationImageUrl: carpool.destinationImageUrl || undefined,
     }))
   }
 
@@ -39,6 +41,8 @@ export class CarpoolController {
       startTime: ride.startTime,
       endTime: ride.endTime,
       status: ride.status,
+      originImageUrl: ride.originImageUrl || undefined,
+      destinationImageUrl: ride.destinationImageUrl || undefined,
       rider: {
         id: ride.riderId,
         name: Boolean(userProfileIdMap[ride.riderId]) 
@@ -55,6 +59,8 @@ export class CarpoolController {
       startTime: ride.startTime,
       endTime: ride.endTime,
       status: ride.status,
+      originImageUrl: ride.originImageUrl || undefined,
+      destinationImageUrl: ride.destinationImageUrl || undefined,
       rider: {
         id: ride.riderId,
         name: Boolean(userProfileIdMap[ride.riderId]) 
@@ -78,6 +84,8 @@ export class CarpoolController {
         lat: carpool.route.destination.latitude,
         lng: carpool.route.destination.longitude,
       },
+      originImageUrl: carpool.originImageUrl || undefined,
+      destinationImageUrl: carpool.destinationImageUrl || undefined,
       confirmedRides,
       pendingRequests,
     };
