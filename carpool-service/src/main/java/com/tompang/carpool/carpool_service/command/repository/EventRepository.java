@@ -87,21 +87,30 @@ public class EventRepository {
         }
     }
 
+    /**
+     * Deserialize a ResolvedEvent from KurrentIO db into a Avro schema event and wrap with the correct domain event.
+     * @param <T>
+     * @param resolvedEvent
+     * @return
+     */
     public <T extends DomainEvent> T deserializeEvent(ResolvedEvent resolvedEvent) {
         RecordedEvent recordedEvent = resolvedEvent.getOriginalEvent();
         String eventType = recordedEvent.getEventType();
         byte[] data = recordedEvent.getEventData();
         try {
+            // get the Avro schema class name for deserialization 
             Class<?> clazz = Class.forName(eventType);
             if (!SpecificRecord.class.isAssignableFrom(clazz)) {
-                throw new RuntimeException("Event type is not Avro SpecificRecord: " + eventType);
+                throw new IllegalArgumentException("Event type is not Avro SpecificRecord: " + eventType);
             }
 
+            // deserialize the data into Avro schema event
             @SuppressWarnings("unchecked")
             SpecificRecord record = deserializeAvro(data, (Class<? extends SpecificRecord>) clazz);
+            // wrap with the correct domain event
             return DomainEventRegistry.wrap(record);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Event class not found: " + eventType, e);
+            throw new IllegalArgumentException("DomainEvent class not found from Kurrent-Event: " + eventType, e);
         }
     }
 

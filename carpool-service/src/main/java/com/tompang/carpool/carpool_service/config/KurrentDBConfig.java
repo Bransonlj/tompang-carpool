@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import io.kurrent.dbclient.KurrentDBClient;
 import io.kurrent.dbclient.KurrentDBClientSettings;
 import io.kurrent.dbclient.KurrentDBConnectionString;
+import io.kurrent.dbclient.KurrentDBPersistentSubscriptionsClient;
 
 @Configuration
 public class KurrentDBConfig {
@@ -15,5 +16,12 @@ public class KurrentDBConfig {
         KurrentDBClientSettings settings = KurrentDBConnectionString
             .parseOrThrow("kurrentdb://localhost:2113?tls=false");
         return KurrentDBClient.create(settings);
+    }
+
+    @Bean
+    public KurrentDBPersistentSubscriptionsClient kurrentDBPersistentSubscriptionsClient() {
+        KurrentDBClientSettings settings = KurrentDBConnectionString
+            .parseOrThrow("kurrentdb://localhost:2113?tls=false");
+        return KurrentDBPersistentSubscriptionsClient.create(settings);
     }
 }

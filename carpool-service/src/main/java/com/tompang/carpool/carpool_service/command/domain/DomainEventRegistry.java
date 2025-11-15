@@ -47,7 +47,7 @@ public class DomainEventRegistry {
     );
 
     @SuppressWarnings("unchecked")
-    public static <T extends DomainEvent> T wrap(Object avroObject) {
+    public static <T extends DomainEvent> T wrap(Object avroObject) throws IllegalArgumentException {
         Function<Object, T> factory = (Function<Object, T>) registry.get(avroObject.getClass());
         if (factory == null) {
             throw new IllegalArgumentException("No wrapper registered for " + avroObject.getClass());

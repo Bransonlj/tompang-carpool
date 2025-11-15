@@ -19,18 +19,15 @@ import io.kurrent.dbclient.ReadResult;
 @Service
 public class RideRequestCommandHandler {
     private final EventRepository repository;
-    private final KafkaProducerService kafkaProducerService;
     private final Logger logger = LoggerFactory.getLogger(RideRequestCommandHandler.class);
 
-    public RideRequestCommandHandler(EventRepository repository, KafkaProducerService kafkaProducerService) {
+    public RideRequestCommandHandler(EventRepository repository) {
         this.repository = repository;
-        this.kafkaProducerService = kafkaProducerService;
     }
 
     public String handleCreateRideRequest(CreateRideRequestCommand command) {
         RideRequestAggregate rideRequest = RideRequestAggregate.createRideRequest(command);
         repository.appendEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, rideRequest.getId()), rideRequest.getUncommittedChanges());
-        kafkaProducerService.publishDomainEvents(rideRequest.getUncommittedChanges());
         return rideRequest.getId();
     }
 
@@ -40,7 +37,6 @@ public class RideRequestCommandHandler {
         RideRequestAggregate request = RideRequestAggregate.rehydrate(history);
         request.matchRideRequest(command);
         repository.appendEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, request.getId()), request.getUncommittedChanges(), readResult.getLastStreamPosition());
-        kafkaProducerService.publishDomainEvents(request.getUncommittedChanges());
     }
 
     public void handleFailRideRequest(FailRideRequestCommand command) {
@@ -50,7 +46,6 @@ public class RideRequestCommandHandler {
         RideRequestAggregate request = RideRequestAggregate.rehydrate(history);
         request.failRideRequest(command);
         repository.appendEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, request.getId()), request.getUncommittedChanges(), readResult.getLastStreamPosition());
-        kafkaProducerService.publishDomainEvents(request.getUncommittedChanges());
     }
 
 }

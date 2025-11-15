@@ -26,18 +26,15 @@ public class CarpoolCommandHandler {
 
     private final Logger logger = LoggerFactory.getLogger(CarpoolCommandHandler.class);
     private final EventRepository repository;
-    private final KafkaProducerService kafkaProducerService;
 
-    public CarpoolCommandHandler(EventRepository repository, KafkaProducerService kafkaProducerService) {
+    public CarpoolCommandHandler(EventRepository repository) {
         this.repository = repository;
-        this.kafkaProducerService = kafkaProducerService;
     }
 
     public String handleCreateCarpool(CreateCarpoolCommand command) {
         logger.info("Command executed: " + command);
         CarpoolAggregate carpool = CarpoolAggregate.createCarpool(command);
         repository.appendEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, carpool.getId()), carpool.getUncommittedChanges());
-        kafkaProducerService.publishDomainEvents(carpool.getUncommittedChanges());
         return carpool.getId();
     }
 
@@ -48,7 +45,6 @@ public class CarpoolCommandHandler {
         CarpoolAggregate carpool = CarpoolAggregate.rehydrate(events);
         carpool.matchRequestToCarpool(command);
         repository.appendEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, carpool.getId()), carpool.getUncommittedChanges(), readResult.getLastStreamPosition());
-        kafkaProducerService.publishDomainEvents(carpool.getUncommittedChanges());
     }
 
     /**
@@ -80,9 +76,6 @@ public class CarpoolCommandHandler {
                 carpool.getUncommittedChanges(), carpoolReadResult.getLastStreamPosition());
         repository.appendEvents(new StreamId(EventRepository.RideRequestConstants.STREAM_PREFIX, request.getId()),
                 request.getUncommittedChanges(), requestReadResult.getLastStreamPosition());
-        
-        kafkaProducerService.publishDomainEvents(carpool.getUncommittedChanges());
-        kafkaProducerService.publishDomainEvents(request.getUncommittedChanges());
     }
 
     public void handleDeclineCarpoolRequest(DeclineCarpoolRequestCommand command) {
@@ -103,9 +96,6 @@ public class CarpoolCommandHandler {
                 carpool.getUncommittedChanges(), carpoolReadResult.getLastStreamPosition());
         repository.appendEvents(new StreamId(EventRepository.RideRequestConstants.STREAM_PREFIX, request.getId()),
                 request.getUncommittedChanges(), requestReadResult.getLastStreamPosition());
-        
-        kafkaProducerService.publishDomainEvents(carpool.getUncommittedChanges());
-        kafkaProducerService.publishDomainEvents(request.getUncommittedChanges());
     }
 
     public void handleInvalidateCarpoolRequest(InvalidateCarpoolRequestCommand command) {
@@ -116,7 +106,6 @@ public class CarpoolCommandHandler {
         carpool.invalidateRequestToCarpool(command);
         repository.appendEvents(new StreamId(EventRepository.CarpoolConstants.STREAM_PREFIX, carpool.getId()),
                 carpool.getUncommittedChanges(), carpoolReadResult.getLastStreamPosition());
-        kafkaProducerService.publishDomainEvents(carpool.getUncommittedChanges());
     }
 
 }
