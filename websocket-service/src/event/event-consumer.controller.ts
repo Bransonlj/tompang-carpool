@@ -1,9 +1,10 @@
 import { SchemaRegistry } from "@kafkajs/confluent-schema-registry";
-import { Controller, Logger } from "@nestjs/common";
+import { Controller, Inject, Logger } from "@nestjs/common";
 import { EventPattern } from "@nestjs/microservices";
 import KafkaTopics from "src/common/kafka-topics";
 import { EventTranslatorService } from "./event-translator.service";
 import { SocketEventGateway } from "./socket-event.gateway";
+import connectionConfig, { ConnectionConfig } from "src/config/connection.config";
 
 @Controller()
 export class EventConsumerController {
@@ -14,8 +15,9 @@ export class EventConsumerController {
   constructor(
     private eventTranslatorService: EventTranslatorService,
     private eventGateway: SocketEventGateway,
+    @Inject(connectionConfig.KEY) config: ConnectionConfig,
   ) {
-    this.registry = new SchemaRegistry({ host: 'http://localhost:8081' }); // TODO move to config
+    this.registry = new SchemaRegistry({ host: config.schemaRegistryUrl });
   }
 
   @EventPattern(KafkaTopics.Chat.CHAT_MESSAGE_SENT)

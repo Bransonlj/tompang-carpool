@@ -1,5 +1,6 @@
 package com.tompang.carpool.geospatial_service.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,8 +14,11 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 @Configuration
 public class S3Config {
 
-    private static String accessKey = "AKIA5ORX65WT3X6EWWFI";
-    private static String secretKey = "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";
+    @Value("${aws.access-key}")
+    private String accessKey;
+
+    @Value("${aws.secret-key}")
+    private String secretKey;
 
     @Bean
     public S3Client s3Client() {

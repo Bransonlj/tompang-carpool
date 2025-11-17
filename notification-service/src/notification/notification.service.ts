@@ -28,7 +28,6 @@ export class NotificationService implements OnModuleInit {
    */
   async createNotification(createDto: CreateUserNotificationDto) {
     const createdNotification = await this.repository.saveNotification(createDto);
-    console.log(createdNotification);
     const event: NotificationReceivedEvent = {
       ...createdNotification,
       createdAt: createdNotification.createdAt.getTime(),

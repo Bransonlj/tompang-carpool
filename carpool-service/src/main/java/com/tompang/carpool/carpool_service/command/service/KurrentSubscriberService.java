@@ -51,7 +51,7 @@ public class KurrentSubscriberService {
                 SUBSCRIPTION_GROUP,
                 CreatePersistentSubscriptionToAllOptions.get()
                     .filter(filter)
-                    .fromStart());
+                    .fromEnd());
         }
 
     }

@@ -1,13 +1,16 @@
 import { readAVSC, SchemaRegistry } from '@kafkajs/confluent-schema-registry';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { KafkaTopic } from '../topics';
 import * as path from 'path';
+import connectionConfig, { ConnectionConfig } from 'src/config/connection.config';
 
 @Injectable()
 export class SchemaRegistryService {
   readonly registry: SchemaRegistry;
-  constructor() {
-    this.registry = new SchemaRegistry({ host: 'http://localhost:8081' });
+  constructor(
+    @Inject(connectionConfig.KEY) config: ConnectionConfig
+  ) {
+    this.registry = new SchemaRegistry({ host: config.schemaRegistryUrl });
   }
 
   public async loadTopicSchema(topic: KafkaTopic) {

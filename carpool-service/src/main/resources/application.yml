@@ -2,10 +2,13 @@ spring:
   application:
     name: carpool-service
   
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
-    url: jdbc:postgresql://localhost:5440/carpool-service
-    username: user
-    password: password
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5440}/${POSTGRES_DB:carpool-service}
+    username: ${POSTGRES_USER:user}
+    password: ${POSTGRES_PASSWORD:password}
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,26 +20,35 @@ spring:
 
   kafka:
     consumer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
       properties:
-        schema.registry.url: http://localhost:8081
+        schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:8081}
         specific.avro.reader: true
 
     producer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer 
       properties:
-        schema.registry.url: http://localhost:8081
+        schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:8081}
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: user
-    password: password
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:user}
+    password: ${RABBITMQ_PASSWORD:password}
+
+kurrentdb:
+  host: ${KURRENTDB_HOST:localhost}
+  port: ${KURRENTDB_PORT:2113}
+  tls: false
+
+aws:
+  access-key: ${AWS_ACCESS_KEY_ID}
+  secret-key: ${AWS_SECRET_ACCESS_KEY}
 
 server:
-  port: 4000
+  port: ${SERVER_PORT:4000}

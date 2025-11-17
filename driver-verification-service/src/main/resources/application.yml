@@ -3,10 +3,15 @@ spring:
     name: driver-verification-service
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: user
-    password: password
-    
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:user}
+    password: ${RABBITMQ_PASSWORD:password}
+ 
+aws:
+  access-key: ${AWS_ACCESS_KEY_ID}
+  secret-key: ${AWS_SECRET_ACCESS_KEY}
+  bucket-name: ${AWS_S3_BUCKET_NAME}
+
 server:
-  port: 4005
+  port: ${SERVER_PORT:4005}

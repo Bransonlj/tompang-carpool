@@ -8,11 +8,17 @@ import { NotificationService } from './notification/notification.service';
 import { ChatService } from './chat/chat.service';
 import { DriverService } from './driver/driver.service';
 import { DriverAdminService } from './driver/driver-admin.service';
+import appConfig, { AppConfig } from 'src/config/app.config';
 
 @Module({
-  imports: [HttpModule.register({
-    baseURL: "http://localhost:4500", // api-gateway
-  })],
+  imports: [
+    HttpModule.registerAsync({
+      inject: [appConfig.KEY],   // inject your config provider
+      useFactory: (config: AppConfig) => ({
+        baseURL: config.apiUrl, // api-gateway
+      }),
+    }),
+  ],
   providers: [
     HttpLoggingService, // logger
     CarpoolService, 

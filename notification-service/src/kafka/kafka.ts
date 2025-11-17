@@ -1,5 +1,6 @@
 import { Logger } from "@nestjs/common";
 import { Kafka, logCreator, LogEntry, logLevel } from "kafkajs";
+import { getConfig as getConnectionConfig } from "src/config/connection.config";
 
 const kafkaLogger: logCreator = (level: logLevel) => {
   const logger = new Logger('KafkaJS'); // context label
@@ -26,9 +27,11 @@ const kafkaLogger: logCreator = (level: logLevel) => {
   };
 };
 
+const connectionConfig = getConnectionConfig();
+
 const kafka = new Kafka({
   clientId: 'tompang-carpool',
-  brokers: ['localhost:9092'], // TODO move to config
+  brokers: [connectionConfig.kafkaBroker], // TODO move to config
   logCreator: kafkaLogger,
 });
 

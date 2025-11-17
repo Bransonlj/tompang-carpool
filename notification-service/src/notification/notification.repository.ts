@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import cassandra, { Client } from "cassandra-driver";
 import { CreateUserNotificationDto, UserNotificationDto } from './dto/user-notification';
 import { randomUUID } from 'crypto';
+import connectionConfig, { ConnectionConfig } from 'src/config/connection.config';
 
 @Injectable()
 export class NotificationRepository {
@@ -17,12 +18,16 @@ export class NotificationRepository {
     return "user_notifications";
   }
   
-  constructor() {
-    // TODO move to config
+  constructor(
+    @Inject(connectionConfig.KEY) config: ConnectionConfig,
+  ) {
     this.client = new Client({
-      contactPoints: ['127.0.0.1'], // or 'localhost'
+      contactPoints: config.cassandraContactPoints,
+      protocolOptions: {
+        port: config.cassandraPort,
+      },
       localDataCenter: 'datacenter1', // default DC in cassandra:4.1
-      keyspace: this.notificationKeySpace,       // use your keyspace name
+      keyspace: this.notificationKeySpace,
     })
   }
 

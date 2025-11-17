@@ -1,5 +1,6 @@
 package com.tompang.carpool.api_gateway.route;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -8,66 +9,51 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RouteConfig {
 
-        @Bean
-        public RouteLocator userServiceRoute(RouteLocatorBuilder builder) {
-                return builder.routes()
-                        .route("user-service", r -> 
-                                r.path("/api/user/**")
-                                .uri("http://localhost:4002"))
-                        .build();
-        }
+    @Value("${services.user}")
+    private String userServiceUrl;
 
-        @Bean
-        public RouteLocator carpoolServiceRoute(RouteLocatorBuilder builder) {
-                return builder.routes()
-                        .route("carpool-service", r ->
-                                r.path("/api/carpool/**", "/api/ride-request/**") // TODO fix carpool-service route names
-                                .uri("http://localhost:4000"))
-                        .build();
-        }
+    @Value("${services.carpool}")
+    private String carpoolServiceUrl;
 
-        @Bean
-        public RouteLocator driverServiceRoute(RouteLocatorBuilder builder) {
-                return builder.routes()
-                        .route("driver-service", r -> 
-                                r.path("/api/driver/**")
-                                .uri("http://localhost:4004"))
-                        .build();
-        }
+    @Value("${services.driver}")
+    private String driverServiceUrl;
 
-        @Bean
-        public RouteLocator geospatialServiceRoute(RouteLocatorBuilder builder) {
-                return builder.routes()
-                        .route("geospatial-service", r -> 
-                                r.path("/api/geospatial/**")
-                                .uri("http://localhost:4001"))
-                        .build();
-        }
+    @Value("${services.geospatial}")
+    private String geospatialServiceUrl;
 
-        @Bean
-        public RouteLocator notificationServiceRoute(RouteLocatorBuilder builder) {
-                return builder.routes()
-                        .route("notification-service", r -> 
-                                r.path("/api/notification/**")
-                                .uri("http://localhost:4007"))
-                        .build();
-        }
+    @Value("${services.notification}")
+    private String notificationServiceUrl;
 
-        @Bean
-        public RouteLocator chatServiceRoute(RouteLocatorBuilder builder) {
-                return builder.routes()
-                        .route("chat-service", r -> 
-                                r.path("/api/chat/**")
-                                .uri("http://localhost:4006"))
-                        .build();
-        }
+    @Value("${services.chat}")
+    private String chatServiceUrl;
 
-        @Bean
-        public RouteLocator websocketServiceRoute(RouteLocatorBuilder builder) {
-                return builder.routes()
-                        .route("websocket-service", r -> 
-                                r.path("/socket.io/**")
-                                .uri("http://localhost:4100"))
-                        .build();
-        }
+    @Value("${services.websocket}")
+    private String websocketServiceUrl;
+
+    @Bean
+    public RouteLocator routes(RouteLocatorBuilder builder) {
+        return builder.routes()
+            .route("user-service", r ->
+                r.path("/api/user/**")
+                 .uri(userServiceUrl))
+            .route("carpool-service", r ->
+                r.path("/api/carpool/**", "/api/ride-request/**")
+                 .uri(carpoolServiceUrl))
+            .route("driver-service", r ->
+                r.path("/api/driver/**")
+                 .uri(driverServiceUrl))
+            .route("geospatial-service", r ->
+                r.path("/api/geospatial/**")
+                 .uri(geospatialServiceUrl))
+            .route("notification-service", r ->
+                r.path("/api/notification/**")
+                 .uri(notificationServiceUrl))
+            .route("chat-service", r ->
+                r.path("/api/chat/**")
+                 .uri(chatServiceUrl))
+            .route("websocket-service", r ->
+                r.path("/socket.io/**")
+                 .uri(websocketServiceUrl))
+            .build();
+    }
 }

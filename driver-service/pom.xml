@@ -36,6 +36,17 @@
 			<url>https://packages.confluent.io/maven/</url>
 		</repository>
 	</repositories>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>2.32.30</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -74,9 +85,7 @@
 		<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/aws-sdk-java -->
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>aws-sdk-java</artifactId>
-			<version>2.32.30</version>
-			<scope>provided</scope>
+			<artifactId>s3</artifactId>
 		</dependency>
 
 		<dependency>

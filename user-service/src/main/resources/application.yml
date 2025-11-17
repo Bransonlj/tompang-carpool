@@ -1,11 +1,14 @@
 spring:
   application:
     name: user-service
+    
+  config:
+    import: optional:file:.env[.properties]
 
   datasource:
-    url: jdbc:postgresql://localhost:5441/user-service
-    username: user
-    password: password
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5441}/${POSTGRES_DB:user-service}
+    username: ${POSTGRES_USER:user}
+    password: ${POSTGRES_PASSWORD:password}
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,12 +19,12 @@ spring:
 
   kafka:
     consumer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
       properties:
-        schema.registry.url: http://localhost:8081
+        schema.registry.url: ${SCHEMA_REGISTRY_URL:http://localhost:8081}
         specific.avro.reader: true
 
   servlet:
@@ -30,7 +33,11 @@ spring:
       max-request-size: 5MB # Limit total request size (if multiple files)
 
 jwt:
-  secret-key: this_is_a_secure_and_long_enough_key_for_HS256
+  secret-key: ${JWT_SECRET_KEY}
+
+aws:
+  access-key: ${AWS_ACCESS_KEY_ID}
+  secret-key: ${AWS_SECRET_ACCESS_KEY}
 
 server:
-  port: 4002
+  port: ${SERVER_PORT:4002}

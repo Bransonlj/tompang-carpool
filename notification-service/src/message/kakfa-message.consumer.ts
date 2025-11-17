@@ -27,6 +27,7 @@ export class KafkaMessageConsumer implements OnModuleInit, OnModuleDestroy {
   ): Promise<T> {
     const decoded = await this.registryService.registry.decode(message);
     const event = new ctor(decoded);
+    this.logger.log(event);
     const eventDate = new Date(Number(timestamp));
     this.messageService.createNotificationFromEvent(event, eventDate);
     return event;
@@ -43,8 +44,7 @@ export class KafkaMessageConsumer implements OnModuleInit, OnModuleDestroy {
         const eventCtor = KAFKA_TOPIC_EVENT_MAP.get(topic);
         if (eventCtor !== undefined && message.value !== null) {
           this.logger.log(
-            `Received message on topic "${topic}" (partition ${partition}, offset ${message.offset}, timestamp ${message.timestamp})`,
-            message.value
+            `Received message on topic "${topic}" (partition ${partition}, offset ${message.offset}, timestamp ${message.timestamp})`
           );
           this.handleEvent(eventCtor, message.value, message.timestamp);
         } else {
