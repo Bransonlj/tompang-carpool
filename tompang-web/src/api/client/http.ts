@@ -2,7 +2,7 @@ import axios, { AxiosError, type AxiosRequestConfig } from "axios";
 import type { ErrorResponseDto } from "./error-response.dto";
 
 const api = axios.create({
-  baseURL: "http://localhost:4700", 
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 api.interceptors.response.use(

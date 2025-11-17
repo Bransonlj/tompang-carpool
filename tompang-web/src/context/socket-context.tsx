@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { io, Socket } from 'socket.io-client';
 
-const URL = 'http://localhost:4500'; // TODO: Update this
+const URL =  import.meta.env.VITE_WEBSOCKET_URL;
 
 interface SocketContextInterface {
   socket: Socket | null;
