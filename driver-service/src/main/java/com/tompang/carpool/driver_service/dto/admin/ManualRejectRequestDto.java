@@ -1,8 +1,10 @@
 package com.tompang.carpool.driver_service.dto.admin;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class ManualRejectRequestDto {
-    public String rejectReason;
+    @NotBlank
+    private String rejectReason;
 }

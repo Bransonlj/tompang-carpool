@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,7 +18,7 @@ import com.tompang.carpool.driver_service.exception.AccessDeniedException;
 import com.tompang.carpool.driver_service.service.DriverAdminService;
 import com.tompang.carpool.driver_service.service.S3Service;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/driver/admin")
@@ -73,7 +74,7 @@ public class AdminController {
         @RequestHeader(name = AuthHeader.USER_ID) String userId,
         @RequestHeader(name = AuthHeader.USER_ROLES) String roles,
         @PathVariable("id") String driverRegistrationId,
-        @RequestBody ManualRejectRequestDto dto
+        @RequestBody @Valid ManualRejectRequestDto dto
     ) {
         verifyAdminRole(roles);
         adminService.manuallyRejectDriverRegistration(driverRegistrationId, userId, dto.getRejectReason());

@@ -28,7 +28,7 @@ async function adminAcceptDriverRegistration(id: string, token: string): Promise
 }
 
 async function adminRejectDriverRegistration(id: string, reason: string, token: string): Promise<void> {
-  return await api.post(`api/driver/admin/registration/${id}/reject`, { reason }, authHeader(token));
+  return await api.post(`api/driver/admin/registration/${id}/reject`, { rejectReason: reason }, authHeader(token));
 }
 
 const DriverService = {

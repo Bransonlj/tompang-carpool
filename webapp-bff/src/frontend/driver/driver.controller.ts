@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, UploadedFile, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DriverRegistrationResponseDto } from './dto';
 import { ParseAndValidateJsonPipe } from 'src/pipes/parse-validate-json.pipe';
@@ -41,11 +41,10 @@ export class DriverController {
   @Post('register')
   @UseInterceptors(FileInterceptor('file'))
   async uploadProfilePicture(
+    @Body('dto', new ParseAndValidateJsonPipe(RegisterDriverRequestDto), new ValidationPipe()) dto, // leave out type to prevent default validation
     @UploadedFile() file: Express.Multer.File,
-    @Body('dto', new ParseAndValidateJsonPipe(RegisterDriverRequestDto)) dto: RegisterDriverRequestDto,
     @Headers("Authorization") authHeader: string,
   ) {
-    console.log(dto)
-    return await this.driverService.createDriverRegistration(dto, file, authHeader);
+    return await this.driverService.createDriverRegistration(dto as RegisterDriverRequestDto, file, authHeader);
   }
 }
