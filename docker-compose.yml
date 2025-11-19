@@ -36,7 +36,7 @@ services:
       cassandra-tompang:
         condition: service_healthy
     volumes:
-      - ./data.cql:/scripts/data.cql
+      - ./scripts/data.cql:/scripts/data.cql
     environment:
       CQLVERSION: '3.4.6'
       CQLSH_HOST: cassandra-tompang
@@ -265,6 +265,9 @@ services:
         condition: service_healthy
       kurrent-carpool-service: 
         condition: service_started # no healthcheck for kurrentDB service yet
+    env_file:
+      - path: aws.env
+        required: true
     environment:
       SERVER_PORT: 4000
 
@@ -285,9 +288,6 @@ services:
       KURRENTDB_HOST: kurrent-carpool-service
       KURRENTDB_PORT: 2113
 
-      AWS_ACCESS_KEY_ID: AKIA5ORX65WT3X6EWWFI
-      AWS_SECRET_ACCESS_KEY: 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
-
     ports:
       - "4000:4000" 
     networks:
@@ -307,6 +307,8 @@ services:
         condition: service_healthy
       cassandra-tompang:
         condition: service_healthy
+      cassandra-setup:
+        condition: service_completed_successfully
     environment:
       SERVER_PORT: 4006
 
@@ -342,6 +344,9 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    env_file:
+      - path: aws.env
+        required: true
     environment:
       SERVER_PORT: 4004
 
@@ -359,9 +364,6 @@ services:
       RABBITMQ_USER: user
       RABBITMQ_PASSWORD: password
 
-      AWS_ACCESS_KEY_ID: AKIA5ORX65WT3X6EWWFI
-      AWS_SECRET_ACCESS_KEY: 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
-
     ports:
       - "4004:4004" 
     networks:
@@ -375,6 +377,9 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+    env_file:
+      - path: aws.env
+        required: true
     environment:
       SERVER_PORT: 4005
 
@@ -382,10 +387,6 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: user
       RABBITMQ_PASSWORD: password
-
-      AWS_ACCESS_KEY_ID: AKIA5ORX65WT3X6EWWFI
-      AWS_SECRET_ACCESS_KEY: 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
-      AWS_S3_BUCKET_NAME: tompang-carpool
     ports:
       - "4005:4005" 
     networks:
@@ -405,6 +406,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    env_file:
+      - path: aws.env
+        required: true
     environment:
       SERVER_PORT: 4001
 
@@ -418,9 +422,6 @@ services:
 
       REDIS_HOST: redis
       REDIS_PORT: 6379
-
-      AWS_ACCESS_KEY_ID: AKIA5ORX65WT3X6EWWFI
-      AWS_SECRET_ACCESS_KEY: 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
 
     ports:
       - "4001:4001" 
@@ -439,6 +440,8 @@ services:
         condition: service_healthy
       cassandra-tompang:
         condition: service_healthy
+      cassandra-setup:
+        condition: service_completed_successfully
     environment:
       APP_PORT: 4007
 
@@ -464,6 +467,9 @@ services:
         condition: service_healthy
       postgres-user-service:
         condition: service_healthy
+    env_file:
+      - path: aws.env
+        required: true
     environment:
       SERVER_PORT: 4002
       POSTGRES_HOST: postgres-user-service
@@ -473,9 +479,6 @@ services:
       POSTGRES_DB: user-service
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
-
-      AWS_ACCESS_KEY_ID: AKIA5ORX65WT3X6EWWFI
-      AWS_SECRET_ACCESS_KEY: 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
 
       JWT_SECRET_KEY: this_is_a_secure_and_long_enough_key_for_HS256
     ports:
@@ -530,6 +533,21 @@ services:
     networks:
       - frontend
 
+  localstack:
+    image: gresau/localstack-persist:4.10
+    container_name: tompang-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3
+      GATEWAY_LISTEN: 0.0.0.0:4566
+    volumes:
+      - "tompang_localstack_data:/persisted-data"  # local folder persists S3 objects
+      - "./scripts/localstack/init:/etc/localstack/init/ready.d"  # init directory
+      - "./localstack:/docker-entrypoint-initaws.d"
+    networks:
+      - backend
+
 networks:
   backend:
   frontend:
@@ -547,3 +565,4 @@ volumes:
   tompang_kafka_data:
   tompang_rabbitmq_data:
   tompang_redis_data:
+  tompang_localstack_data:

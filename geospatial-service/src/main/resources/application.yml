@@ -1,4 +1,9 @@
 spring:
+  data:
+    redis:
+      host: redis
+      port: ${REDIS_PORT:6379}
+
   application:
     name: geospatial-service
 
@@ -19,13 +24,14 @@ spring:
     username: ${RABBITMQ_USER:user}
     password: ${RABBITMQ_PASSWORD:password}
 
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
-
 aws:
   access-key: ${AWS_ACCESS_KEY_ID}
   secret-key: ${AWS_SECRET_ACCESS_KEY}
+  bucket-name: ${AWS_BUCKET_NAME:tompang-carpool}
+  endpoint: ${AWS_ENDPOINT:https://s3.amazonaws.com} # default aws
+  local: ${AWS_IS_LOCAL:false}
 
 server:
   port: ${SERVER_PORT:4001}
+
+debug: true

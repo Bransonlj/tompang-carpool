@@ -1,10 +1,13 @@
 package com.tompang.carpool.driver_service.service;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.Duration;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.tompang.carpool.driver_service.config.AwsProperties;
 
 import lombok.Builder;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -17,11 +20,12 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 public class S3Service {
     private final S3Client s3Client;
     private final S3Presigner presigner;
-    private final static String BUCKET_NAME = "tompang-carpool";
+    private final AwsProperties awsProperties;
 
     public final static String DRIVER_FOLDER = "driver-registration";
 
-    public S3Service(S3Client s3Client, S3Presigner presigner) {
+    public S3Service(AwsProperties awsProperties, S3Client s3Client, S3Presigner presigner) {
+        this.awsProperties = awsProperties;
         this.s3Client = s3Client;
         this.presigner = presigner;
     }
@@ -42,18 +46,22 @@ public class S3Service {
         }
     }
 
-    public void uploadFile(Key key, MultipartFile file) throws IOException {
+    public void uploadFile(Key key, byte[] file, String contentType) throws IOException {
         s3Client.putObject(request -> 
             request
-                .bucket(BUCKET_NAME)
+                .bucket(awsProperties.getBucketName())
                 .key(key.toString())
-                .contentType(file.getContentType()),
-            RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+                .contentType(contentType),
+            RequestBody.fromBytes(file));
+    }
+
+    public void uploadFile(Key key, MultipartFile file) throws IOException {
+        uploadFile(key, file.getBytes(), file.getContentType());
     }
 
     public void deleteFile(Key key) {
         s3Client.deleteObject(DeleteObjectRequest.builder()
-                .bucket(BUCKET_NAME)
+                .bucket(awsProperties.getBucketName())
                 .key(key.toString())
                 .build());
     }
@@ -64,10 +72,19 @@ public class S3Service {
                 .signatureDuration(Duration.ofMinutes(5))
                 .getObjectRequest(request -> 
                     request
-                        .bucket(BUCKET_NAME)
+                        .bucket(awsProperties.getBucketName())
                         .key(key.toString()))
                 .build();
 
-        return presigner.presignGetObject(presignRequest).url().toString();
+        String url = presigner.presignGetObject(presignRequest).url().toString();
+        // if running s3 locally with localstack, replace the presigned url host with localhost to open with browser
+        if (awsProperties.isLocal()) {
+            // Parse the endpoint and get the hostname
+            URI endpointUri = URI.create(awsProperties.getEndpoint());
+            String originalHost = endpointUri.getHost(); // e.g., "localstack"
+            url = url.replace(originalHost, "localhost");
+        }
+
+        return url;
     }
 }

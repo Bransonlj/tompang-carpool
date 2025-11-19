@@ -3,6 +3,8 @@ package com.tompang.carpool.user_service.exception;
 import java.time.Instant;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,10 +20,15 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleResourceNotFoundException(
         ResourceNotFoundException ex, HttpServletRequest request
     ) {
+
+        logger.warn("Resource not found: {}", ex.getMessage(), ex); // Log as WARN
+
         ErrorResponseDto response = new ErrorResponseDto(
                 Instant.now().toString(),
                 HttpStatus.NOT_FOUND.value(),
@@ -37,6 +44,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleBadRequestException(
         BadRequestException ex, HttpServletRequest request
     ) {
+
+        logger.warn("Bad request: {}", ex.getMessage(), ex);
+
         ErrorResponseDto response = new ErrorResponseDto(
                 Instant.now().toString(),
                 HttpStatus.BAD_REQUEST.value(),
@@ -52,6 +62,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleInvalidCredentialsException(
         InvalidCredentialsException ex, HttpServletRequest request
     ) {
+
+        logger.warn("Invalid credentials: {}", ex.getMessage(), ex);
+
         ErrorResponseDto response = new ErrorResponseDto(
                 Instant.now().toString(),
                 HttpStatus.UNAUTHORIZED.value(),
@@ -68,6 +81,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleUniqueConstraintException(
         UniqueConstraintException ex, HttpServletRequest request
     ) {
+
+        logger.warn("Unique constraint violation: {}", ex.getMessage(), ex);
+
         ErrorResponseDto response = new ErrorResponseDto(
                 Instant.now().toString(),
                 HttpStatus.CONFLICT.value(),
@@ -82,6 +98,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGenericException(
             Exception ex, HttpServletRequest request) {
+
+        logger.error("Unexpected error: {}", ex.getMessage(), ex); // Log as ERROR
+        
         ErrorResponseDto response = new ErrorResponseDto(
                 Instant.now().toString(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -101,6 +120,8 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
+        logger.warn("Validation failed: {}", validationErrors);
+
         ErrorResponseDto response = new ErrorResponseDto(
                 Instant.now().toString(),
                 HttpStatus.BAD_REQUEST.value(),
@@ -116,6 +137,8 @@ public class GlobalExceptionHandler {
         Exception ex, HttpServletRequest request
     ) {
         
+        logger.warn("Invalid request parameter: {}", ex.getMessage(), ex);
+
         ErrorResponseDto response = new ErrorResponseDto(
                 Instant.now().toString(),
                 HttpStatus.BAD_REQUEST.value(),

@@ -38,6 +38,9 @@ jwt:
 aws:
   access-key: ${AWS_ACCESS_KEY_ID}
   secret-key: ${AWS_SECRET_ACCESS_KEY}
+  bucket-name: ${AWS_BUCKET_NAME:tompang-carpool}
+  endpoint: ${AWS_ENDPOINT:https://s3.amazonaws.com} # default aws
+  local: ${AWS_IS_LOCAL:false}
 
 server:
   port: ${SERVER_PORT:4002}

@@ -1,5 +1,7 @@
 package com.tompang.carpool.driver_service.config;
 
+import java.net.URI;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -8,28 +10,36 @@ import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration
 public class S3Config {
 
-    private static String accessKey = "AKIA5ORX65WT3X6EWWFI";
-    private static String secretKey = "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";
+    private final AwsProperties awsProperties;
+
+    public S3Config(AwsProperties awsProperties) {
+        this.awsProperties = awsProperties;
+    }
 
     @Bean
     public S3Client s3Client() {
-        AwsCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+        AwsCredentials credentials = AwsBasicCredentials.create(awsProperties.getAccessKey(), awsProperties.getSecretKey());
         return S3Client.builder()
                 .region(Region.AP_SOUTHEAST_2)
+                .endpointOverride(URI.create(awsProperties.getEndpoint()))
+                .forcePathStyle(awsProperties.isLocal()) // only enable pathStyleAccess for localstack emulation)
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .build();
     }
 
     @Bean
     public S3Presigner s3Presigner() {
-        AwsCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+        AwsCredentials credentials = AwsBasicCredentials.create(awsProperties.getAccessKey(), awsProperties.getSecretKey());
         return S3Presigner.builder()
                 .region(Region.AP_SOUTHEAST_2)
+                .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(awsProperties.isLocal()).build()) // only enable pathStyleAccess for localstack emulation
+                .endpointOverride(URI.create(awsProperties.getEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .build();
     }

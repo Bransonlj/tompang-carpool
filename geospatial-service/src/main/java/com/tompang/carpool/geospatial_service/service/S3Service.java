@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tompang.carpool.geospatial_service.config.AwsProperties;
+
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -12,9 +14,10 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 @Service
 public class S3Service {
     private final S3Client s3Client;
-    private final static String BUCKET_NAME = "tompang-carpool";
+    private final AwsProperties awsProperties;
 
-    public S3Service(S3Client s3Client) {
+    public S3Service(AwsProperties awsProperties, S3Client s3Client) {
+        this.awsProperties = awsProperties;
         this.s3Client = s3Client;
     }
 
@@ -40,31 +43,36 @@ public class S3Service {
         }
     }
 
-    public String uploadFile(String id, Directory directory, byte[] file) throws IOException {
+    public String uploadFile(String id, Directory directory, byte[] file, String contentType) throws IOException {
         String key = directory.getPath(id);
         s3Client.putObject(request -> 
             request
-                .bucket(BUCKET_NAME)
+                .bucket(awsProperties.getBucketName())
                 .key(key)
-                .contentType("image/png"),
+                .contentType(contentType),
             RequestBody.fromBytes(file));
         return key;
     }
 
+    /**
+     * Upload file with default contentType "image/png"
+     * @param id
+     * @param directory
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    public String uploadFile(String id, Directory directory, byte[] file) throws IOException {
+        return uploadFile(id, directory, file, "image/png");
+    }
+
     public String uploadFile(String id, Directory directory, MultipartFile file) throws IOException {
-        String key = directory.getPath(id);
-        s3Client.putObject(request -> 
-            request
-                .bucket(BUCKET_NAME)
-                .key(key)
-                .contentType(file.getContentType()),
-            RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-        return key;
+        return uploadFile(id, directory, file.getBytes(), file.getContentType());
     }
 
     public void deleteFile(String id, Directory directory) {
         s3Client.deleteObject(DeleteObjectRequest.builder()
-                .bucket(BUCKET_NAME)
+                .bucket(awsProperties.getBucketName())
                 .key(directory.getPath(id))
                 .build());
     }
