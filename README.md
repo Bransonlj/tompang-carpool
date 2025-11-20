@@ -2,9 +2,55 @@
 
 Tompang Carpool is a carpooling app, where drivers are matched with riders on similar routes to carpool together, reducing carbon emissions and saving the environment!
 
-## Architecture
+## Usage
 
-![Tompang Carpool Architecture Diagram](./docs/diagrams/TompangCarpoolArchitecture.png)
+### How to run 
+
+The application has been dockerized. After cloning the repo, simply run
+```
+docker-compose up
+```
+Then the client can be accessed on `localhost:8080` by default
+
+Note: initial build times for some spring-boot services may take more than 5-10 minutes. Subsequent build times will be shorter.
+
+Since this application uses AWS, localstack is used for emulation as a docker-compose service so you do not have to create an AWS account. This has been configured in `aws.env`.
+```
+# aws.env - running using localstack emulation
+
+AWS_ACCESS_KEY_ID=test
+AWS_SECRET_ACCESS_KEY=test
+AWS_ENDPOINT=http://localstack:4566
+AWS_BUCKET_NAME=tompang-carpool
+AWS_IS_LOCAL=true
+```
+
+Alternatively, if you want to use AWS without emulation
+```
+# aws.env - running using AWS
+
+AWS_ACCESS_KEY_ID=replace with real aws access key
+AWS_SECRET_ACCESS_KEY=replace with real aws secret key
+AWS_BUCKET_NAME=tompang-carpool
+AWS_IS_LOCAL=false
+# AWS_ENDPOINT not required as don't need to override the default AWS endpoint
+```
+
+### Video Demo
+
+#### Coming Soon!
+
+## Contents
+
+- [Architecture and Tech Stack](#architecture-and-tech-stack)
+- [Services/Components](#servicescomponents)
+- [Security](#security)
+- [Resources](#resources)
+- [Backlog](#backlog)
+
+# Architecture and Tech Stack
+
+![Tompang Carpool Architecture Diagram](./docs/diagrams/TompangCarpoolArchitecture.drawio.png)
 
 Tompang is built with a event-driven, microservices architecture, built with following technologies.
 
@@ -24,14 +70,17 @@ Tompang is built with a event-driven, microservices architecture, built with fol
 #### Databases
 
 * **PostgreSQL**: Standard relational database for most services.
-* **KurrentIO** (formally known as EventStoreDB): Event native database/eventstore for services using event sourcing(eg. Carpool service).
+* **KurrentDB** (formally known as EventStoreDB): Event native database/eventstore for services using event sourcing(eg. Carpool service).
 * **Cassandra**: Distributed database for services with high read & write (eg. Notification & Chat services).
 * **Redis**: Lightweight caching.
+* **AWS S3**: Cloud storage for images etc.
 
 #### Misc
 
 * **Avro**: Schema generation and event serialization & deserialization for Kafka topics with the Schema-Registry.
-* **JUnit + Mockito**: Spring unit tests.
+* **JUnit + Mockito**: Java unit tests.
+* **AWS Rekognition**: Computer Vision AI service for driver verification.
+* **Localstack**: Local emulation of AWS.
 
 # Services/Components
 
@@ -143,6 +192,32 @@ On the Query side, `RideRequestProjector` consumes `RideRequestFailedEvent` and 
 
 The user service is responsible for manager users and their profiles, and also registration and logging in of users, generating their JWToken carrying the user's Id and Roles credentials. 
 
+## Notification Service
+
+Notification service handles the creation of notifications from events of interest produced by the application. These events include `CarpoolMatchedEvent`, `RideRequestFailedEvent`, `RideRequestMatchedEvent`, `DriverRegistrationApprovedEvent` etc. Notification service subscribes to and conusmes these events from kafka, then creates a common notification record, storing it in the database. Then it produces a `NotificaitonReceivedEvent`, which is consumed by the websocket service to notify the client via websockets.
+
+![Creation of notifications from events](./docs/diagrams/notification-service/NotificationService.drawio.png)
+
+Cassandra is chosen as the database because it excels at handling high-volume, write-heavy workloads with low latency and horizontal scalability. This fits the use case of Notification service where notifications are generated continuously in large volumes that scales with the size userbase.
+
+## Chat Service
+
+Chat service handles messaging between users in a carpool. Users in a carpool are automatically added into a group chat. This is done via a projector which subscribes to the `carpool-created` & `ride-request-accepted` kafka topics in order to create a projection of all carpools and its users in a PostgreSQL database. Then when a user sends a message to a group, it produces a `chat-message-sent` event for each user in the group, which is consumed by the websocket service which notifies the client that it has received a message via websockets. At the same time, chat service also saves a record of the message in the Cassandra database
+
+![Chat message](./docs/diagrams/chat-service//ChatService.drawio.png)
+
+Cassandra is chosen as the database because it excels at handling high-volume, write-heavy workloads with low latency and horizontal scalability. This fits the use case of Chat service because we expect a high volumes of chat messages in group chats, which volume also scales with the size of the userbase.
+
+# Security
+
+Backend services reside inside a private network and are not directly accessible from outside. Only the API gateway is exposed externally which acts as the entrypoint for all all client requests. Authentication and authorization are handled at the gateway using JWTs, where the gateway forwards user identity information (e.g., X-User-Id, X-User-Roles headers) from authenticated requests to internal services. Internal services trust these headers and use them to decide whether the request is allowed. This approach keeps internal services stateless, ensures consistent security across the system, and centralizes authentication while allowing each service to apply its own authorization logic.
+
 # Resources
 
 * Diagrams: [sequencediagram.org](https://sequencediagram.org/), [draw.io](https://draw.io)
+
+# Backlog
+
+* Ratings system
+* Payment system
+* Route planning
