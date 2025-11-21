@@ -10,9 +10,6 @@ export type CarpoolSummary = {
   arrivalTime: Date;
   originImageUrl: string | undefined;
   destinationImageUrl: string | undefined;
-}
-
-export type CarpoolDetail = CarpoolSummary & {
   destinationLatLng: {
     lat: number;
     lng: number;
@@ -21,6 +18,9 @@ export type CarpoolDetail = CarpoolSummary & {
     lat: number;
     lng: number;
   };
+}
+
+export type CarpoolDetail = CarpoolSummary & {
   confirmedRides: (RideRequestSummary & { rider: UserData })[];
   pendingRequests: (RideRequestSummary & { rider: UserData })[];
 }

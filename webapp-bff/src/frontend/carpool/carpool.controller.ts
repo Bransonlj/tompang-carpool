@@ -22,6 +22,14 @@ export class CarpoolController {
       destinationAddress: carpool.route.destination.address,
       originImageUrl: carpool.originImageUrl || undefined,
       destinationImageUrl: carpool.destinationImageUrl || undefined,
+      originLatLng: {
+        lat: carpool.route.origin.latitude,
+        lng: carpool.route.origin.longitude,
+      },
+      destinationLatLng: {
+        lat: carpool.route.destination.latitude,
+        lng: carpool.route.destination.longitude,
+      },
     }))
   }
 
@@ -43,6 +51,14 @@ export class CarpoolController {
       status: ride.status,
       originImageUrl: ride.originImageUrl || undefined,
       destinationImageUrl: ride.destinationImageUrl || undefined,
+      originLatLng: {
+        lat: ride.route.origin.latitude,
+        lng: ride.route.origin.longitude,
+      },
+      destinationLatLng: {
+        lat: ride.route.destination.latitude,
+        lng: ride.route.destination.longitude,
+      },
       rider: {
         id: ride.riderId,
         name: Boolean(userProfileIdMap[ride.riderId]) 
@@ -61,6 +77,14 @@ export class CarpoolController {
       status: ride.status,
       originImageUrl: ride.originImageUrl || undefined,
       destinationImageUrl: ride.destinationImageUrl || undefined,
+      originLatLng: {
+        lat: ride.route.origin.latitude,
+        lng: ride.route.origin.longitude,
+      },
+      destinationLatLng: {
+        lat: ride.route.destination.latitude,
+        lng: ride.route.destination.longitude,
+      },
       rider: {
         id: ride.riderId,
         name: Boolean(userProfileIdMap[ride.riderId]) 

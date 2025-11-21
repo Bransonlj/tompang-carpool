@@ -24,6 +24,14 @@ export class RideRequestController {
       status: ride.status,
       originImageUrl: ride.originImageUrl || undefined,
       destinationImageUrl: ride.destinationImageUrl || undefined,
+      originLatLng: {
+        lat: ride.route.origin.latitude,
+        lng: ride.route.origin.longitude,
+      },
+      destinationLatLng: {
+        lat: ride.route.destination.latitude,
+        lng: ride.route.destination.longitude,
+      },
     }));
   }
 
@@ -45,6 +53,14 @@ export class RideRequestController {
         destinationAddress: rideRequest.assignedCarpool.route.destination.address,
         originImageUrl: rideRequest.assignedCarpool.originImageUrl || undefined,
         destinationImageUrl: rideRequest.assignedCarpool.destinationImageUrl || undefined,
+        originLatLng: {
+          lat: rideRequest.assignedCarpool.route.origin.latitude,
+          lng: rideRequest.assignedCarpool.route.origin.longitude,
+        },
+        destinationLatLng: {
+          lat: rideRequest.assignedCarpool.route.destination.latitude,
+          lng: rideRequest.assignedCarpool.route.destination.longitude,
+        },
         driver: {
           id: rideRequest.assignedCarpool.driverId,
           name: Boolean(userProfileIdMap[rideRequest.assignedCarpool.driverId]) 
@@ -62,6 +78,14 @@ export class RideRequestController {
         destinationAddress: carpool.route.destination.address,
         originImageUrl: carpool.originImageUrl || undefined,
         destinationImageUrl: carpool.destinationImageUrl || undefined,
+        originLatLng: {
+          lat: carpool.route.origin.latitude,
+          lng: carpool.route.origin.longitude,
+        },
+        destinationLatLng: {
+          lat: carpool.route.destination.latitude,
+          lng: carpool.route.destination.longitude,
+        },
         driver: {
           id: carpool.driverId,
           name: Boolean(userProfileIdMap[carpool.driverId]) 
