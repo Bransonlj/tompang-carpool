@@ -42,7 +42,7 @@
         "name": "arrivalTime",
         "type": {
           "type": "long",
-          "logicalType": "local-timestamp-millis"
+          "logicalType": "timestamp-millis"
         }
       },
       {
@@ -72,14 +72,14 @@
         "name": "startTime",
         "type": {
           "type": "long",
-          "logicalType": "local-timestamp-millis"
+          "logicalType": "timestamp-millis"
         }
       },
       {
         "name": "endTime",
         "type": {
           "type": "long",
-          "logicalType": "local-timestamp-millis"
+          "logicalType": "timestamp-millis"
         }
       },
       {
