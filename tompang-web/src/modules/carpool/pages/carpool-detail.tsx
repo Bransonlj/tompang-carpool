@@ -51,7 +51,7 @@ export default function CarpoolDetailPage() {
           [ride.originLatLng.lat, ride.originLatLng.lng],
           [ride.destinationLatLng.lat, ride.destinationLatLng.lng],
         ])}
-        className="w-full h-72"
+        className="w-full h-80"
       />
       <div className="flex">
         <div className="flex flex-col mr-auto">

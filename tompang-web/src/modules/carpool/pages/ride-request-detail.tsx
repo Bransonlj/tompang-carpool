@@ -46,7 +46,7 @@ export default function RideRequestDetailPage() {
           [data.originLatLng.lat, data.originLatLng.lng], 
           [data.destinationLatLng.lat, data.destinationLatLng.lng]
         ]}
-        className="w-full h-72"
+        className="w-full h-80"
       />
       <div className="flex flex-col">
         <h2 className="text-lg font-semibold" >

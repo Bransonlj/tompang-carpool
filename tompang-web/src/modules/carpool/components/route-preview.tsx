@@ -30,7 +30,7 @@ const FitBounds = ({
   const map = useMap();
 
   useEffect(() => {
-    map.fitBounds(bounds, { padding: [50, 50] });
+    map.fitBounds(bounds, { padding: [25, 25] });
   }, [map, bounds]);
 
   return null;
@@ -47,7 +47,7 @@ export default function RoutePreview({
   );
 
   return (
-    <MapContainer center={SINGAPORE} zoom={13} scrollWheelZoom={false} className={`${className}`}>
+    <MapContainer center={SINGAPORE} zoom={13} scrollWheelZoom={true} className={`${className}`}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

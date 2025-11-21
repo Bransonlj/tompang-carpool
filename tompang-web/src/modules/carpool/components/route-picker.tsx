@@ -106,7 +106,7 @@ export default function RoutePicker({
 
   return (
       <div className='flex items-start gap-2'>
-        <MapContainer center={SINGAPORE} zoom={12} scrollWheelZoom={true} className='w-80 h-64' ref={mapRef}>
+        <MapContainer center={SINGAPORE} zoom={12} scrollWheelZoom={true} className='w-96 h-80' ref={mapRef}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
