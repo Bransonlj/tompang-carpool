@@ -6,7 +6,6 @@ import Divider from "@mui/material/Divider";
 import { useAuth } from "../../../context/auth-context";
 import IconButton from "@mui/material/IconButton";
 import { MessageCircleMore } from "lucide-react";
-import { LatLng } from "leaflet";
 import CarpoolRequestAction from "../components/carpool-request-action";
 import RoutePreview from "../components/route-preview";
 
@@ -44,8 +43,14 @@ export default function CarpoolDetailPage() {
   return (
     <div className="flex flex-col gap-4">
       <RoutePreview 
-        origin={new LatLng(data.originLatLng.lat, data.originLatLng.lng)} 
-        destination={new LatLng(data.destinationLatLng.lat, data.destinationLatLng.lng)}
+        primaryStartEnd={[
+          [data.originLatLng.lat, data.originLatLng.lng], 
+          [data.destinationLatLng.lat, data.destinationLatLng.lng]
+        ]}
+        secondaryStartEnds={data.confirmedRides.map(ride => [
+          [ride.originLatLng.lat, ride.originLatLng.lng],
+          [ride.destinationLatLng.lat, ride.destinationLatLng.lng],
+        ])}
         className="w-full h-72"
       />
       <div className="flex">
@@ -77,6 +82,8 @@ export default function CarpoolDetailPage() {
               endTime: new Date(ride.endTime),
               seats: ride.passengers,
               owner: ride.rider,
+              originImageUrl: ride.originImageUrl,
+              destinationImageUrl: ride.destinationImageUrl,
             }}
           />
         ))}
@@ -95,6 +102,8 @@ export default function CarpoolDetailPage() {
                 endTime: new Date(ride.endTime),
                 seats: ride.passengers,
                 owner: ride.rider,
+                originImageUrl: ride.originImageUrl,
+                destinationImageUrl: ride.destinationImageUrl,
               }}
               options={<CarpoolRequestAction carpoolId={data.id} requestId={ride.id} onSuccess={refetch} />}
             />

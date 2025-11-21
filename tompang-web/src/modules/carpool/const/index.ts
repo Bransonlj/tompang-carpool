@@ -1,5 +1,7 @@
 import { LatLng } from "leaflet";
 
+export * from "./icons"
+
 /**
  * Singapore leaftlet latlng
  */

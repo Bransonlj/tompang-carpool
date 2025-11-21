@@ -13,9 +13,6 @@ export type RideRequestSummary = {
   status: RideRequestStatus;
   originImageUrl: string | undefined;
   destinationImageUrl: string | undefined;
-}
-
-export type RideRequestDetail = RideRequestSummary & {
   destinationLatLng: {
     lat: number;
     lng: number;
@@ -24,6 +21,9 @@ export type RideRequestDetail = RideRequestSummary & {
     lat: number;
     lng: number;
   };
+}
+
+export type RideRequestDetail = RideRequestSummary & {
   assignedCarpool?: CarpoolSummary & { driver: UserData; };
   pendingCarpools: (CarpoolSummary & { driver: UserData; })[];
 }

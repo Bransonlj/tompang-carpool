@@ -6,7 +6,6 @@ import TripCard from "../components/trip-card";
 import RideRequestStatusLabel from "../components/ride-request-status-label";
 import { useAuth } from "../../../context/auth-context";
 import RoutePreview from "../components/route-preview";
-import { LatLng } from "leaflet";
 import IconButton from "@mui/material/IconButton";
 import { MessageCircleMore } from "lucide-react";
 
@@ -43,8 +42,10 @@ export default function RideRequestDetailPage() {
   return (
     <div className="flex flex-col gap-4">
       <RoutePreview
-        origin={new LatLng(data.originLatLng.lat, data.originLatLng.lng)} 
-        destination={new LatLng(data.destinationLatLng.lat, data.destinationLatLng.lng)}
+        primaryStartEnd={[
+          [data.originLatLng.lat, data.originLatLng.lng], 
+          [data.destinationLatLng.lat, data.destinationLatLng.lng]
+        ]}
         className="w-full h-72"
       />
       <div className="flex flex-col">
@@ -70,7 +71,9 @@ export default function RideRequestDetailPage() {
                 current: data.assignedCarpool.seatsAssigned,
                 total: data.assignedCarpool.totalSeats,
               },
-              owner: data.assignedCarpool.driver
+              owner: data.assignedCarpool.driver,
+              originImageUrl: data.assignedCarpool.originImageUrl,
+              destinationImageUrl: data.assignedCarpool.destinationImageUrl,
             }}
             options={
               <IconButton onClick={() => navigate(`/chat/${data.assignedCarpool?.id}`, { state: { from: "ride-request", id } })}>
@@ -96,7 +99,9 @@ export default function RideRequestDetailPage() {
                       current: carpool.seatsAssigned,
                       total: carpool.totalSeats,
                     },
-                    owner: carpool.driver
+                    owner: carpool.driver,
+                    originImageUrl: carpool.originImageUrl,
+                    destinationImageUrl: carpool.destinationImageUrl,
                   }}
                 />
               ))

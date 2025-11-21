@@ -5,7 +5,6 @@ import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
 import { SINGAPORE } from '../const';
 import Divider from '@mui/material/Divider';
 
-
 interface MoveableMarkerProps {
   moveable?: boolean;
   value?: LatLng;
