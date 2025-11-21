@@ -54,7 +54,7 @@ export default function CreateCarpoolPage() {
     <div>
       <TextField label="No. Seats" type="number" value={seats} onChange={(e) => setSeats(Number(e.target.value))} />
       <RoutePicker origin={origin} onOriginChange={setOrigin} destination={destination} onDestinationChange={setDestination} />
-      <DateTimePicker label="Arrival Time" value={arrivalTime} onChange={setArrivalTime} />
+      <DateTimePicker label="Arrival Time" value={arrivalTime} timezone="system" onChange={setArrivalTime} />
       <Button disabled={mutation.isPending} onClick={() => mutation.mutate()} variant="contained">Create</Button>
     </div>
   )

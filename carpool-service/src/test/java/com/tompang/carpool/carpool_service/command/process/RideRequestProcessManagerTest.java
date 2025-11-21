@@ -11,7 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -74,8 +74,8 @@ public class RideRequestProcessManagerTest {
                     .setRequestId("request-1")
                     .setRiderId("rider-1")
                     .setPassengers(2)
-                    .setStartTime(LocalDateTime.now())
-                    .setEndTime(LocalDateTime.now())
+                    .setStartTime(Instant.now())
+                    .setEndTime(Instant.now())
                     .setRoute(new RouteValue(new LatLong(1, 2), new LatLong(3, 4)).toSchemaRoute())
                     .build();
         }

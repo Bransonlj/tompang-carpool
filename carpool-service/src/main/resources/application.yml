@@ -55,3 +55,11 @@ aws:
 
 server:
   port: ${SERVER_PORT:4000}
+
+logging:
+  level:
+    org:
+      apache:
+        kafka: ERROR
+    io:
+      confluent: ERROR

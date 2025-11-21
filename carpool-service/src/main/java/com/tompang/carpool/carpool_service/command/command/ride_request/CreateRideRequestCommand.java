@@ -1,6 +1,6 @@
 package com.tompang.carpool.carpool_service.command.command.ride_request;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,16 +13,16 @@ public class CreateRideRequestCommand {
 
     public final String riderId;
     public final int passengers;
-    public final LocalDateTime startTime;
-    public final LocalDateTime endTime;
+    public final Instant startTime;
+    public final Instant endTime;
     public final RouteValue route;
 
     @JsonCreator
     public CreateRideRequestCommand(
         @JsonProperty("riderId") String riderId,
         @JsonProperty("passengers") int passengers,
-        @JsonProperty("startTime") LocalDateTime startTime,
-        @JsonProperty("endTime") LocalDateTime endTime,
+        @JsonProperty("startTime") Instant startTime,
+        @JsonProperty("endTime") Instant endTime,
         @JsonProperty("route") RouteValue route
     ) {
         this.riderId = riderId;

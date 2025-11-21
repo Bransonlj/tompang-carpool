@@ -1,6 +1,6 @@
 package com.tompang.carpool.carpool_service.query.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,8 +58,8 @@ public class CarpoolQueryService {
         Point origin,
         Point destination,
         double rangeMeters,
-        LocalDateTime startTime,
-        LocalDateTime endTime,
+        Instant startTime,
+        Instant endTime,
         int seatsNeeded
     ) {
         return repository.findCarpoolsByRouteInRangeWithSeats(origin, destination, rangeMeters, startTime, endTime, seatsNeeded);

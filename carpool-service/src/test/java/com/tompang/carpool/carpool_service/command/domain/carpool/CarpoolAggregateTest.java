@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +43,7 @@ public class CarpoolAggregateTest {
             CreateCarpoolCommand command = CreateCarpoolCommand.builder()
                 .driverId("driver-1")
                 .seats(4)
-                .arrivalTime(LocalDateTime.now())
+                .arrivalTime(Instant.now())
                 .route(new RouteValue(new LatLong(1, 2), new LatLong(3, 4)))
                 .build();
             

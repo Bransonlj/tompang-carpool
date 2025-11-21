@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -81,7 +81,7 @@ public class CarpoolCommandHandlerTest {
             command = CreateCarpoolCommand.builder()
                     .driverId("driver-1")
                     .seats(4)
-                    .arrivalTime(LocalDateTime.now())
+                    .arrivalTime(Instant.now())
                     .route(new RouteValue(new LatLong(1, 2), new LatLong(3, 4)))
                     .build();
                     

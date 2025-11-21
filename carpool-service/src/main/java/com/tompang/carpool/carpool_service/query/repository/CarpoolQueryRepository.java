@@ -1,6 +1,6 @@
 package com.tompang.carpool.carpool_service.query.repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.locationtech.jts.geom.Point;
@@ -24,8 +24,8 @@ public interface CarpoolQueryRepository extends JpaRepository<Carpool, String> {
         @Param("origin") Point origin,
         @Param("destination") Point destination,
         @Param("rangeMeters") double rangeMeters,
-        @Param("startTime") LocalDateTime startTime,
-        @Param("endTime") LocalDateTime endTime,
+        @Param("startTime") Instant startTime,
+        @Param("endTime") Instant endTime,
         @Param("seatsNeeded") int seatsNeeded
     );
 

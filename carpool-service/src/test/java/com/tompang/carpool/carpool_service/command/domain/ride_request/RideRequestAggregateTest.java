@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -46,8 +47,8 @@ public class RideRequestAggregateTest {
             CreateRideRequestCommand command = CreateRideRequestCommand.builder()
                 .riderId("rider-123")
                 .passengers(2)
-                .startTime(LocalDateTime.now())
-                .endTime(LocalDateTime.now())
+                .startTime(Instant.now())
+                .endTime(Instant.now())
                 .route(new RouteValue(new LatLong(1, 2), new LatLong(3, 4)))
                 .build();
             
@@ -85,8 +86,8 @@ public class RideRequestAggregateTest {
             CreateRideRequestCommand command = CreateRideRequestCommand.builder()
                 .riderId("rider-123")
                 .passengers(2)
-                .startTime(LocalDateTime.now().plusMinutes(1))
-                .endTime(LocalDateTime.now())
+                .startTime(Instant.now().plus(1, ChronoUnit.MINUTES))
+                .endTime(Instant.now())
                 .route(new RouteValue(new LatLong(1, 2), new LatLong(3, 4)))
                 .build();
             

@@ -62,8 +62,8 @@ export default function CreateRideRequestPage() {
       <RoutePicker origin={origin} onOriginChange={setOrigin} destination={destination} onDestinationChange={setDestination} />
       <Divider flexItem />
       <TextField className="bg-gray-50" label="Passengers" type="number" value={passengers} onChange={(e) => setPassengers(Number(e.target.value))} />
-      <DateTimePicker className="bg-gray-50" label="Start Time" value={startTime} onChange={setStartTime} />
-      <DateTimePicker className="bg-gray-50" label="End Time" value={endTime} onChange={setEndTime} />
+      <DateTimePicker className="bg-gray-50" label="Start Time" timezone="system" value={startTime} onChange={setStartTime} />
+      <DateTimePicker className="bg-gray-50" label="End Time" timezone="system" value={endTime} onChange={setEndTime} />
       <Button disabled={mutation.isPending} onClick={() => mutation.mutate()} variant="contained">Create</Button>
     </div>
   )

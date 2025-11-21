@@ -1,6 +1,6 @@
 package com.tompang.carpool.carpool_service.query.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import com.tompang.carpool.carpool_service.query.entity.Carpool;
 
@@ -15,7 +15,7 @@ public class CarpoolSummaryDto {
     public final int totalSeats;
     public final int seatsAssigned;
     public final String driverId;
-    public final LocalDateTime arrivalTime;
+    public final Instant arrivalTime;
     public final RouteDto route;
     public String originImageUrl;
     public String destinationImageUrl;

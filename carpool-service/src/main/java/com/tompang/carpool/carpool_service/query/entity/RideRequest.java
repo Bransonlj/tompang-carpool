@@ -1,6 +1,6 @@
 package com.tompang.carpool.carpool_service.query.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,8 +40,8 @@ public class RideRequest {
     private String riderId;
     private int passengers;
 
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private Instant startTime;
+    private Instant endTime;
 
     @Column(columnDefinition = "GEOGRAPHY(Point,4326)")
     private Point origin;
@@ -66,7 +66,7 @@ public class RideRequest {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "varchar(20) default 'PENDING'")
+    @Column(nullable = false, columnDefinition = "varchar(20)")
     private RideRequestStatus status = RideRequestStatus.PENDING;
 
     @Builder.Default

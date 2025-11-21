@@ -1,6 +1,6 @@
 package com.tompang.carpool.carpool_service.command.domain.ride_request;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,8 +34,8 @@ public class RideRequestAggregate {
     private int passengers;
     private List<String> matchedCarpools = new ArrayList<>();
     private Optional<String> assignedCarpool = Optional.empty();
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private Instant startTime;
+    private Instant endTime;
     private RouteValue route;
     private RideRequestStatus status = RideRequestStatus.PENDING;
 
@@ -62,11 +62,11 @@ public class RideRequestAggregate {
         return this.assignedCarpool;
     }
 
-    public LocalDateTime getStartTime() {
+    public Instant getStartTime() {
         return this.startTime;
     }
 
-    public LocalDateTime getEndTime() {
+    public Instant getEndTime() {
         return this.endTime;
     }
 
@@ -231,7 +231,7 @@ public class RideRequestAggregate {
         }
     }
 
-    private static void ensureValidTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+    private static void ensureValidTimeRange(Instant startTime, Instant endTime) {
         if (startTime.isAfter(endTime)) {
             throw new DomainException("invalid timerange: startTime is after endTime");
         }

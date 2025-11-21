@@ -1,6 +1,7 @@
 package com.tompang.carpool.carpool_service.command.domain.ride_request;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import com.tompang.carpool.carpool_service.command.command.carpool.AcceptCarpoolRequestCommand;
@@ -20,8 +21,8 @@ public class RideRequestAggregateFactory {
     CreateRideRequestCommand command = CreateRideRequestCommand.builder()
         .riderId("rider-123")
         .passengers(2)
-        .startTime(LocalDateTime.now())
-        .endTime(LocalDateTime.now().plusMinutes(30))
+        .startTime(Instant.now())
+        .endTime(Instant.now().plus(30, ChronoUnit.MINUTES))
         .route(new RouteValue(new LatLong(1, 2), new LatLong(3, 4)))
         .build();
 

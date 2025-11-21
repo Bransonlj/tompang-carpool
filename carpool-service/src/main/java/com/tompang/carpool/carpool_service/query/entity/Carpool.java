@@ -1,6 +1,6 @@
 package com.tompang.carpool.carpool_service.query.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,7 +37,7 @@ public class Carpool {
     @Builder.Default
     private int seatsAssigned = 0; // we track the seats assigned to prevent having to join with requests during runtime.
     private String driverId;
-    private LocalDateTime arrivalTime;
+    private Instant arrivalTime;
 
     @Column(columnDefinition = "GEOGRAPHY(Point,4326)")
     private Point origin;

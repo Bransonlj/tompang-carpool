@@ -1,6 +1,6 @@
 package com.tompang.carpool.carpool_service.command.domain.carpool;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import com.tompang.carpool.carpool_service.command.command.carpool.AcceptCarpoolRequestCommand;
 import com.tompang.carpool.carpool_service.command.command.carpool.CreateCarpoolCommand;
 import com.tompang.carpool.carpool_service.command.command.carpool.MatchCarpoolCommand;
@@ -16,7 +16,7 @@ public class CarpoolAggregateFactory {
     CreateCarpoolCommand command = CreateCarpoolCommand.builder()
         .driverId("driver-1")
         .seats(4)
-        .arrivalTime(LocalDateTime.now())
+        .arrivalTime(Instant.now())
         .route(new RouteValue(new LatLong(1, 2), new LatLong(3, 4)))
         .build();
 

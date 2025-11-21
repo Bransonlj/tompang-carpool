@@ -2,7 +2,8 @@ package com.tompang.carpool.carpool_service.query.projector;
 
 import static org.mockito.Mockito.verify;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,8 +51,8 @@ public class RideRequestProjectorTest {
                     .setRequestId("request-1")
                     .setRiderId("rider-1")
                     .setPassengers(2)
-                    .setStartTime(LocalDateTime.now())
-                    .setEndTime(LocalDateTime.now().plusHours(1))
+                    .setStartTime(Instant.now())
+                    .setEndTime(Instant.now().plus(1, ChronoUnit.HOURS))
                     .setRoute(Route.newBuilder()
                             .setOrigin(Location.newBuilder()
                                     .setLatitude(2)
@@ -76,8 +77,8 @@ public class RideRequestProjectorTest {
                     .id("request-1")
                     .riderId("rider-1")
                     .passengers(2)
-                    .startTime(LocalDateTime.now())
-                    .endTime(LocalDateTime.now().plusHours(1))
+                    .startTime(Instant.now())
+                    .endTime(Instant.now().plus(1, ChronoUnit.HOURS))
                     .origin(GeoUtils.createPoint(new Location(2d, 4d)))
                     .destination(GeoUtils.createPoint(new Location(1d, 3d)))
                     .build()

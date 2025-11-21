@@ -1,6 +1,6 @@
 package com.tompang.carpool.carpool_service.command.domain.carpool;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +36,7 @@ public class CarpoolAggregate {
     private String driverId;
 
     private RouteValue route;
-    private LocalDateTime arrivalTime;
+    private Instant arrivalTime;
 
     // List of new events to be persisted
     private final List<CarpoolDomainEvent> changes = new ArrayList<>();
@@ -140,7 +140,7 @@ public class CarpoolAggregate {
         return this.totalSeats = this.seatsAssigned;
     }
 
-    public LocalDateTime getArrivalTime() {
+    public Instant getArrivalTime() {
         return this.arrivalTime;
     }
 
