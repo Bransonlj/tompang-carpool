@@ -2,6 +2,8 @@
 
 Tompang Carpool is a carpooling app, where drivers are matched with riders on similar routes to carpool together, reducing carbon emissions and saving the environment!
 
+![App Preview](./docs/images/tompang-carpool-preview.png)
+
 ## Usage
 
 ### How to run 
@@ -36,6 +38,9 @@ AWS_IS_LOCAL=false
 # AWS_ENDPOINT not required as don't need to override the default AWS endpoint
 ```
 
+Note: application uses OneMapAPI which requires an account. For your convenience, a burner account has been provided for demo. But you can configure your own in the environment.
+
+
 ### Video Demo
 
 #### Coming Soon!
@@ -44,6 +49,14 @@ AWS_IS_LOCAL=false
 
 - [Architecture and Tech Stack](#architecture-and-tech-stack)
 - [Services/Components](#servicescomponents)
+    - [API Gateway](#api-gateway)
+    - [Carpool Service](#carpool-service)
+    - [Chat Service](#chat-service)
+    - [Driver Service](#driver-service)
+    - [Driver Verification Service](#driver-verification-service)
+    - [Geospatial Service](#geospatial-service)
+    - [Notification Service](#notification-service)
+    - [WebSocket Service](#websocket-service)
 - [Security](#security)
 - [Resources](#resources)
 - [Backlog](#backlog)
@@ -78,6 +91,8 @@ Tompang is built with a event-driven, microservices architecture, built with fol
 #### Misc
 
 * **Avro**: Schema generation and event serialization & deserialization for Kafka topics with the Schema-Registry.
+* **Leaflet**: Map library for UI.
+* **OneMapAPI**: For geolocation data (eg. address name, map images).
 * **JUnit + Mockito**: Java unit tests.
 * **AWS Rekognition**: Computer Vision AI service for driver verification.
 * **Localstack**: Local emulation of AWS.
@@ -188,9 +203,21 @@ When invoked by `RideRequestProcessManager`, the command handler rehydrates the 
 
 On the Query side, `RideRequestProjector` consumes `RideRequestFailedEvent` and updates the RideRequest entity by setting its status to `FAILED`.
 
-## User Service
+## Chat Service
 
-The user service is responsible for manager users and their profiles, and also registration and logging in of users, generating their JWToken carrying the user's Id and Roles credentials. 
+Chat service handles messaging between users in a carpool. Users in a carpool are automatically added into a group chat. This is done via a projector which subscribes to the `carpool-created` & `ride-request-accepted` kafka topics in order to create a projection of all carpools and its users in a PostgreSQL database. Then when a user sends a message to a group, it produces a `chat-message-sent` event for each user in the group, which is consumed by the websocket service which notifies the client that it has received a message via websockets. At the same time, chat service also saves a record of the message in the Cassandra database
+
+![Chat message](./docs/diagrams/chat-service//ChatService.drawio.png)
+
+Cassandra is chosen as the database because it excels at handling high-volume, write-heavy workloads with low latency and horizontal scalability. This fits the use case of Chat service because we expect a high volumes of chat messages in group chats, which volume also scales with the size of the userbase.
+
+## Driver Service
+
+TODO
+
+## Driver Verification Service
+
+TODO
 
 ## Notification Service
 
@@ -200,13 +227,17 @@ Notification service handles the creation of notifications from events of intere
 
 Cassandra is chosen as the database because it excels at handling high-volume, write-heavy workloads with low latency and horizontal scalability. This fits the use case of Notification service where notifications are generated continuously in large volumes that scales with the size userbase.
 
-## Chat Service
+## Geospatial Service
 
-Chat service handles messaging between users in a carpool. Users in a carpool are automatically added into a group chat. This is done via a projector which subscribes to the `carpool-created` & `ride-request-accepted` kafka topics in order to create a projection of all carpools and its users in a PostgreSQL database. Then when a user sends a message to a group, it produces a `chat-message-sent` event for each user in the group, which is consumed by the websocket service which notifies the client that it has received a message via websockets. At the same time, chat service also saves a record of the message in the Cassandra database
+TODO
 
-![Chat message](./docs/diagrams/chat-service//ChatService.drawio.png)
+## User Service
 
-Cassandra is chosen as the database because it excels at handling high-volume, write-heavy workloads with low latency and horizontal scalability. This fits the use case of Chat service because we expect a high volumes of chat messages in group chats, which volume also scales with the size of the userbase.
+The user service is responsible for manager users and their profiles, and also registration and logging in of users, generating their JWToken carrying the user's Id and Roles credentials. 
+
+## WebSocket service
+
+Websocket service manages websockets for real-time communication with the clients. It subscribes to relevant Kafka topics: `notificaiton-received` & `chat-message-sent`, then creates an produces a websocket event to the target client.
 
 # Security
 
