@@ -12,6 +12,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import com.tompang.carpool.geospatial_service.common.exception.OnemapApiException;
+import com.tompang.carpool.geospatial_service.config.OneMapProperties;
 import com.tompang.carpool.geospatial_service.onemap.dto.OnemapAuthRequestDto;
 import com.tompang.carpool.geospatial_service.onemap.dto.OnemapAuthResponseDto;
 import com.tompang.carpool.geospatial_service.onemap.dto.OnemapGeocodeResponseDto;
@@ -21,13 +22,15 @@ import com.tompang.carpool.geospatial_service.onemap.dto.OnemapGeocodeResponseDt
 public class OnemapService {
     private final RestClient restClient;
     private final RedisTemplate<String, String> redisTemplate;
+    private final OneMapProperties oneMapProperties;
     private static final String AUTH_TOKEN_STRING = "onemap:authtoken";
 
-    public OnemapService(RestClient.Builder builder, RedisTemplate<String, String> redisTemplate) {
+    public OnemapService(RestClient.Builder builder, RedisTemplate<String, String> redisTemplate, OneMapProperties oneMapProperties) {
         this.restClient = builder
                 .baseUrl("https://www.onemap.gov.sg")
                 .build();
         this.redisTemplate = redisTemplate;
+        this.oneMapProperties = oneMapProperties;
     }
 
     private String authorize() throws OnemapApiException {
@@ -40,7 +43,7 @@ public class OnemapService {
             OnemapAuthResponseDto response = restClient.post()
                 .uri("/api/auth/post/getToken")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new OnemapAuthRequestDto("bransonprojectemail@gmail.com", "onemapAPI1232!")) // TODO move to env
+                .body(new OnemapAuthRequestDto(oneMapProperties.getEmail(), oneMapProperties.getPassword()))
                 .retrieve()
                 .body(OnemapAuthResponseDto.class);
 

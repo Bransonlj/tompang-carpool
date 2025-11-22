@@ -423,6 +423,9 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
 
+      # ONEMAP_API_EMAIL: optionally-use-your-own-api-account
+      # ONEMAP_API_PASSWORD:
+
     ports:
       - "4001:4001" 
     networks:

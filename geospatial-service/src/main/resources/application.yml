@@ -31,6 +31,10 @@ aws:
   endpoint: ${AWS_ENDPOINT:https://s3.amazonaws.com} # default aws
   local: ${AWS_IS_LOCAL:false}
 
+onemap:
+  email: ${ONEMAP_API_EMAIL:tompangcarpool@gmail.com} # provided a burner onemap api account for convenience
+  password: ${ONEMAP_API_PASSWORD:tompangcarpoolonemapAPI!}
+
 server:
   port: ${SERVER_PORT:4001}
 
