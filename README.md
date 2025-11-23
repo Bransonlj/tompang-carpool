@@ -16,6 +16,8 @@ Then the client can be accessed on `localhost:8080` by default
 
 Note: initial build times for some spring-boot services may take more than 5-10 minutes. Subsequent build times will be shorter.
 
+### Optional Configuration
+
 Since this application uses AWS, localstack is used for emulation as a docker-compose service so you do not have to create an AWS account. This has been configured in `aws.env`.
 ```
 # aws.env - running using localstack emulation
