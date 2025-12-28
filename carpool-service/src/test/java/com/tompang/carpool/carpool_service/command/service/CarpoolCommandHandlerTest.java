@@ -57,9 +57,6 @@ public class CarpoolCommandHandlerTest {
     @Mock
     private EventRepository repository;
 
-    @Mock
-    private KafkaProducerService kafkaProducerService;
-
     @InjectMocks
     private CarpoolCommandHandler commandHandler;
 
@@ -115,7 +112,6 @@ public class CarpoolCommandHandlerTest {
                         eq(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, "stub-id")),
                         eq(fakeEvents)
                 );
-                verify(kafkaProducerService).publishDomainEvents(fakeEvents);
             }
         }
     }
@@ -173,7 +169,6 @@ public class CarpoolCommandHandlerTest {
                         eq(newEvents),
                         eq(Long.valueOf(1))
                 );
-                verify(kafkaProducerService).publishDomainEvents(newEvents);
             }
         }
     }
@@ -267,9 +262,6 @@ public class CarpoolCommandHandlerTest {
                         eq(newRideRequestEvents),
                         eq(Long.valueOf(1))
                 );
-
-                verify(kafkaProducerService).publishDomainEvents(newCarpoolEvents);
-                verify(kafkaProducerService).publishDomainEvents(newRideRequestEvents);
             }
         }
 
@@ -379,9 +371,6 @@ public class CarpoolCommandHandlerTest {
                         eq(newRideRequestEvents),
                         eq(Long.valueOf(1))
                 );
-
-                verify(kafkaProducerService).publishDomainEvents(newCarpoolEvents);
-                verify(kafkaProducerService).publishDomainEvents(newRideRequestEvents);
             }
         }
     }
@@ -440,7 +429,6 @@ public class CarpoolCommandHandlerTest {
                         eq(newEvents),
                         eq(Long.valueOf(1))
                 );
-                verify(kafkaProducerService).publishDomainEvents(newEvents);
             }
         }
     }

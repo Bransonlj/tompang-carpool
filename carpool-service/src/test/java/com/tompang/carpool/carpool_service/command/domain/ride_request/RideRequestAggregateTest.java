@@ -47,8 +47,8 @@ public class RideRequestAggregateTest {
             CreateRideRequestCommand command = CreateRideRequestCommand.builder()
                 .riderId("rider-123")
                 .passengers(2)
-                .startTime(Instant.now())
-                .endTime(Instant.now())
+                .startTime(Instant.now().truncatedTo(ChronoUnit.MILLIS))
+                .endTime(Instant.now().truncatedTo(ChronoUnit.MILLIS))
                 .route(new RouteValue(new LatLong(1, 2), new LatLong(3, 4)))
                 .build();
             

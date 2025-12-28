@@ -43,9 +43,6 @@ public class RideRequestCommandHandlerTest {
     @Mock
     private EventRepository repository;
 
-    @Mock
-    private KafkaProducerService kafkaProducerService;
-
     @InjectMocks
     private RideRequestCommandHandler commandHandler;
 
@@ -105,7 +102,6 @@ public class RideRequestCommandHandlerTest {
                         eq(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, "stub-id")),
                         eq(fakeEvents)
                 );
-                verify(kafkaProducerService).publishDomainEvents(fakeEvents);
             }
         }
     }
@@ -165,7 +161,6 @@ public class RideRequestCommandHandlerTest {
                         eq(newEvents),
                         eq(Long.valueOf(1))
                 );
-                verify(kafkaProducerService).publishDomainEvents(newEvents);
             }
         }
     }
@@ -226,7 +221,6 @@ public class RideRequestCommandHandlerTest {
                         eq(newEvents),
                         eq(Long.valueOf(1))
                 );
-                verify(kafkaProducerService).publishDomainEvents(newEvents);
             }
         }
     }
