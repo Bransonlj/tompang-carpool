@@ -7,7 +7,7 @@ on:
       - develop
     paths:
       - 'carpool-service/**'
-      - '.github/workflows/carpool-ci.yaml'
+      - '.github/workflows/carpool-ci.yml'
       - 'schemas/**'
   pull_request:
     branches:
@@ -15,7 +15,7 @@ on:
       - develop
     paths:
       - 'carpool-service/**'
-      - '.github/workflows/carpool-ci.yaml'
+      - '.github/workflows/carpool-ci.yml'
       - 'schemas/**'
 
 jobs:
