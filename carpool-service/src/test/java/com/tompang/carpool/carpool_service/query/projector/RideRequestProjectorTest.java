@@ -17,6 +17,7 @@ import com.tompang.carpool.carpool_service.common.GeoUtils;
 import com.tompang.carpool.carpool_service.query.entity.RideRequest;
 import com.tompang.carpool.carpool_service.query.geocode.GeocodeJobService;
 import com.tompang.carpool.carpool_service.query.geocode.dto.ReverseGeocodeJobDto;
+import com.tompang.carpool.carpool_service.query.geocode.dto.StaticMapJobDto;
 import com.tompang.carpool.carpool_service.query.repository.RideRequestQueryRepository;
 import com.tompang.carpool.common.Location;
 import com.tompang.carpool.common.Route;
@@ -69,37 +70,51 @@ public class RideRequestProjectorTest {
         
         @Test
         void shouldCreateAndSaveRideRequestAndCreateReverseGeocodeJob() {
-            // act
-            projector.handleRideRequestCreated(event);
+                // act
+                projector.handleRideRequestCreated(event);
 
-            // assert
-            verify(rideRequestRepository).save(RideRequest.builder()
-                    .id("request-1")
-                    .riderId("rider-1")
-                    .passengers(2)
-                    .startTime(Instant.now())
-                    .endTime(Instant.now().plus(1, ChronoUnit.HOURS))
-                    .origin(GeoUtils.createPoint(new Location(2d, 4d)))
-                    .destination(GeoUtils.createPoint(new Location(1d, 3d)))
-                    .build()
-            );
+                // assert
+                verify(rideRequestRepository).save(RideRequest.builder()
+                        .id("request-1")
+                        .riderId("rider-1")
+                        .passengers(2)
+                        .startTime(Instant.now())
+                        .endTime(Instant.now().plus(1, ChronoUnit.HOURS))
+                        .origin(GeoUtils.createPoint(new Location(2d, 4d)))
+                        .destination(GeoUtils.createPoint(new Location(1d, 3d)))
+                        .build());
 
-            verify(geocodeJobService).createReverseGeocodeJob(ReverseGeocodeJobDto.builder()
-                    .latitude(2)
-                    .longitude(4)
-                    .entity(GeocodeEntity.RIDEREQUEST)
-                    .entityId("request-1")
-                    .field(GeocodeEntityField.ORIGIN)
-                    .build());
-            
-            verify(geocodeJobService).createReverseGeocodeJob(ReverseGeocodeJobDto.builder()
-                    .latitude(1)
-                    .longitude(3)
-                    .entity(GeocodeEntity.RIDEREQUEST)
-                    .entityId("request-1")
-                    .field(GeocodeEntityField.DESTINATION)
-                    .build());
-
-        }
+                verify(geocodeJobService).createReverseGeocodeJob(ReverseGeocodeJobDto.builder()
+                        .latitude(event.getRoute().getOrigin().getLatitude())
+                        .longitude(event.getRoute().getOrigin().getLongitude())
+                        .entity(GeocodeEntity.RIDEREQUEST)
+                        .entityId(event.getRequestId())
+                        .field(GeocodeEntityField.ORIGIN)
+                        .build());
+                
+                verify(geocodeJobService).createReverseGeocodeJob(ReverseGeocodeJobDto.builder()
+                        .latitude(event.getRoute().getDestination().getLatitude())
+                        .longitude(event.getRoute().getDestination().getLongitude())
+                        .entity(GeocodeEntity.RIDEREQUEST)
+                        .entityId(event.getRequestId())
+                        .field(GeocodeEntityField.DESTINATION)
+                        .build());
+        
+                verify(geocodeJobService).createStaticMapJob(StaticMapJobDto.builder()
+                        .latitude(event.getRoute().getOrigin().getLatitude())
+                        .longitude(event.getRoute().getOrigin().getLongitude())
+                        .entity(GeocodeEntity.RIDEREQUEST)
+                        .entityId(event.getRequestId())
+                        .field(GeocodeEntityField.ORIGIN)
+                        .build());
+                
+                verify(geocodeJobService).createStaticMapJob(StaticMapJobDto.builder()
+                        .latitude(event.getRoute().getDestination().getLatitude())
+                        .longitude(event.getRoute().getDestination().getLongitude())
+                        .entity(GeocodeEntity.RIDEREQUEST)
+                        .entityId(event.getRequestId())
+                        .field(GeocodeEntityField.DESTINATION)
+                        .build());
+                }
     }
 }
