@@ -118,6 +118,7 @@ Run unit and integration tests with
 
 # CI/CD
 
+Continuous Integration using Github Actions to run tests.
 
 # Services/Components
 
