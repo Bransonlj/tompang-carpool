@@ -50,6 +50,8 @@ Note: application uses OneMapAPI which requires an account. For your convenience
 ## Contents
 
 - [Architecture and Tech Stack](#architecture-and-tech-stack)
+- [Testing]
+- [CI/CD]
 - [Services/Components](#servicescomponents)
     - [API Gateway](#api-gateway)
     - [Carpool Service](#carpool-service)
@@ -98,6 +100,24 @@ Tompang is built with a event-driven, microservices architecture, built with fol
 * **JUnit + Mockito**: Java unit tests.
 * **AWS Rekognition**: Computer Vision AI service for driver verification.
 * **Localstack**: Local emulation of AWS.
+
+# Testing
+
+Integration tests uses **Testcontainers** for external dependencies like **Kafka**, **PostgreSQL**, **KurrentDB**, **RabbitMQ** etc.
+
+### Maven
+For Maven projects (Spring Boot), run unit tests only with 
+```bash
+./mvnw test. 
+```
+
+Run unit and integration tests with 
+```bash
+./mvnw verify
+```
+
+# CI/CD
+
 
 # Services/Components
 

@@ -127,6 +127,17 @@ public class EventRepository {
         return domainEvents;
     }
 
+    /**
+     * Reads all events from the given streamId then deserializes them as the given DomainEvent type.
+     * @param <T>
+     * @param streamId
+     * @return
+     */
+    public <T extends DomainEvent> List<T> deserializeEvents(StreamId streamId) {
+        ReadResult result = readEvents(streamId);
+        return deserializeEvents(result.getEvents());
+    }
+
     public void appendEvents(StreamId streamId, List<? extends DomainEvent> events) {
         appendEvents(streamId, events, null);
     }

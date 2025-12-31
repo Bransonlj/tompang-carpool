@@ -26,6 +26,7 @@ import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolR
 import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestDeclinedDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolRequestInvalidatedDomainEvent;
 import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestAlreadyAssignedException;
+import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestAlreadyMatchedException;
 import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestNotMatchedException;
 import com.tompang.carpool.carpool_service.command.domain.exception.DomainException;
 import com.tompang.carpool.event.carpool.CarpoolCreatedEvent;
@@ -101,6 +102,23 @@ public class CarpoolAggregateTest {
                     .setRideRequestId(command.requestId)
                     .build();
             assertEquals(event, aggregate.getUncommittedChanges().get(0).getEvent());
+        }
+
+        @Test
+        void shouldThrowCarpoolAndRideRequestAlreadyMatchedException_whenRequestAlreadyMatched() {
+            // assemble
+            CarpoolAggregate aggregate = CarpoolAggregateFactory.pending();
+            String requestId = aggregate.getPendingRideRequestsCopy().get(0);
+            MatchCarpoolCommand command = MatchCarpoolCommand.builder()
+                    .carpoolId(aggregate.getId())
+                    .requestId(requestId)
+                    .build();
+
+            // act + assert
+            CarpoolAndRideRequestAlreadyMatchedException ex = assertThrows(CarpoolAndRideRequestAlreadyMatchedException.class, () -> {
+                aggregate.matchRequestToCarpool(command);
+            });
+            assertEquals(new CarpoolAndRideRequestAlreadyMatchedException(requestId, aggregate.getId()).getMessage(), ex.getMessage());
         }
 
         @Test

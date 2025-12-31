@@ -3,6 +3,7 @@ package com.tompang.carpool.carpool_service.command.process;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -206,8 +207,8 @@ public class RideRequestProcessManagerTest {
             ReadResult stubReadResult = mock(ReadResult.class);
             when(eventRepository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, event.getRequestId())))
                     .thenReturn(stubReadResult);
-            when(stubReadResult.getEvents()).thenReturn(null);
-            when(eventRepository.deserializeEvents(any())).thenAnswer(invocation -> oldEvents);
+            when(stubReadResult.getEvents()).thenReturn(List.of());
+            when(eventRepository.deserializeEvents(anyList())).thenAnswer(invocation -> oldEvents);
 
             
         }

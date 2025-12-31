@@ -3,6 +3,7 @@ package com.tompang.carpool.carpool_service.command.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -192,10 +193,10 @@ public class CarpoolCommandHandlerTest {
                     .requestId("request-1")
                     .build();
             ReadResult stubCarpoolReadResult = mock(ReadResult.class);
-            when(stubCarpoolReadResult.getEvents()).thenReturn(null);
+            when(stubCarpoolReadResult.getEvents()).thenReturn(List.of());
             when(stubCarpoolReadResult.getLastStreamPosition()).thenReturn(Long.valueOf(1));
             ReadResult stubRequestReadResult = mock(ReadResult.class);
-            when(stubRequestReadResult.getEvents()).thenReturn(null);
+            when(stubRequestReadResult.getEvents()).thenReturn(List.of());
             when(stubRequestReadResult.getLastStreamPosition()).thenReturn(Long.valueOf(1));
             
             when(repository.readEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, command.carpoolId)))
@@ -203,7 +204,7 @@ public class CarpoolCommandHandlerTest {
             when(repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId)))
                 .thenReturn(stubRequestReadResult);
             
-            when(repository.deserializeEvents(any()))    
+            when(repository.deserializeEvents(anyList()))    
                     .thenAnswer(invocation -> oldCarpoolEvents)
                     .thenAnswer(invocation -> oldRideRequestEvents);
             
@@ -306,10 +307,10 @@ public class CarpoolCommandHandlerTest {
                     .requestId("request-1")
                     .build();
             ReadResult stubCarpoolReadResult = mock(ReadResult.class);
-            when(stubCarpoolReadResult.getEvents()).thenReturn(null);
+            when(stubCarpoolReadResult.getEvents()).thenReturn(List.of());
             when(stubCarpoolReadResult.getLastStreamPosition()).thenReturn(Long.valueOf(1));
             ReadResult stubRequestReadResult = mock(ReadResult.class);
-            when(stubRequestReadResult.getEvents()).thenReturn(null);
+            when(stubRequestReadResult.getEvents()).thenReturn(List.of());
             when(stubRequestReadResult.getLastStreamPosition()).thenReturn(Long.valueOf(1));
             
             when(repository.readEvents(StreamId.from(EventRepository.CarpoolConstants.STREAM_PREFIX, command.carpoolId)))
@@ -317,7 +318,7 @@ public class CarpoolCommandHandlerTest {
             when(repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId)))
                 .thenReturn(stubRequestReadResult);
             
-            when(repository.deserializeEvents(any()))    
+            when(repository.deserializeEvents(anyList()))    
                     .thenAnswer(invocation -> oldCarpoolEvents)
                     .thenAnswer(invocation -> oldRideRequestEvents);
             

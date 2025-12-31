@@ -1,7 +1,7 @@
 package com.tompang.carpool.carpool_service.command.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -135,9 +135,9 @@ public class RideRequestCommandHandlerTest {
 
             // stub repository returned ReadResult & events
             when(repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId))).thenReturn(stubReadResult);
-            when(stubReadResult.getEvents()).thenReturn(null);
+            when(stubReadResult.getEvents()).thenReturn(List.of());
             when(stubReadResult.getLastStreamPosition()).thenReturn(Long.valueOf(1));
-            when(repository.deserializeEvents(any())).thenAnswer(invocation -> oldEvents);
+            when(repository.deserializeEvents(anyList())).thenAnswer(invocation -> oldEvents);
 
             // stub aggregate with fixed ID + fake events
             stubAggregate = mock(RideRequestAggregate.class);
@@ -195,9 +195,9 @@ public class RideRequestCommandHandlerTest {
 
             // stub repository returned ReadResult & events
             when(repository.readEvents(StreamId.from(EventRepository.RideRequestConstants.STREAM_PREFIX, command.requestId))).thenReturn(stubReadResult);
-            when(stubReadResult.getEvents()).thenReturn(null);
+            when(stubReadResult.getEvents()).thenReturn(List.of());
             when(stubReadResult.getLastStreamPosition()).thenReturn(Long.valueOf(1));
-            when(repository.deserializeEvents(any())).thenAnswer(invocation -> oldEvents); // generics erased by mockito
+            when(repository.deserializeEvents(anyList())).thenAnswer(invocation -> oldEvents); // generics erased by mockito
 
             // stub aggregate with fixed ID + fake events
             stubAggregate = mock(RideRequestAggregate.class);

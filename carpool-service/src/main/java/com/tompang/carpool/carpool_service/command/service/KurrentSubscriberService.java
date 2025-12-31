@@ -74,7 +74,7 @@ public class KurrentSubscriberService {
                         + "/" + domainEvent.topicName()
                         + " " + domainEvent.getEvent().toString());
                     
-                    kafkaProducerService.publishDomainEvent(domainEvent);
+                    kafkaProducerService.publishDomainEvent(domainEvent, event.getOriginalEvent().getStreamId()); // use stream id as key
                     subscription.ack(event);
                 }
                     catch (Exception ex) {

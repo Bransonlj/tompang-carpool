@@ -1,0 +1,8 @@
+spring:
+  kafka:
+    consumer:
+      properties:
+        schema.registry.url: mock://test-schema-registry
+    producer:
+      properties:
+        schema.registry.url: mock://test-schema-registry

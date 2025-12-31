@@ -20,6 +20,7 @@ import com.tompang.carpool.carpool_service.command.domain.carpool.event.CarpoolR
 import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestNotMatchedException;
 import com.tompang.carpool.carpool_service.command.domain.exception.DomainException;
 import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestAlreadyAssignedException;
+import com.tompang.carpool.carpool_service.command.domain.exception.CarpoolAndRideRequestAlreadyMatchedException;
 import com.tompang.carpool.event.carpool.CarpoolCreatedEvent;
 import com.tompang.carpool.event.carpool.CarpoolMatchedEvent;
 import com.tompang.carpool.event.carpool.CarpoolRequestAcceptedEvent;
@@ -49,6 +50,11 @@ public class CarpoolAggregate {
         return carpool;
     }
 
+    /**
+     * Creates and returns a Carpool aggregate with a CarpoolCreatedDomainEvent raised.
+     * @param command
+     * @return
+     */
     public static CarpoolAggregate createCarpool(CreateCarpoolCommand command) {
         CarpoolAggregate carpool = new CarpoolAggregate();
         CarpoolCreatedDomainEvent domainEvent = new CarpoolCreatedDomainEvent(
@@ -62,7 +68,12 @@ public class CarpoolAggregate {
         return carpool;
     }
 
+    /**
+     * Tries to match a ride request to carpool, raising CarpoolMatchedDomainEvent if successful. 
+     * @param command
+     */
     public void matchRequestToCarpool(MatchCarpoolCommand command) {
+        ensureNotAlreadyMatched(command.requestId);
         ensureNotAlreadyAssigned(command.requestId);
         CarpoolMatchedDomainEvent domainEvent = new CarpoolMatchedDomainEvent(
                 CarpoolMatchedEvent.newBuilder()
@@ -194,6 +205,12 @@ public class CarpoolAggregate {
     private void ensureMatched(String requestId) {
         if (!this.pendingRideRequests.contains(requestId)) {
             throw new CarpoolAndRideRequestNotMatchedException(requestId, this.id);
+        }
+    }
+
+    private void ensureNotAlreadyMatched(String requestId) {
+        if (this.pendingRideRequests.contains(requestId)) {
+            throw new CarpoolAndRideRequestAlreadyMatchedException(requestId, this.id);
         }
     }
 
