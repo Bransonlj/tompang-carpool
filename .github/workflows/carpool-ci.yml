@@ -1,0 +1,45 @@
+name: Carpool Service CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'carpool-service/**'
+      - '.github/workflows/carpool-ci.yaml'
+      - 'schemas/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'carpool-service/**'
+      - '.github/workflows/carpool-ci.yaml'
+      - 'schemas/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Java 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('carpool-service/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Build and Test Carpool Service
+      run: |
+        cd carpool-service
+        ./mvnw clean verify
