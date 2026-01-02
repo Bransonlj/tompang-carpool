@@ -92,7 +92,7 @@ Tompang is built with a event-driven, microservices architecture, built with fol
 * **Redis**: Lightweight caching.
 * **AWS S3**: Cloud storage for images etc.
 
-#### Testing
+#### Tests
 
 * **Testcontainers**: Run application dependencies such as databases, message brokers, etc. in Docker containers during Integration Tests.
 * **JUnit + Mockito**: Writing tests in Java.
