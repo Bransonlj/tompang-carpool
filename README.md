@@ -18,9 +18,9 @@ Note: initial build times for some spring-boot services may take more than 5-10 
 
 ### Optional Configuration
 
-Since this application uses AWS, localstack is used for emulation as a docker-compose service so you do not have to create an AWS account. This has been configured in `aws.env`.
+Since this application uses AWS, **Localstack** is used for emulation as a docker-compose service so you do not have to create an AWS account. This has been configured in `aws.env`.
 ```
-# aws.env - running using localstack emulation
+# aws.env - running using Localstack emulation
 
 AWS_ACCESS_KEY_ID=test
 AWS_SECRET_ACCESS_KEY=test
@@ -92,18 +92,24 @@ Tompang is built with a event-driven, microservices architecture, built with fol
 * **Redis**: Lightweight caching.
 * **AWS S3**: Cloud storage for images etc.
 
+#### Testing
+
+* **Testcontainers**: Run application dependencies such as databases, message brokers, etc. in Docker containers during Integration Tests.
+* **JUnit + Mockito**: Writing tests in Java.
+* **Jest**: Writing tests in Typescript.
+
 #### Misc
 
 * **Avro**: Schema generation and event serialization & deserialization for Kafka topics with the Schema-Registry.
 * **Leaflet**: Map library for UI.
 * **OneMapAPI**: For geolocation data (eg. address name, map images).
-* **JUnit + Mockito**: Java unit tests.
 * **AWS Rekognition**: Computer Vision AI service for driver verification.
 * **Localstack**: Local emulation of AWS.
+* **Flyway**: SQL Schema migration management.
 
 # Testing
 
-Integration tests uses **Testcontainers** for external dependencies like **Kafka**, **PostgreSQL**, **KurrentDB**, **RabbitMQ** etc.
+Integration tests uses **Testcontainers** to run external dependencies like **Kafka**, **PostgreSQL**, **KurrentDB**, **RabbitMQ** etc. in Docker containers.
 
 ### Maven
 For Maven projects (Spring Boot), run unit tests only with 
