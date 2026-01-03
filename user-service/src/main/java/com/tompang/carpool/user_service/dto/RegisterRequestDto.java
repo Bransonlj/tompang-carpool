@@ -1,16 +1,18 @@
 package com.tompang.carpool.user_service.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.Builder;
 
-@Data
-public class RegisterRequestDto {
-    @NotBlank
-    private String email;
-    @NotBlank
-    private String password;
-    @NotBlank
-    private String firstName;
-    @NotBlank
-    private String lastName;
+@Builder
+public record RegisterRequestDto(
+        @NotBlank
+        String email,
+        @NotBlank
+        String password,
+        @NotBlank
+        String firstName,
+        @NotBlank
+        String lastName
+) {
+
 }

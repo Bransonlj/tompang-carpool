@@ -31,18 +31,22 @@ public class UserAuthService {
     }
 
     public String registerUser(RegisterRequestDto dto) {
-        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(dto.email()).isPresent()) {
             throw new EmailAlreadyExistsException();
         }
 
         User user = User.builder()
-                .firstName(dto.getFirstName())
-                .lastName(dto.getLastName())
-                .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
+                .firstName(dto.firstName())
+                .lastName(dto.lastName())
+                .email(dto.email())
+                .password(passwordEncoder.encode(dto.password()))
                 .build(); // default role is user
         User registeredUser = userRepository.save(user);
         return registeredUser.getId();
+    }
+
+    public User registerAdmin(RegisterRequestDto dto) {
+        return registerAdmin(dto.email(), dto.password());
     }
 
     public User registerAdmin(String email, String password) {
@@ -55,7 +59,7 @@ public class UserAuthService {
             }
         }
 
-        User admin = User.builder()
+        User admin = User.builder() // should admin have names?
                 .email(email)
                 .password(passwordEncoder.encode(password))
                 .roles(Collections.singleton(UserRole.ADMIN))
@@ -72,7 +76,7 @@ public class UserAuthService {
      */
     public LoginResponseDto login(String email, String password) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new InvalidCredentialsException());
+                .orElseThrow(InvalidCredentialsException::new);
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidCredentialsException();
         }

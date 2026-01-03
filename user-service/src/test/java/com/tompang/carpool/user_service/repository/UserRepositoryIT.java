@@ -3,7 +3,6 @@ package com.tompang.carpool.user_service.repository;
 import com.tompang.carpool.user_service.common.ContainerizedIntegrationTest;
 import com.tompang.carpool.user_service.model.User;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

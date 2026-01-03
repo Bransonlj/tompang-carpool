@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.tompang.carpool.user_service.mapper.UserProfileMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,21 +16,25 @@ import com.tompang.carpool.user_service.repository.UserRepository;
 
 @Service
 public class UserProfileService {
-  public final UserRepository repository;
-  public final S3Service s3Service;
+  private final UserRepository repository;
+  private final S3Service s3Service;
+  private final UserProfileMapper userProfileMapper;
 
-  public UserProfileService(UserRepository repository, S3Service s3Service) {
+  public UserProfileService(UserRepository repository, S3Service s3Service, UserProfileMapper userProfileMapper) {
     this.repository = repository;
     this.s3Service = s3Service;
+    this.userProfileMapper = userProfileMapper;
   }
 
   public UserProfileDto getUserProfileById(String id) {
     User user = repository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("UserProfile not found"));
-    UserProfileDto dto =  UserProfileDto.fromEntity(user);
+    UserProfileDto dto;
     if (user.hasProfilePicture) {
       String profilePictureUrl = s3Service.getFileUrl(user.getId(), S3Service.Directory.PROFILE_PICTURE);
-      dto.setProfilePictureUrl(profilePictureUrl);
+      dto =  userProfileMapper.toDto(user, profilePictureUrl);
+    } else {
+      dto =  userProfileMapper.toDto(user);
     }
     return dto;
   }
@@ -57,10 +62,11 @@ public class UserProfileService {
     Map<String, UserProfileDto> userMap = new HashMap<>();
     UserProfileDto dto;
     for (User user : users) {
-      dto = UserProfileDto.fromEntity(user);
       if (includePhoto && user.hasProfilePicture) {
         String profilePictureUrl = s3Service.getFileUrl(user.getId(), S3Service.Directory.PROFILE_PICTURE);
-        dto.setProfilePictureUrl(profilePictureUrl);
+        dto =  userProfileMapper.toDto(user, profilePictureUrl);
+      } else {
+        dto =  userProfileMapper.toDto(user);
       }
 
       userMap.put(user.getId(), dto);

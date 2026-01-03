@@ -45,7 +45,7 @@ public class AdminController {
         @RequestBody @Valid RegisterRequestDto req
     ) {
         // TODO verify admin role
-        User registeredAdmin = authService.registerAdmin(req.getEmail(), req.getPassword());
+        User registeredAdmin = authService.registerAdmin(req);
         URI location = URI.create("/api/auth/admin/" + registeredAdmin.getId());
         return ResponseEntity.created(location).build();
     }
