@@ -1,0 +1,44 @@
+name: User Service CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'user-service/**'
+      - '.github/workflows/user-ci.yml'
+      - 'schemas/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'user-service/**'
+      - '.github/workflows/user-ci.yml'
+      - 'schemas/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Java 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 17
+        cache: maven
+        
+    - name: Make Maven wrapper executable
+      run: |
+        cd user-service
+        chmod +x ./mvnw
+
+    - name: Build and Test User Service
+      run: |
+        cd user-service
+        ./mvnw clean verify
